@@ -1,0 +1,120 @@
+variables:
+  FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend
+  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend
+  INGRESS_IMAGE: $CI_REGISTRY_IMAGE/ingress
+  MAVEN_OPTS: >-
+    -Dhttps.protocols=TLSv1.2
+    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    -Dorg.slf4j.simpleLogger.showDateTime=true
+  MAVEN_CLI_OPTS: >-
+    --batch-mode
+    --errors
+    --fail-at-end
+    --show-version
+    --no-transfer-progress
+    -DinstallAtEnd=true
+    -DdeployAtEnd=true
+
+stages:
+  - test
+  - build
+  - deploy
+
+test-backend:
+  image: maven:3-eclipse-temurin-21
+  cache:
+    paths:
+      - .m2/repository
+  stage: test
+  script:
+    - cd backend
+    - 'mvn $MAVEN_CLI_OPTS verify'
+  only:
+    changes:
+      - backend/**/*
+  tags:
+    - test-env
+
+test-frontend:
+  image: node:20
+  cache:
+    key:
+      files:
+        - package.json
+        - package-lock.json
+    paths:
+      - node_modules
+  stage: test
+  script:
+    - cd frontend
+    - npm ci
+    - npm run lint
+    - npm test
+  only:
+    changes:
+      - frontend/**/*
+  tags:
+    - test-env
+
+build_frontend:
+  stage: build
+  script:
+    - cd frontend
+    - docker build -t $FRONTEND_IMAGE .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $FRONTEND_IMAGE
+  only:
+    refs:
+      - master
+      - main
+    changes:
+      - frontend/**/*
+  tags:
+    - build-env
+
+build_ingress:
+  stage: build
+  script:
+    - cd ingress
+    - docker build -t $INGRESS_IMAGE .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $INGRESS_IMAGE
+  only:
+    refs:
+      - master
+      - main
+    changes:
+      - ingress/**/*
+  tags:
+    - build-env
+
+build_backend:
+  stage: build
+  script:
+    - cd backend
+    - docker build -t $BACKEND_IMAGE .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $BACKEND_IMAGE
+  only:
+    refs:
+      - master
+      - main
+    changes:
+      - backend/**/*
+  tags:
+    - build-env
+
+deploy:
+  stage: deploy
+  script:
+    - mv .env.prod .env
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker-compose pull
+    - docker-compose down --remove-orphans
+    - docker-compose up -d
+  only:
+    refs:
+      - master
+      - main
+  tags:
+    - deploy-env
