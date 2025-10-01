@@ -67,8 +67,6 @@ build_frontend:
     refs:
       - master
       - main
-    changes:
-      - frontend/**/*
   tags:
     - build-env
 
@@ -83,8 +81,6 @@ build_ingress:
     refs:
       - master
       - main
-    changes:
-      - ingress/**/*
   tags:
     - build-env
 
@@ -99,8 +95,6 @@ build_backend:
     refs:
       - master
       - main
-    changes:
-      - backend/**/*
   tags:
     - build-env
 
