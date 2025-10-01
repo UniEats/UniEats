@@ -9,8 +9,30 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async (req: LoginRequest) => {
-      const tokens = await auth("/sessions", req);
+      const tokens = await auth("POST", "/sessions", req);
       setToken({ state: "LOGGED_IN", tokens });
+    },
+  });
+}
+
+export function useRefresh() {
+  const [tokenState, setToken] = useToken();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (tokenState.state !== "LOGGED_IN") {
+        return;
+      }
+
+      try {
+        const refreshToken = tokenState.tokens.refreshToken;
+        const tokenPromise = auth("PUT", "/sessions", { refreshToken });
+        setToken({ state: "REFRESHING", tokenPromise });
+        setToken({ state: "LOGGED_IN", tokens: await tokenPromise });
+      } catch (err) {
+        setToken({ state: "LOGGED_OUT" });
+        throw err;
+      }
     },
   });
 }
@@ -20,15 +42,15 @@ export function useSignup() {
 
   return useMutation({
     mutationFn: async (req: SignupRequest) => {
-      const tokens = await auth("/users", req);
+      const tokens = await auth("POST", "/users", req);
       setToken({ state: "LOGGED_IN", tokens });
     },
   });
 }
 
-async function auth(endpoint: string, data: LoginRequest | SignupRequest) {
+async function auth(method: "PUT" | "POST", endpoint: string, data: object) {
   const response = await fetch(BASE_API_URL + endpoint, {
-    method: "POST",
+    method,
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",

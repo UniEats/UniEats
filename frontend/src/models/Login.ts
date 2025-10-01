@@ -17,7 +17,7 @@ export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 
 export const AuthResponseSchema = z.object({
   accessToken: z.string().min(1),
-  refreshToken: z.string().nullable(),
+  refreshToken: z.string().min(1),
 });
 
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
