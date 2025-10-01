@@ -31,6 +31,7 @@ services:
       db:
         condition: service_healthy
     environment:
+      SERVER_SERVLET_CONTEXT_PATH: /api
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: "${DB_APP_PASSWORD}"
       SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/products"
