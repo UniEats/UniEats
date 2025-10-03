@@ -9,4 +9,5 @@ This is a simple ingress reverse proxy.
 ## To run
 
 This should only be run as part of the docker-compose.
-It dispatches requests to different servers depending on the request url.
+It dispatches requests to different servers depending on the request url and
+the rules in [nginx.conf](./nginx.conf)

@@ -14,15 +14,25 @@ This will produce a jar file inside the target dir, using the project name.
 By default, this is `product-template-0.0.1-SNAPSHOT.jar`
 
 Also by default, `mvn package` will run tests before packaging the executable.
-`-DskipTests` will allow for faster packaging, assuming that tests are already known to be successful.
+`-DskipTests` will allow for faster packaging, assuming that tests are already
+known to be successful.
 
 ### Execute
 
-After compiling:
+1. Configure a database in [application.properties](src/main/resources/application.properties).
+   The default database is the one exposed by the docker-compose, which can be started with
 
-```bash
-java -jar target/product-template-0.0.1-SNAPSHOT.jar
-```
+   ```bash
+   docker-compose up -d db
+   ```
+
+2. After compiling:
+
+   ```bash
+   java -jar target/product-template-0.0.1-SNAPSHOT.jar
+   ```
+
+3. If both are running, you should be able to access the swagger docs and run requests
 
 ### Swagger/OpenAPI
 
