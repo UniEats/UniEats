@@ -1,7 +1,7 @@
 services:
   ingress:
     build: ./ingress
-    image: "${INGRESS_IMAGE}"
+    image: "${INGRESS_IMAGE:-}"
     depends_on:
       - backend
       - frontend
@@ -26,7 +26,7 @@ services:
 
   backend:
     build: ./backend
-    image: "${BACKEND_IMAGE}"
+    image: "${BACKEND_IMAGE:-}"
     depends_on:
       db:
         condition: service_healthy
@@ -39,7 +39,7 @@ services:
 
   frontend:
     build: ./frontend
-    image: "${FRONTEND_IMAGE}"
+    image: "${FRONTEND_IMAGE:-}"
     depends_on:
       - backend
     environment:
