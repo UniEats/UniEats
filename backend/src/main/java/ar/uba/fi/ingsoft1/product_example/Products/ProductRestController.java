@@ -1,4 +1,4 @@
-package ar.uba.fi.ingsoft1.product_example.products;
+package ar.uba.fi.ingsoft1.product_example.Products;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.NonNull;
@@ -26,9 +26,15 @@ import java.util.Optional;
 class ProductRestController {
     private final ProductService productService;
 
+
     @GetMapping
-    public List<ProductDTO> getProducts(ProductSearchDTO filter) {
-        return productService.getProducts(filter);
+    public List<ProductDTO> getAllProducts() {
+        return productService.geAlltProducts();
+    }
+
+    @GetMapping("/all-ingredients-in-stock")
+    public List<ProductDTO> getProductsWithAllIngredientsInStock() {
+        return productService.getProductsAvailable();
     }
 
     @GetMapping("/{id}")
@@ -43,7 +49,7 @@ class ProductRestController {
     public ProductDTO createProduct(
             @NonNull @RequestBody ProductCreateDTO data
     ) {
-        return productService.createProduct(data);
+        return productService.createProduct(data).toDTO();
     }
 
     @PatchMapping("/{id}")

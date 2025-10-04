@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/brands").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
                         .requestMatchers("/brands/**").authenticated()
+                        .requestMatchers("/ingredients/**").authenticated()
                         .requestMatchers("/products/**").authenticated()
                         .anyRequest().denyAll())
                 .sessionManagement(sessionManager -> sessionManager

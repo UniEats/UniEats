@@ -1,4 +1,4 @@
-package ar.uba.fi.ingsoft1.product_example.products;
+package ar.uba.fi.ingsoft1.product_example.Products;
 
 import java.util.Optional;
 
