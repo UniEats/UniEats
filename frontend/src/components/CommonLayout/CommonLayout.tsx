@@ -44,7 +44,9 @@ const LoggedInLinks = () => {
       <li>
         <Link href="/under-construction">Main Page</Link>
       </li>
-      <li>Products</li>
+      <li>
+        <Link href="/menu">Menu</Link>
+      </li>
       <li>
         <Link href="/brands">Brands</Link>
       </li>

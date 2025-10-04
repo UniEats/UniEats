@@ -8,6 +8,8 @@ import { MainScreen } from "@/screens/MainScreen";
 import { SignupScreen } from "@/screens/SignupScreen";
 import { useToken } from "@/services/TokenContext";
 
+import { MenuScreen } from "./screens/MenuScreen";
+
 export const Navigation = () => {
   const [tokenState] = useToken();
   switch (tokenState.state) {
@@ -15,6 +17,9 @@ export const Navigation = () => {
     case "REFRESHING":
       return (
         <Switch>
+          <Route path="/menu">
+            <MenuScreen />
+          </Route>
           <Route path="/brands">
             <BrandListScreen />
           </Route>
