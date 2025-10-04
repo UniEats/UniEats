@@ -60,7 +60,10 @@
   font-size: 0.95rem;
   border: none;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 .menu-topbar__ghost {
@@ -109,7 +112,10 @@
   border-radius: 999px;
   color: #3c3f44;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .menu-category:hover {
@@ -146,7 +152,7 @@
 
 .menu-grid {
   display: grid;
-  gap: 32px;
+  gap: 96px 32px;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   max-width: 1200px;
   margin: 0 auto;
@@ -192,7 +198,9 @@
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .menu-next__link:hover {
@@ -280,7 +288,9 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .store-badge strong {
