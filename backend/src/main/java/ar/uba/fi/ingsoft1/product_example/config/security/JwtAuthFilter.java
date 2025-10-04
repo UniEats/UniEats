@@ -11,7 +11,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,8 +34,12 @@ class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        this.authenticateToken(request);
-        filterChain.doFilter(request, response);
+        try {
+            this.authenticateToken(request);
+            filterChain.doFilter(request, response);
+        } catch (ResponseStatusException e) {
+            response.sendError(e.getStatusCode().value());
+        }
     }
 
     private void authenticateToken(HttpServletRequest request) {

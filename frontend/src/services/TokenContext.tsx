@@ -1,12 +1,18 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { Dispatch, useCallback, useContext, useState } from "react";
 
 import { AuthResponse, AuthResponseSchema } from "@/models/Login";
+import { useRefresh } from "@/services/UserServices";
 
 const TOKEN_STORAGE_KEY = "tokens";
 
 type TokenContextData =
   | {
       state: "LOGGED_OUT";
+    }
+  | {
+      state: "REFRESHING";
+      tokenPromise: Promise<AuthResponse>;
     }
   | {
       state: "LOGGED_IN";
@@ -31,13 +37,45 @@ export const TokenProvider = ({ children }: React.PropsWithChildren) => {
   return <TokenContext.Provider value={[state, setState]}>{children}</TokenContext.Provider>;
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useToken() {
   const context = useContext(TokenContext);
   if (context === null) {
     throw new Error("React tree should be wrapped in TokenProvider");
   }
   return context;
+}
+
+export function useAccessTokenGetter() {
+  const [tokenState] = useToken();
+
+  return async function getAccessToken() {
+    switch (tokenState.state) {
+      case "LOGGED_OUT":
+        throw new Error("Auth needed for service");
+      case "REFRESHING":
+        return (await tokenState.tokenPromise).accessToken;
+      case "LOGGED_IN":
+        return tokenState.tokens.accessToken;
+      default:
+        // Make the compiler check this is unreachable
+        return tokenState satisfies never;
+    }
+  };
+}
+
+export function useHandleResponse() {
+  const { mutate } = useRefresh();
+
+  return async function handleResponse<T>(response: Response, parse: (json: unknown) => T) {
+    if (response.status === 401) {
+      mutate();
+      throw new Error("Attempting token refresh");
+    } else if (response.ok) {
+      return parse(await response.json());
+    } else {
+      throw new Error(`Failed with status ${response.status}: ${await response.text()}`);
+    }
+  };
 }
 
 const getInitialTokenState = (): TokenContextData => {

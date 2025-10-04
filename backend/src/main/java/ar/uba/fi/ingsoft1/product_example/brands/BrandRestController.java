@@ -1,5 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.brands;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequestMapping("/brands")
 @Validated
 @RequiredArgsConstructor
+@Tag(name = "Brands")
 class BrandRestController {
     private final BrandService brandService;
 

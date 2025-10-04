@@ -3,13 +3,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { BASE_API_URL } from "@/config/app-query-client";
 
 import { Brand, BrandCreateRequest, BrandSchema } from "../models/Brand";
-import { useToken } from "./TokenContext";
+import { useAccessTokenGetter, useHandleResponse } from "./TokenContext";
 
 export function useBrandList() {
-  const [tokenState] = useToken();
-  if (tokenState.state !== "LOGGED_IN") {
-    throw new Error("Auth needed for service");
-  }
+  const getAccessToken = useAccessTokenGetter();
+  const handleResponse = useHandleResponse();
 
   return useQuery({
     queryKey: ["brands"],
@@ -18,19 +16,18 @@ export function useBrandList() {
         method: "GET",
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${tokenState.tokens.accessToken}`,
+          Authorization: `Bearer ${await getAccessToken()}`,
         },
       });
-      return BrandSchema.array().parse(await response.json());
+
+      return handleResponse(response, (json) => BrandSchema.array().parse(json));
     },
   });
 }
 
 export function useBrand(id: string) {
-  const [tokenState] = useToken();
-  if (tokenState.state !== "LOGGED_IN") {
-    throw new Error("Auth needed for service");
-  }
+  const getAccessToken = useAccessTokenGetter();
+  const handleResponse = useHandleResponse();
 
   return useQuery({
     queryKey: ["brand", id],
@@ -39,19 +36,18 @@ export function useBrand(id: string) {
         method: "GET",
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${tokenState.tokens.accessToken}`,
+          Authorization: `Bearer ${await getAccessToken()}`,
         },
       });
-      return BrandSchema.parse(await response.json());
+
+      return handleResponse(response, (json) => BrandSchema.parse(json));
     },
   });
 }
 
 export function useBrandCreate() {
-  const [tokenState] = useToken();
-  if (tokenState.state !== "LOGGED_IN") {
-    throw new Error("Auth needed for service");
-  }
+  const getAccessToken = useAccessTokenGetter();
+  const handleResponse = useHandleResponse();
 
   return useMutation({
     mutationFn: async (data: BrandCreateRequest): Promise<Brand> => {
@@ -59,17 +55,13 @@ export function useBrandCreate() {
         method: "POST",
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${tokenState.tokens.accessToken}`,
+          Authorization: `Bearer ${await getAccessToken()}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
-      if (response.ok) {
-        return BrandSchema.parse(await response.json());
-      } else {
-        throw new Error(`Failed with status ${response.status}: ${await response.text()}`);
-      }
+      return handleResponse(response, (json) => BrandSchema.parse(json));
     },
   });
 }
