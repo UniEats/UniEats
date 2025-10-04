@@ -123,6 +123,27 @@
   transform: translateY(0);
 }
 
+.product-cta--delete {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.product-cta--delete:hover {
+  background: #4b5563;
+}
+
+.product-cta--delete svg {
+  width: 18px;
+  height: 18px;
+}
+
 @media (max-width: 640px) {
   .product-card {
     padding: 0;

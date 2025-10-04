@@ -4,6 +4,7 @@ import Product from "../Product/Product";
 import "./Menu.css";
 
 type MenuItem = {
+  id: string;
   title: string;
   description: string;
   price: string;
@@ -25,6 +26,7 @@ const menuSections: MenuSection[] = [
     subtitle: "Price and availability may vary by location.",
     items: [
       {
+        id: "1",
         title: "Chick-fil-A® Chicken Biscuit",
         description: "Hand-breaded chicken tucked inside a warm buttermilk biscuit.",
         price: "$3.29",
@@ -33,6 +35,7 @@ const menuSections: MenuSection[] = [
       },
 
       {
+        id: "2",
         title: "Chick-n-Minis®",
         description: "Yeast rolls filled with nuggets and brushed with honey butter glaze.",
         price: "$4.49",
@@ -40,6 +43,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "3",
         title: "Egg White Grill",
         description: "Grilled chicken, egg whites, and cheese on a toasted multigrain muffin.",
         price: "$4.19",
@@ -48,6 +52,7 @@ const menuSections: MenuSection[] = [
       },
 
       {
+        id: "4",
         title: "Hash Brown Scramble Bowl",
         description: "Crispy hash browns layered with scrambled eggs, cheese, and nuggets.",
         price: "$5.29",
@@ -55,6 +60,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1546069901-d5bfd2cbfb1f?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "5",
         title: "Chicken, Egg & Cheese Biscuit",
         description: "Seasoned chicken filet with folded egg and cheese on a biscuit.",
         price: "$4.59",
@@ -62,6 +68,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "6",
         title: "Chicken, Egg & Cheese Muffin",
         description: "Whole egg, cheddar, and juicy chicken stacked on an English muffin.",
         price: "$4.79",
@@ -69,6 +76,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "7",
         title: "Berry Parfait",
         description: "Greek yogurt layered with fresh berries and crunchy granola.",
         price: "$3.69",
@@ -76,6 +84,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "8",
         title: "Fruit Cup",
         description: "Seasonal mix of strawberries, blueberries, mandarins, and apples.",
         price: "$3.19",
@@ -90,6 +99,7 @@ const menuSections: MenuSection[] = [
     subtitle: "Crafted classics and guest favorites served hot and fast.",
     items: [
       {
+        id: "9",
         title: "Spicy Deluxe Sandwich",
         description: "Spicy chicken breast with pepper jack, lettuce, and tomato on a toasted bun.",
         price: "$5.69",
@@ -97,6 +107,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80",
       },
       {
+        id: "10",
         title: "Grilled Nuggets",
         description: "Marinated chicken bites grilled for a smoky, protein-rich option.",
         price: "$5.35",
@@ -104,6 +115,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1432139555190-58524dae6a55?q=80",
       },
       {
+        id: "11",
         title: "Market Salad",
         description: "Chilled chicken on spring mix with blue cheese, apples, and berries.",
         price: "$9.59",
@@ -111,6 +123,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?q=80",
       },
       {
+        id: "12",
         title: "Cobb Salad",
         description: "Crispy nuggets over greens with egg, bacon, cheese, and grape tomatoes.",
         price: "$8.99",
@@ -118,6 +131,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1546069901-d5bfd2cbfb1f?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "13",
         title: "Grilled Chicken Club",
         description: "Grilled filet layered with Colby-Jack cheese, bacon, lettuce, and tomato.",
         price: "$7.89",
@@ -125,6 +139,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?q=80",
       },
       {
+        id: "14",
         title: "Chick-fil-A® Deluxe Sandwich",
         description: "Classic chicken sandwich with lettuce, tomato, and American cheese.",
         price: "$5.39",
@@ -139,6 +154,7 @@ const menuSections: MenuSection[] = [
     subtitle: "Fresh greens, vibrant toppings, and house-made dressings.",
     items: [
       {
+        id: "15",
         title: "Kale Crunch Side",
         description: "Shredded kale and cabbage tossed with apple cider vinaigrette.",
         price: "$3.49",
@@ -146,6 +162,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "16",
         title: "Garden Salad",
         description: "Romaine, tomatoes, roasted corn, bell peppers, and shredded cheese.",
         price: "$7.19",
@@ -153,6 +170,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "17",
         title: "Southwest Avocado Salad",
         description: "Spicy grilled filet over greens with corn, beans, avocado, and cheese.",
         price: "$9.15",
@@ -160,6 +178,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1484980972926-edee96e0960d?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "18",
         title: "Seasonal Fruit Blend",
         description: "Rotating selection of ripe fruit served chilled and ready to share.",
         price: "$3.89",
@@ -174,6 +193,7 @@ const menuSections: MenuSection[] = [
     subtitle: "Pair your entrée with crispy, creamy, or fresh-made sides.",
     items: [
       {
+        id: "19",
         title: "Waffle Potato Fries®",
         description: "Crispy waffle-cut potatoes cooked in canola oil and seasoned lightly.",
         price: "$2.49",
@@ -181,6 +201,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "20",
         title: "Mac & Cheese",
         description: "Cheddar and parmesan sauce baked over tender macaroni until golden.",
         price: "$3.59",
@@ -188,6 +209,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "21",
         title: "Greek Yogurt Parfait",
         description: "Vanilla Greek yogurt topped with fresh berries and granola crunch.",
         price: "$4.25",
@@ -195,6 +217,7 @@ const menuSections: MenuSection[] = [
         image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80",
       },
       {
+        id: "22",
         title: "Chicken Tortilla Soup",
         description: "Hearty soup with shredded chicken, beans, and a mild chili spice.",
         price: "$5.35",
@@ -206,12 +229,26 @@ const menuSections: MenuSection[] = [
 ];
 
 export default function Menu() {
+  const [sections, setSections] = useState<MenuSection[]>(menuSections);
   const [activeCategoryId, setActiveCategoryId] = useState<MenuSection["id"]>(menuSections[0]?.id ?? "breakfast");
 
   const activeSection = useMemo(
-    () => menuSections.find((section) => section.id === activeCategoryId) ?? menuSections[0],
-    [activeCategoryId],
+    () => sections.find((section) => section.id === activeCategoryId) ?? sections[0],
+    [activeCategoryId, sections],
   );
+
+const handleDelete = (id: string) => {
+    setSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === activeCategoryId
+          ? {
+              ...section,
+              items: section.items.filter((item) => item.id !== id),
+            }
+          : section
+      )
+    );
+  };
 
   return (
     <div className="menu-page">
@@ -246,7 +283,16 @@ export default function Menu() {
         <section className="menu-grid-section">
           <div className="menu-grid">
             {activeSection.items.map((item) => (
-              <Product key={item.title} {...item} />
+              <Product 
+                key={item.title} 
+                id={item.id}
+                image={item.image} 
+                title={item.title} 
+                description={item.description} 
+                price={item.price} 
+                tags={item.tags} 
+                onDelete={handleDelete} 
+              />
             ))}
           </div>
         </section>
