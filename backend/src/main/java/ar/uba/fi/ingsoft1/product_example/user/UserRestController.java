@@ -1,6 +1,8 @@
 package ar.uba.fi.ingsoft1.product_example.user;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ class UserRestController {
     @PostMapping(produces = "application/json")
     @Operation(summary = "Create a new user")
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiResponse(responseCode = "409", description = "User already exists", content = @Content)
     ResponseEntity<TokenDTO> signUp(
             @Valid @NonNull @RequestBody UserCreateDTO data
     ) throws MethodArgumentNotValidException {

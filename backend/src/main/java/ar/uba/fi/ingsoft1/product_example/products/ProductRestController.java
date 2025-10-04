@@ -1,5 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.products;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import java.util.Optional;
 @RequestMapping("/products")
 @Validated
 @RequiredArgsConstructor
+@Tag(name = "Products")
 class ProductRestController {
     private final ProductService productService;
 

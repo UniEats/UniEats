@@ -12,6 +12,7 @@ export const Navigation = () => {
   const [tokenState] = useToken();
   switch (tokenState.state) {
     case "LOGGED_IN":
+    case "REFRESHING":
       return (
         <Switch>
           <Route path="/brands">

@@ -1,7 +1,7 @@
 services:
   ingress:
     build: ./ingress
-    image: "${INGRESS_IMAGE}"
+    image: "${INGRESS_IMAGE:-}"
     depends_on:
       - backend
       - frontend
@@ -26,11 +26,12 @@ services:
 
   backend:
     build: ./backend
-    image: "${BACKEND_IMAGE}"
+    image: "${BACKEND_IMAGE:-}"
     depends_on:
       db:
         condition: service_healthy
     environment:
+      SERVER_SERVLET_CONTEXT_PATH: /api
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: "${DB_APP_PASSWORD}"
       SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/products"
@@ -38,7 +39,7 @@ services:
 
   frontend:
     build: ./frontend
-    image: "${FRONTEND_IMAGE}"
+    image: "${FRONTEND_IMAGE:-}"
     depends_on:
       - backend
     environment:
