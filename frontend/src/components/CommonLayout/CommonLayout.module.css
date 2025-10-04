@@ -4,16 +4,94 @@
   min-height: 100vh;
 }
 
-.topBar {
+.siteTopbar {
   display: flex;
-  flex-direction: row;
-  list-style: none;
   align-items: center;
-  justify-content: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  padding: 20px 48px;
+  border-bottom: 1px solid #f2f3f6;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  position: relative;
+  z-index: 5;
 }
 
-.topBar > * {
-  margin: 1rem;
+.siteBrand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #d80f2f;
+  text-decoration: none;
+}
+
+.siteNav {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.95rem;
+  flex: 1 1 320px;
+}
+
+.siteNavLink {
+  color: #3c3f44;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.siteNavLink:hover {
+  color: #bf0c2b;
+}
+
+.siteActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.siteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  text-decoration: none;
+}
+
+.siteButtonGhost {
+  background: transparent;
+  color: #3c3f44;
+  border: 1px solid #d9dadd;
+}
+
+.siteButtonGhost:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(30, 30, 30, 0.06);
+}
+
+.siteButtonCta {
+  background: #da0f33;
+  color: #ffffff;
+  box-shadow: 0 16px 30px rgba(218, 15, 51, 0.25);
+}
+
+.siteButtonCta:hover {
+  background: #bf0c2b;
+  transform: translateY(-1px);
+}
+
+.siteButtonCta:active {
+  transform: translateY(0);
 }
 
 .body {
@@ -23,4 +101,22 @@
   align-items: stretch;
   width: 100%;
   padding: 0;
+}
+
+@media (max-width: 720px) {
+  .siteTopbar {
+    justify-content: center;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .siteActions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .siteNav {
+    width: 100%;
+    justify-content: center;
+  }
 }

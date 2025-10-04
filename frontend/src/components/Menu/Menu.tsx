@@ -215,27 +215,6 @@ export default function Menu() {
 
   return (
     <div className="menu-page">
-      <header className="menu-topbar">
-        <div className="menu-topbar__brand" aria-label="Dining brand">
-          IDS Dining
-        </div>
-        <nav className="menu-topbar__links" aria-label="Primary">
-          <a href="#">Find a restaurant</a>
-          <a href="#">Menu</a>
-          <a href="#">Stories</a>
-          <a href="#">About</a>
-          <a href="#">Careers</a>
-        </nav>
-        <div className="menu-topbar__actions">
-          <button className="menu-topbar__ghost" type="button">
-            Sign in
-          </button>
-          <button className="menu-topbar__cta" type="button">
-            Order now
-          </button>
-        </div>
-      </header>
-
       <nav className="menu-categories" aria-label="Menu sections">
         <ul role="tablist">
           {menuSections.map((section) => {
@@ -269,16 +248,6 @@ export default function Menu() {
             {activeSection.items.map((item) => (
               <Product key={item.title} {...item} />
             ))}
-          </div>
-        </section>
-
-        <section className="menu-next">
-          <div className="menu-next__card">
-            <span className="menu-eyebrow">What&apos;s next</span>
-            <h2>Explore entrées</h2>
-            <button type="button" className="menu-next__link">
-              View entrées
-            </button>
           </div>
         </section>
       </main>

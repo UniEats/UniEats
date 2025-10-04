@@ -6,86 +6,10 @@
   background: linear-gradient(180deg, #ffffff 0%, #fff7f8 40%, #ffffff 100%);
   color: #1f2933;
   min-height: 100vh;
+  margin-bottom: 64px;
   display: flex;
   flex-direction: column;
   gap: 0;
-}
-
-.menu-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px 24px;
-  padding: 20px 48px;
-  border-bottom: 1px solid #f2f3f6;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(6px);
-}
-
-.menu-topbar__brand {
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #d80f2f;
-}
-
-.menu-topbar__links {
-  display: flex;
-  gap: 18px;
-  font-size: 0.95rem;
-}
-
-.menu-topbar__links a {
-  color: #3c3f44;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.menu-topbar__links a:hover {
-  color: #bf0c2b;
-}
-
-.menu-topbar__actions {
-  display: flex;
-  gap: 12px;
-}
-
-.menu-topbar__ghost,
-.menu-topbar__cta {
-  padding: 10px 20px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  border: none;
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
-}
-
-.menu-topbar__ghost {
-  background: transparent;
-  color: #3c3f44;
-  border: 1px solid #d9dadd;
-}
-
-.menu-topbar__ghost:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(30, 30, 30, 0.06);
-}
-
-.menu-topbar__cta {
-  background: #da0f33;
-  color: #ffffff;
-  box-shadow: 0 16px 30px rgba(218, 15, 51, 0.25);
-}
-
-.menu-topbar__cta:hover {
-  background: #bf0c2b;
-  transform: translateY(-1px);
 }
 
 .menu-categories {
@@ -354,7 +278,6 @@
 }
 
 @media (max-width: 720px) {
-  .menu-topbar,
   .menu-categories,
   .menu-grid-section,
   .menu-next,
@@ -365,21 +288,6 @@
 
   .menu-next__card {
     padding: 56px 40px;
-  }
-
-  .menu-topbar {
-    justify-content: center;
-  }
-
-  .menu-topbar__actions {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .menu-topbar__links {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
   }
 }
 
