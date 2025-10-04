@@ -3,10 +3,12 @@ import "./Product.css";
 interface ProductProps {
   image?: string;
   title: string;
-  calories: string;
+  description: string;
+  price: string;
+  tags: string[];
 }
 
-export default function Product({ image, title, calories }: ProductProps) {
+export default function Product({ image, title, description, price, tags }: ProductProps) {
   return (
     <article className="product-card">
       <div className="product-media">
@@ -14,7 +16,17 @@ export default function Product({ image, title, calories }: ProductProps) {
       </div>
       <div className="product-body">
         <h3 className="product-title">{title}</h3>
-        <p className="product-meta">{calories}</p>
+        <p className="product-description">{description}</p>
+        <span className="product-price">{price}</span>
+        {tags.length > 0 ? (
+          <ul className="product-tags" aria-label="Dietary tags">
+            {tags.map((tag) => (
+              <li key={tag} className="product-tag">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         <button className="product-cta" type="button">
           Order now
         </button>

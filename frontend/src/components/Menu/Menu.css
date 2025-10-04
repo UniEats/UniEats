@@ -152,9 +152,9 @@
 
 .menu-grid {
   display: grid;
-  gap: 96px 32px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  max-width: 1200px;
+  gap: 80px 32px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  max-width: min(1500px, 100%);
   margin: 0 auto;
 }
 
