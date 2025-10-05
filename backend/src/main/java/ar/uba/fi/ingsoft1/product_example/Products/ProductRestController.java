@@ -5,7 +5,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,16 +52,29 @@ class ProductRestController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ProductDTO> createProduct(
-            @NonNull @RequestBody ProductCreateDTO data
-    ) {
-        return productService.createProduct(data)
-            .map(ResponseEntity::ok)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR, "Product could not be created"
-        ));
+            @RequestPart("product") String product,
+            @RequestPart(value = "image", required = true) MultipartFile image
+    ) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        ProductCreateDTO dto = mapper.readValue(product, ProductCreateDTO.class);
+        /*
+        ProductCreateDTO dtoWithImage = new ProductCreateDTO(
+                dto.name(),
+                dto.description(),
+                dto.price(),
+                dto.ingredientIds(),
+                dto.tagIds(),
+                image
+        );
+        */
+        return productService.createProduct(dto, image)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Product could not be created"
+                ));
     }
 
     @PatchMapping("/{id}")

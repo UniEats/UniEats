@@ -9,7 +9,8 @@ public record ProductDTO(
         String name,
         String description,
         BigDecimal price,
-        List<String> tags
+        List<String> tags,
+        byte[] image
 ) {
     public ProductDTO(Product product) {
         this(
@@ -19,7 +20,8 @@ public record ProductDTO(
             product.getPrice(),
             product.getTags() != null
                 ? product.getTags().stream().map(Tag::getTag).toList()
-                : List.of()
+                : List.of(),
+            product.getImage()
         );
     }
 

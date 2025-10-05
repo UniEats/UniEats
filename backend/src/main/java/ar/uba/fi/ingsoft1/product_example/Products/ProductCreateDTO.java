@@ -26,7 +26,7 @@ public record ProductCreateDTO(
         @NonNull @Digits(integer = 10, fraction = 2) @DecimalMin("0.00") BigDecimal price,
         @NonNull List<Long> ingredientIds,
         @NonNull List<Long> tagIds
-) {
+    ) {
     public Product toProductWithIngredientsAndTags(
             Function<Long, Ingredient> ingredientFetcher,
             Function<Long, Tag> tagFetcher

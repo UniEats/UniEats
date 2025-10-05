@@ -12,6 +12,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.DecimalMin;
@@ -27,11 +29,13 @@ import java.util.List;
 import java.util.ArrayList;
 
 @Entity
+@Table(name = "product")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Product {
+
     @Id
     @GeneratedValue
     private Long id;
@@ -50,6 +54,9 @@ public class Product {
         this.price = price.setScale(2, RoundingMode.HALF_UP);
     }
 
+    @Column(name = "image", columnDefinition = "BYTEA")
+    private byte[] image;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ProductIngredient> productIngredients;
 
@@ -63,7 +70,8 @@ public class Product {
             this.getName(),
             this.getDescription(),
             this.getPrice(),
-            tagNames
+            tagNames,
+            this.getImage()
         );
     }  
 
