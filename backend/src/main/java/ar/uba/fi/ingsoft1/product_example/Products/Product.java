@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
@@ -49,7 +50,7 @@ public class Product {
         this.price = price.setScale(2, RoundingMode.HALF_UP);
     }
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ProductIngredient> productIngredients;
 
     public ProductDTO toDTO() {

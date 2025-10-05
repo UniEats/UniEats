@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useDeleteProduct } from "@/services/ProductServices";
 import Product from "../Product/Product";
 import "./Menu.css";
 
@@ -27,24 +28,34 @@ export const Menu = ({ menuSections }: MenuProps) => {
   const [activeCategoryId, setActiveCategoryId] = useState<MenuSection["id"] | null>(
     menuSections.length > 0 ? menuSections[0].id : null
   );
+  
+  const deleteProduct = useDeleteProduct();
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteProduct.mutateAsync(id);
+
+      setSections((prevSections) =>
+        prevSections.map((section) =>
+          section.id === activeCategoryId
+            ? {
+                ...section,
+                products: section.products.filter((item) => item.id !== id),
+              }
+            : section
+        )
+      );
+    } catch (error) {
+      console.error("Error deleting product", error);
+      alert("No se pudo eliminar el producto");
+    }
+  };
 
   const activeSection = useMemo(() => {
     if (sections.length === 0) return undefined;
     return sections.find((section) => section.id === activeCategoryId) ?? sections[0];
   }, [activeCategoryId, sections]);
 
-  const handleDelete = (id: number) => {
-    setSections((prevSections) =>
-      prevSections.map((section) =>
-        section.id === activeCategoryId
-          ? {
-              ...section,
-              products: section.products.filter((item) => item.id !== id),
-            }
-          : section
-      )
-    );
-  };
 
   return (
     <div className="menu-page">

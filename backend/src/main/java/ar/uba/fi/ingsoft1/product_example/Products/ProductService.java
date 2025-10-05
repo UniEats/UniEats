@@ -8,6 +8,7 @@ import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientRepository;
+import ar.uba.fi.ingsoft1.product_example.MenuSection.MenuSectionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ class ProductService {
     private final IngredientRepository ingredientRepository;
     private final ProductIngredientRepository productIngredientRepository;
     private final TagRepository tagRepository;
+    private final MenuSectionRepository menuSectionRepository;
 
     public List<ProductDTO> geAlltProducts() {
         return productRepository.findAll()
@@ -84,5 +86,20 @@ class ProductService {
                 .map(update::applyTo)
                 .map(productRepository::save)
                 .map(ProductDTO::new);
+    }
+
+    public boolean deleteProduct(long id) {
+        if (!productRepository.existsById(id)) {
+            return false;
+        }
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Quitar el producto de todas las secciones
+        menuSectionRepository.findAll().forEach(section -> {
+            section.getProducts().remove(product);
+        });
+        productRepository.delete(product);
+        return true;
     }
 }
