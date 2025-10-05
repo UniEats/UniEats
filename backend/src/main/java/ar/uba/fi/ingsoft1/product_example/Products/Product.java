@@ -1,5 +1,7 @@
 package ar.uba.fi.ingsoft1.product_example.Products;
 
+import ar.uba.fi.ingsoft1.product_example.MenuSection.MenuSection;
+
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 
@@ -71,4 +73,7 @@ public class Product {
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private List<Tag> tags = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "products")
+    private List<MenuSection> menuSections = new ArrayList<>();
 }

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 
-record ProductDTO(
+public record ProductDTO(
         long id,
         String name,
         String description,
