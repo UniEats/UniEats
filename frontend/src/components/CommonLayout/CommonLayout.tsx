@@ -63,7 +63,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
           ) : (
             <>
               <Link href="/login" className={`${styles.siteButton} ${styles.siteButtonGhost}`}>
-                Sign in
+                Log in
               </Link>
               <Link href="/signup" className={`${styles.siteButton} ${styles.siteButtonCta}`}>
                 Order now
