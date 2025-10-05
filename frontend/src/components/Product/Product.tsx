@@ -1,13 +1,13 @@
 import "./Product.css";
 
 interface ProductProps {
-  id: string;
+  id: number;
   image?: string;
   title: string;
   description: string;
-  price: string;
+  price: number;
   tags: string[];
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export default function Product({ id, image, title, description, price, tags, onDelete }: ProductProps) {
