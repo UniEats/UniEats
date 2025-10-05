@@ -24,7 +24,6 @@ type MenuProps = {
 };
 
 export const Menu = ({ menuSections }: MenuProps) => {
-  const [sections, setSections] = useState<MenuSection[]>(menuSections);
   const [activeCategoryId, setActiveCategoryId] = useState<MenuSection["id"] | null>(
     menuSections.length > 0 ? menuSections[0].id : null
   );
@@ -34,28 +33,16 @@ export const Menu = ({ menuSections }: MenuProps) => {
   const handleDelete = async (id: number) => {
     try {
       await deleteProduct.mutateAsync(id);
-
-      setSections((prevSections) =>
-        prevSections.map((section) =>
-          section.id === activeCategoryId
-            ? {
-                ...section,
-                products: section.products.filter((item) => item.id !== id),
-              }
-            : section
-        )
-      );
     } catch (error) {
       console.error("Error deleting product", error);
-      alert("No se pudo eliminar el producto");
+      alert("The product could not be deleted");
     }
   };
 
   const activeSection = useMemo(() => {
-    if (sections.length === 0) return undefined;
-    return sections.find((section) => section.id === activeCategoryId) ?? sections[0];
-  }, [activeCategoryId, sections]);
-
+    if (!menuSections || menuSections.length === 0) return undefined;
+    return menuSections.find((section) => section.id === activeCategoryId) ?? menuSections[0];
+  }, [activeCategoryId, menuSections]);
 
   return (
     <div className="menu-page">
