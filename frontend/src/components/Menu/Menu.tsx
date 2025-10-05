@@ -9,7 +9,7 @@ type MenuItem = {
   description: string;
   price: number;
   tags?: string[] | undefined;
-  // image?: string;
+  image?: Uint8Array;
 };
 
 type MenuSection = {
@@ -82,7 +82,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
                   <Product 
                     key={item.name} 
                     id={item.id}
-                    // image={item.image} 
+                    image={item.image} 
                     title={item.name} 
                     description={item.description} 
                     price={item.price} 

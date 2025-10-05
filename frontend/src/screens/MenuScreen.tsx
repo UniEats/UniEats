@@ -10,7 +10,6 @@ export const MenuScreen = () => {
       {menuData.isLoading ? (
         "Loading..."
       ) : !menuData.data ? (
-        console.error(menuData),
         "Data load failed"
       ) : (
         <Menu menuSections={menuData.data} />

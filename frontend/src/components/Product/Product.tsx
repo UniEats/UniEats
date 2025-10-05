@@ -1,8 +1,9 @@
 import "./Product.css";
+import { useMemo } from "react";
 
 interface ProductProps {
   id: number;
-  image?: string;
+  image?: Uint8Array;
   title: string;
   description: string;
   price: number;
@@ -11,10 +12,27 @@ interface ProductProps {
 }
 
 export default function Product({ id, image, title, description, price, tags, onDelete }: ProductProps) {
+  const imageUrl = useMemo(() => {
+    if (!image) return undefined;
+
+    let buffer: ArrayBuffer;
+
+    if (image instanceof Uint8Array) {
+      buffer = image.slice().buffer as unknown as ArrayBuffer;
+    } else if (typeof image === "object" && image !== null && "byteLength" in image) {
+      buffer = new Uint8Array(image as ArrayBufferLike).slice().buffer as unknown as ArrayBuffer;
+    } else {
+      throw new Error("Tipo de imagen no soportado");
+    }
+
+    const blob = new Blob([buffer], { type: "image/png" });
+    return URL.createObjectURL(blob);
+  }, [image]);
+
   return (
     <article className="product-card">
       <div className="product-media">
-        <img className="product-image" src={image} alt={title} loading="lazy" />
+        <img className="product-image" src={imageUrl} alt={title} loading="lazy" />
       </div>
       <div className="product-body">
         <div className="product-content">
