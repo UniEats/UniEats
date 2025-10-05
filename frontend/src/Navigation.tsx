@@ -1,32 +1,29 @@
 import { Redirect, Route, Switch } from "wouter";
 
-import { BrandCreateScreen } from "@/screens/BrandCreateScreen";
-import { BrandDetailScreen } from "@/screens/BrandDetailScreen";
-import { BrandListScreen } from "@/screens/BrandListScreen";
 import { LoginScreen } from "@/screens/LoginScreen";
 import { MainScreen } from "@/screens/MainScreen";
 import { SignupScreen } from "@/screens/SignupScreen";
-import { useToken } from "@/services/TokenContext";
+import { useToken, 
+  //useUserRole 
+} from "@/services/TokenContext";
 
 import { MenuScreen } from "./screens/MenuScreen";
 
 export const Navigation = () => {
   const [tokenState] = useToken();
+  //const userRole = useUserRole();
+
   switch (tokenState.state) {
     case "LOGGED_IN":
     case "REFRESHING":
       return (
+        // TO restringe access to certain routes based on user role
+            // {userRole === "ROLE_ADMIN" && (
+            // <></> )}
         <Switch>
           <Route path="/menu">
             <MenuScreen />
           </Route>
-          <Route path="/brands">
-            <BrandListScreen />
-          </Route>
-          <Route path="/brands/new">
-            <BrandCreateScreen />
-          </Route>
-          <Route path="/brands/:id">{({ id }) => <BrandDetailScreen id={id} />}</Route>
           <Route path="/">
             <MainScreen />
           </Route>

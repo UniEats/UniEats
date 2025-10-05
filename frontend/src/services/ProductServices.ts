@@ -16,7 +16,7 @@ export async function deleteProductById(
   });
 
   if (response.status === 204) {
-    return {};
+    return {"message": "Product deleted successfully"} as const;
   }
 
   return handleResponse(response, async () => ({} as const));

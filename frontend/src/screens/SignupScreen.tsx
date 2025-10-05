@@ -25,19 +25,6 @@ export const SignupScreen = () => {
         <formData.FormContainer extraError={error}>
           <formData.AppField name="username" children={(field) => <field.TextField label="Username" />} />
           <formData.AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
-          <formData.AppField
-            name="role"
-            children={(field) => (
-              <label>
-                <input
-                  type="checkbox"
-                  checked={field.state.value === "ROLE_ADMIN"}
-                  onChange={() => field.handleChange(field.state.value === "ROLE_ADMIN" ? "ROLE_USER" : "ROLE_ADMIN")}
-                />
-                Admin
-              </label>
-            )}
-          />
         </formData.FormContainer>
       </formData.AppForm>
     </CommonLayout>

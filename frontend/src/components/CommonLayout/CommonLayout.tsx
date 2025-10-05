@@ -29,9 +29,6 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
               <Link href="/menu" className={styles.siteNavLink}>
                 Menu
               </Link>
-              <Link href="/brands" className={styles.siteNavLink}>
-                Brands
-              </Link>
             </>
           ) : (
             <>
