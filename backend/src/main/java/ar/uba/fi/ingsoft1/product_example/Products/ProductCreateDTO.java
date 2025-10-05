@@ -4,6 +4,7 @@ import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
 
 import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
+import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -23,9 +24,13 @@ public record ProductCreateDTO(
         @NonNull @Size(min = 1, max = 100) String name,
         @NonNull @Size(min = 1, max = 500) String description,
         @NonNull @Digits(integer = 10, fraction = 2) @DecimalMin("0.00") BigDecimal price,
-        @NonNull List<Long> ingredientIds
+        @NonNull List<Long> ingredientIds,
+        @NonNull List<Long> tagIds
 ) {
-    public Product toProductWithIngredients(Function<Long, Ingredient> ingredientFetcher) {
+    public Product toProductWithIngredientsAndTags(
+            Function<Long, Ingredient> ingredientFetcher,
+            Function<Long, Tag> tagFetcher
+    ) {
         Product product = new Product(name, description, price);
 
         List<ProductIngredient> productIngredients = ingredientIds.stream()
@@ -44,8 +49,13 @@ public record ProductCreateDTO(
                 return pi;
             })
             .collect(Collectors.toList());
-
         product.setProductIngredients(productIngredients);
+
+        List<Tag> tags = tagIds.stream()
+            .map(tagFetcher)
+            .collect(Collectors.toList());
+        product.setTags(tags);
+
         return product;
     }
 }

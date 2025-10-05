@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,10 +47,14 @@ class ProductRestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDTO createProduct(
+    public ResponseEntity<ProductDTO> createProduct(
             @NonNull @RequestBody ProductCreateDTO data
     ) {
-        return productService.createProduct(data).toDTO();
+        return productService.createProduct(data)
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR, "Product could not be created"
+        ));
     }
 
     @PatchMapping("/{id}")

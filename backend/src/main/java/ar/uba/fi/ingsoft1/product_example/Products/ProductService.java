@@ -1,6 +1,9 @@
 package ar.uba.fi.ingsoft1.product_example.Products;
 
 import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
+import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
+import ar.uba.fi.ingsoft1.product_example.Tags.TagRepository;
+
 import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
@@ -21,6 +24,7 @@ class ProductService {
     private final ProductRepository productRepository;
     private final IngredientRepository ingredientRepository;
     private final ProductIngredientRepository productIngredientRepository;
+    private final TagRepository tagRepository;
 
     public List<ProductDTO> geAlltProducts() {
         return productRepository.findAll()
@@ -41,8 +45,16 @@ class ProductService {
     }
 
     @Transactional
-    public Product createProduct(ProductCreateDTO dto) {
+    public Optional<ProductDTO> createProduct(ProductCreateDTO dto) {
         Product product = new Product(dto.name(), dto.description(), dto.price());
+
+        List<Tag> tags = dto.tagIds().stream()
+            .map(tagId -> tagRepository.findById(tagId)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found: " + tagId)))
+            .toList();
+
+        product.setTags(tags);
+
         product = productRepository.save(product);
 
         Product finalProduct = product;
@@ -50,9 +62,8 @@ class ProductService {
             .map(ingredientId -> {
                 Ingredient ingredient = ingredientRepository.findById(ingredientId)
                     .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientId));
-                
-                ProductIngredient pi = new ProductIngredient();
 
+                ProductIngredient pi = new ProductIngredient();
                 ProductIngredientId piId = new ProductIngredientId(finalProduct.getId(), ingredient.getId());
                 pi.setId(piId);
                 pi.setProduct(finalProduct);
@@ -65,7 +76,7 @@ class ProductService {
         productIngredientRepository.saveAll(productIngredients);
         product.setProductIngredients(productIngredients);
 
-        return product;
+        return Optional.of(product.toDTO());
     }
 
     public Optional<ProductDTO> updateProduct(Long id, ProductUpdateDTO update) {

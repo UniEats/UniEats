@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, "/brands").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/tags/**").hasRole("ADMIN")
                         .requestMatchers("/brands/**").authenticated()
                         .requestMatchers("/ingredients/**").authenticated()
                         .requestMatchers("/products/**").authenticated()
