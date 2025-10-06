@@ -23,7 +23,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
         <nav className={styles.siteNav} aria-label="Primary navigation">
           {isAuthenticated ? (
             <>
-              <Link href="/under-construction" className={styles.siteNavLink}>
+              <Link href="/" className={styles.siteNavLink}>
                 Main Page
               </Link>
               <Link href="/menu" className={styles.siteNavLink}>

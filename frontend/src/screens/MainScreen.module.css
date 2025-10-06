@@ -1,0 +1,28 @@
+.wrapper {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 992px) {
+  .wrapper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.infoBox {
+  padding: 1.5rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.75rem;
+  background-color: #f9fafb;
+}
+
+.infoTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
