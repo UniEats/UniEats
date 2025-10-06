@@ -1,7 +1,14 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
-import { ProductCreateRequest, ProductFormValues, ProductSchema } from "@/models/Product";
+import {
+  ProductCreateRequest,
+  ProductFormValues,
+  ProductListSchema,
+  ProductSchema,
+  ProductUpdateFormValues,
+  ProductUpdateRequest,
+} from "@/models/Product";
 import { useAccessTokenGetter, useHandleResponse } from "./TokenContext";
 
 async function postProduct(
@@ -35,10 +42,30 @@ async function postProduct(
   return handleResponse(response, (json) => ProductSchema.parse(json));
 }
 
+async function patchProduct(
+  id: number,
+  payload: ProductUpdateRequest,
+  getAccessToken: () => Promise<string>,
+  handleResponse: ReturnType<typeof useHandleResponse>,
+) {
+  const token = await getAccessToken();
+  const response = await fetch(`${BASE_API_URL}/products/${id}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response, (json) => ProductSchema.parse(json));
+}
+
 export async function deleteProductById(
-  id: number, 
-  getAccessToken: () => Promise<string>, 
-  handleResponse: ReturnType<typeof useHandleResponse>
+  id: number,
+  getAccessToken: () => Promise<string>,
+  handleResponse: ReturnType<typeof useHandleResponse>,
 ) {
   const token = await getAccessToken();
   const response = await fetch(`${BASE_API_URL}/products/${id}`, {
@@ -55,6 +82,26 @@ export async function deleteProductById(
   return handleResponse(response, async () => ({} as const));
 }
 
+export function useProductList() {
+  const getAccessToken = useAccessTokenGetter();
+  const handleResponse = useHandleResponse();
+
+  return useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await fetch(`${BASE_API_URL}/products`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${await getAccessToken()}`,
+        },
+      });
+
+      return handleResponse(response, (json) => ProductListSchema.parse(json));
+    },
+  });
+}
+
 export function useDeleteProduct() {
   const getAccessToken = useAccessTokenGetter();
   const handleResponse = useHandleResponse();
@@ -64,6 +111,7 @@ export function useDeleteProduct() {
     mutationFn: (id: number) => deleteProductById(id, getAccessToken, handleResponse),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 }
@@ -89,6 +137,42 @@ export function useCreateProduct() {
       };
 
       return postProduct(payload, getAccessToken, handleResponse);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["menus"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+export function useUpdateProduct() {
+  const getAccessToken = useAccessTokenGetter();
+  const handleResponse = useHandleResponse();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (values: ProductUpdateFormValues) => {
+      const productId = Number.parseInt(values.productId, 10);
+
+      if (Number.isNaN(productId)) {
+        throw new Error("Invalid product selected");
+      }
+
+      const payload: ProductUpdateRequest = {};
+
+      if (values.name.trim().length > 0) {
+        payload.name = values.name.trim();
+      }
+
+      if (values.description.trim().length > 0) {
+        payload.description = values.description.trim();
+      }
+
+      if (!payload.name && !payload.description) {
+        throw new Error("Nothing to update");
+      }
+
+      return patchProduct(productId, payload, getAccessToken, handleResponse);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });

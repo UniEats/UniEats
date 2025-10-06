@@ -2,6 +2,7 @@ import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
 import { IngredientForm } from "@/components/AdminForms/IngredientForm";
 import { TagForm } from "@/components/AdminForms/TagForm";
 import { ProductForm } from "@/components/AdminForms/ProductForm";
+import { ProductUpdateForm } from "@/components/AdminForms/ProductUpdateForm";
 import { useUserRole } from "@/services/TokenContext";
 
 import styles from "./MainScreen.module.css";
@@ -23,6 +24,9 @@ export const MainScreen = () => {
           <TagForm />
           <div className={styles.fullWidth}>
             <ProductForm />
+          </div>
+          <div className={styles.fullWidth}>
+            <ProductUpdateForm />
           </div>
         </div>
       )}

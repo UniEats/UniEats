@@ -9,7 +9,10 @@ export const ProductSchema = z.object({
   image: z.string().optional(),
 });
 
+export const ProductListSchema = z.array(ProductSchema);
+
 export type Product = z.infer<typeof ProductSchema>;
+export type ProductList = z.infer<typeof ProductListSchema>;
 
 export const ProductFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -28,6 +31,29 @@ export const ProductFormSchema = z.object({
 
 export type ProductFormValues = z.infer<typeof ProductFormSchema>;
 
+export const ProductUpdateFormSchema = z
+  .object({
+    productId: z.string().min(1, "Select a product"),
+    name: z.string(),
+    description: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.name.trim().length === 0 && data.description.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["name"],
+        message: "Provide a new name or description",
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["description"],
+        message: "Provide a new name or description",
+      });
+    }
+  });
+
+export type ProductUpdateFormValues = z.infer<typeof ProductUpdateFormSchema>;
+
 export type ProductCreateRequest = {
   name: string;
   description: string;
@@ -35,4 +61,9 @@ export type ProductCreateRequest = {
   ingredientIds: number[];
   tagIds: number[];
   image: File;
+};
+
+export type ProductUpdateRequest = {
+  name?: string;
+  description?: string;
 };
