@@ -60,16 +60,7 @@ class ProductRestController {
     ) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         ProductCreateDTO dto = mapper.readValue(product, ProductCreateDTO.class);
-        /*
-        ProductCreateDTO dtoWithImage = new ProductCreateDTO(
-                dto.name(),
-                dto.description(),
-                dto.price(),
-                dto.ingredientIds(),
-                dto.tagIds(),
-                image
-        );
-        */
+
         return productService.createProduct(dto, image)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(
