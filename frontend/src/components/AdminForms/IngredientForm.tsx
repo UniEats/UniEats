@@ -37,13 +37,27 @@ export const IngredientForm = () => {
   return (
     <section className={styles.formSection} aria-labelledby="ingredient-form-title">
       <h2 id="ingredient-form-title" className={styles.formTitle}>
-        Create Ingredient
+        Add Ingredient
       </h2>
       <formData.AppForm>
         <formData.FormContainer extraError={submissionError}>
           <formData.AppField name="name" children={(field) => <field.TextField label="Name" />} />
           <formData.AppField name="description" children={(field) => <field.TextField label="Description" />} />
           <formData.AppField name="stock" children={(field) => <field.TextField label="Initial stock" />} />
+
+          <div className={styles.formActions}>
+            <button
+              type="button"
+              className={styles.cancelButton}
+              onClick={() => window.history.back()}
+            >
+              Cancel
+            </button>
+
+            <button type="submit" className={styles.submitButton}>
+              Add Item
+            </button>
+          </div>
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}

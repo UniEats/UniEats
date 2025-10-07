@@ -35,11 +35,19 @@ export const TagForm = () => {
   return (
     <section className={styles.formSection} aria-labelledby="tag-form-title">
       <h2 id="tag-form-title" className={styles.formTitle}>
-        Create Tag
+        Add Tag
       </h2>
       <formData.AppForm>
         <formData.FormContainer extraError={submissionError}>
           <formData.AppField name="tag" children={(field) => <field.TextField label="Tag name" />} />
+        <div className={styles.formActions}>
+          <button type="button" className={styles.cancelButton} onClick={() => window.history.back()}>
+            Cancel
+          </button>
+          <button type="submit" className={styles.submitButton}>
+            Add Item
+          </button>
+        </div>
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}

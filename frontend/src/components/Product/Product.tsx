@@ -40,7 +40,7 @@ export default function Product({ id, image, title, description, price, tags, on
         <div className="product-content">
           <h3 className="product-title">{title}</h3>
           <p className="product-description">{description}</p>
-          <span className="product-price">{price}</span>
+          <span className="product-price">${price}</span>
           {tags.length > 0 ? (
             <ul className="product-tags" aria-label="Dietary tags">
               {tags.map((tag) => (

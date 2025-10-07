@@ -25,6 +25,7 @@ export function Login({ onSubmit, submitError }: Props) {
         <formData.FormContainer extraError={submitError}>
           <formData.AppField name="username" children={(field) => <field.TextField label="Username" />} />
           <formData.AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
+          <button type="submit">Log In</button>
         </formData.FormContainer>
       </formData.AppForm>
     </>

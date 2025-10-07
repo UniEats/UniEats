@@ -131,6 +131,14 @@ export const ProductUpdateForm = () => {
             name="description"
             children={(field) => <field.TextField label="New description" />}
           />
+        <div className={styles.formActions}>
+          <button type="button" className={styles.cancelButton} onClick={() => window.history.back()}>
+            Cancel
+          </button>
+          <button type="submit" className={styles.submitButton}>
+            Add Item
+          </button>
+        </div>
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}

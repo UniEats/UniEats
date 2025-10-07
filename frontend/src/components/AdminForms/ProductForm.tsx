@@ -83,7 +83,7 @@ export const ProductForm = () => {
   return (
     <section className={styles.formSection} aria-labelledby="product-form-title">
       <h2 id="product-form-title" className={styles.formTitle}>
-        Create Product
+        Add Product
       </h2>
       {ingredients.length === 0 ? <p>Please add at least one ingredient before creating a product.</p> : null}
       <formData.AppForm>
@@ -186,6 +186,14 @@ export const ProductForm = () => {
               </div>
             )}
           />
+        <div className={styles.formActions}>
+          <button type="button" className={styles.cancelButton} onClick={() => window.history.back()}>
+            Cancel
+          </button>
+          <button type="submit" className={styles.submitButton}>
+            Add Item
+          </button>
+        </div>
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}
