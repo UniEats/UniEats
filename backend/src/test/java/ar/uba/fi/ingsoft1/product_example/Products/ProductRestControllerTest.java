@@ -52,7 +52,7 @@ class ProductRestControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = {"ADMIN"})
     void getAllProducts_returnsList() throws Exception {
         Mockito.when(productService.geAlltProducts()).thenReturn(List.of(productDTO));
 
@@ -62,7 +62,7 @@ class ProductRestControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = {"ADMIN"})
     void getProductsWithAllIngredientsInStock_returnsList() throws Exception {
         Mockito.when(productService.getProductsAvailable()).thenReturn(List.of(productDTO));
 
@@ -72,7 +72,7 @@ class ProductRestControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = {"ADMIN"})
     void getProductById_found() throws Exception {
         Mockito.when(productService.getProductById(1L)).thenReturn(Optional.of(productDTO));
 
@@ -82,7 +82,7 @@ class ProductRestControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = {"ADMIN"})
     void getProductById_notFound() throws Exception {
         Mockito.when(productService.getProductById(999L)).thenReturn(Optional.empty());
 

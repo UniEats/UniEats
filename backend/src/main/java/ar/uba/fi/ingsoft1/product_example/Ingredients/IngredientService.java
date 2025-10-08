@@ -37,10 +37,6 @@ class IngredientService {
         Ingredient ingredient = ingredientOpt.get();
         int newStock = ingredient.getStock() + amount;
 
-        if (newStock < 0) {
-            throw new IllegalArgumentException("Stock cannot be negative.");
-        }
-
         ingredient.setStock(newStock);
         ingredientRepository.save(ingredient);
 
