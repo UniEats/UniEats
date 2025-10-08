@@ -1,4 +1,4 @@
-package ar.uba.fi.ingsoft1.product_example.MenuSection;
+package ar.uba.fi.ingsoft1.product_example.MenuSections;
 
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;

@@ -8,7 +8,8 @@ import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientRepository;
-import ar.uba.fi.ingsoft1.product_example.MenuSection.MenuSectionRepository;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSectionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -72,8 +73,6 @@ class ProductService {
                 throw new RuntimeException("Error reading the image", e);
             }
         }
- 
-        product = productRepository.save(product);
 
         Product finalProduct = product;
         List<ProductIngredient> productIngredients = dto.ingredientIds().stream()
@@ -91,8 +90,17 @@ class ProductService {
             })
             .toList();
 
-        productIngredientRepository.saveAll(productIngredients);
         product.setProductIngredients(productIngredients);
+
+        if (dto.menuSectionIds() != null && !dto.menuSectionIds().isEmpty()) {
+            List<MenuSection> sections = dto.menuSectionIds().stream()
+                    .map(sectionId -> menuSectionRepository.findById(sectionId)
+                            .orElseThrow(() -> new EntityNotFoundException("Menu section not found: " + sectionId)))
+                    .toList();
+            product.setMenuSections(sections);
+        }
+
+        productRepository.save(product);
 
         return Optional.of(product.toDTO());
     }

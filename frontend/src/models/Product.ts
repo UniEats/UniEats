@@ -6,6 +6,7 @@ export const ProductSchema = z.object({
   description: z.string(),
   price: z.number(),
   tags: z.array(z.string()),
+  menuSections: z.array(z.string()),
   image: z.string().optional(),
 });
 
@@ -23,6 +24,7 @@ export const ProductFormSchema = z.object({
     .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, "Price must be a non-negative number"),
   ingredientIds: z.array(z.string()).min(1, "Select at least one ingredient"),
   tagIds: z.array(z.string()),
+  menuSectionIds: z.array(z.string()).min(1, "Select at least one menu section"),
   image: z
     .instanceof(File)
     .or(z.null())
@@ -60,6 +62,7 @@ export type ProductCreateRequest = {
   price: number;
   ingredientIds: number[];
   tagIds: number[];
+  menuSectionIds: number[];
   image: File;
 };
 

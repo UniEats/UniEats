@@ -1,4 +1,4 @@
-package ar.uba.fi.ingsoft1.product_example.MenuSection;
+package ar.uba.fi.ingsoft1.product_example.MenuSections;
 
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
@@ -46,5 +46,5 @@ public class MenuSection {
         joinColumns = @JoinColumn(name = "menu_section_id"),
         inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private List<Product> products = new ArrayList<>();;
+    private List<Product> products = new ArrayList<>();
 }

@@ -1,4 +1,4 @@
-package ar.uba.fi.ingsoft1.product_example.MenuSection;
+package ar.uba.fi.ingsoft1.product_example.MenuSections;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

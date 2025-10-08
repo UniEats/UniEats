@@ -1,6 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.Products;
 
-import ar.uba.fi.ingsoft1.product_example.MenuSection.MenuSection;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
 
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
@@ -58,7 +58,7 @@ public class Product {
     private byte[] image;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<ProductIngredient> productIngredients;
+    private List<ProductIngredient> productIngredients = new ArrayList<>();
 
     public ProductDTO toDTO() {
         List<String> tagNames = tags != null

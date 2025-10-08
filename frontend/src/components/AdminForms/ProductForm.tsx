@@ -6,6 +6,7 @@ import { ProductFormSchema, ProductFormValues } from "@/models/Product";
 import { useCreateProduct } from "@/services/ProductServices";
 import { useIngredientList } from "@/services/IngredientServices";
 import { useTagList } from "@/services/TagServices";
+import { useMenuSectionList } from "@/services/MenuSectionServices";
 
 import styles from "./AdminForms.module.css";
 
@@ -22,6 +23,7 @@ const PRODUCT_DEFAULT_VALUES: ProductFormValues = {
   price: "",
   ingredientIds: [],
   tagIds: [],
+  menuSectionIds: [],
   image: null,
 };
 
@@ -29,6 +31,7 @@ export const ProductForm = () => {
   const createProduct = useCreateProduct();
   const ingredientsQuery = useIngredientList();
   const tagsQuery = useTagList();
+  const menuSectionsQuery = useMenuSectionList()
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const formData = useAppForm({
@@ -49,27 +52,26 @@ export const ProductForm = () => {
       : new Error(String(createProduct.error))
     : null;
 
-  if (ingredientsQuery.isLoading || tagsQuery.isLoading) {
+  if (ingredientsQuery.isLoading || tagsQuery.isLoading || menuSectionsQuery.isLoading) {
     return (
       <section className={styles.formSection} aria-live="polite">
-        Loading ingredients and tags...
+        Loading ingredients, tags and menu sections...
       </section>
     );
   }
 
-  if (ingredientsQuery.error || tagsQuery.error) {
+  if (ingredientsQuery.error || tagsQuery.error || menuSectionsQuery.error) {
     const ingredientError = ingredientsQuery.error;
     const tagError = tagsQuery.error;
+    const menuError = menuSectionsQuery.error;
     const errorMessage =
-      ingredientError instanceof Error
-        ? ingredientError.message
-        : typeof ingredientError === "string"
-          ? ingredientError
+        ingredientError instanceof Error
+          ? ingredientError.message
           : tagError instanceof Error
-            ? tagError.message
-            : typeof tagError === "string"
-              ? tagError
-              : "Failed to load required data.";
+          ? tagError.message
+          : menuError instanceof Error
+          ? menuError.message
+          : "Failed to load required data.";
     return (
       <section className={styles.formSection} aria-live="assertive">
         <p>{errorMessage}</p>
@@ -79,6 +81,7 @@ export const ProductForm = () => {
 
   const ingredients = ingredientsQuery.data ?? [];
   const tags = tagsQuery.data ?? [];
+  const menuSections = menuSectionsQuery.data ?? [];
 
   return (
     <section className={styles.formSection} aria-labelledby="product-form-title">
@@ -155,6 +158,43 @@ export const ProductForm = () => {
                             onBlur={field.handleBlur}
                           />
                           <span>{tag.tag}</span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+              </div>
+            )}
+          />
+          <formData.Field
+            name="menuSectionIds"
+            children={(field) => (
+              <div className={styles.formFields}>
+                <span className={styles.fieldLabel}>Menu Sections</span>
+                <div className={styles.optionsGrid}>
+                  {menuSections.length === 0 ? (
+                    <span>No menu sections available yet.</span>
+                  ) : (
+                    menuSections.map((section) => {
+                      const optionValue = section.id.toString();
+                      const isChecked = field.state.value.includes(optionValue);
+                      return (
+                        <label key={section.id} className={styles.optionRow}>
+                          <input
+                            type="checkbox"
+                            value={optionValue}
+                            checked={isChecked}
+                            onChange={(event) => {
+                              const { checked, value } = event.target;
+                              const nextValue = checked
+                                ? [...field.state.value, value]
+                                : field.state.value.filter((item) => item !== value);
+                              field.handleChange(nextValue);
+                            }}
+                            onBlur={field.handleBlur}
+                          />
+                          <span>{section.label}</span>
                         </label>
                       );
                     })

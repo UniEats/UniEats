@@ -27,6 +27,7 @@ async function postProduct(
       price: data.price,
       ingredientIds: data.ingredientIds,
       tagIds: data.tagIds,
+      menuSectionIds: data.menuSectionIds,
     }),
   );
   formData.append("image", data.image);
@@ -133,6 +134,7 @@ export function useCreateProduct() {
         price: Number(values.price),
         ingredientIds: values.ingredientIds.map((id) => Number.parseInt(id, 10)),
         tagIds: values.tagIds.map((id) => Number.parseInt(id, 10)),
+        menuSectionIds: values.menuSectionIds.map((id) => Number.parseInt(id, 10)),
         image: values.image,
       };
 
