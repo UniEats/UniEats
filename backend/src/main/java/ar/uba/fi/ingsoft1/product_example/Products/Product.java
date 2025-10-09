@@ -57,8 +57,19 @@ public class Product {
     @Column(name = "image", columnDefinition = "BYTEA")
     private byte[] image;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<ProductIngredient> productIngredients = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_tag",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "products")
+    private List<MenuSection> menuSections = new ArrayList<>();
 
     public ProductDTO toDTO() {
         List<String> tagNames = tags != null
@@ -75,14 +86,5 @@ public class Product {
         );
     }  
 
-    @ManyToMany
-    @JoinTable(
-        name = "product_tag",
-        joinColumns = @JoinColumn(name = "product_id"),
-        inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
-    private List<Tag> tags = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "products")
-    private List<MenuSection> menuSections = new ArrayList<>();
 }

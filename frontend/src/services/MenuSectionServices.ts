@@ -9,7 +9,7 @@ async function postMenuSection(
   getAccessToken: () => Promise<string>,
   handleResponse: ReturnType<typeof useHandleResponse>,
 ) {
-  const response = await fetch(`${BASE_API_URL}/menuSections`, {
+  const response = await fetch(`${BASE_API_URL}/menu-sections`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -28,7 +28,7 @@ export async function deleteMenuSectionById(
   handleResponse: ReturnType<typeof useHandleResponse>,
 ) {
   const token = await getAccessToken();
-  const response = await fetch(`${BASE_API_URL}/menuSections/${id}`, {
+  const response = await fetch(`${BASE_API_URL}/menu-sections/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -47,9 +47,9 @@ export function useMenuSectionList() {
   const handleResponse = useHandleResponse();
 
   return useQuery({
-    queryKey: ["menuSections"],
+    queryKey: ["menu-sections"],
     queryFn: async () => {
-      const response = await fetch(`${BASE_API_URL}/menuSections`, {
+      const response = await fetch(`${BASE_API_URL}/menu-sections`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -77,7 +77,7 @@ export function useCreateMenuSection() {
       return postMenuSection(payload, getAccessToken, handleResponse);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["menuSections"] });
+      queryClient.invalidateQueries({ queryKey: ["menu-sections"] });
     },
   });
 }
@@ -90,7 +90,7 @@ export function useDeleteMenuSection() {
   return useMutation({
     mutationFn: (id: number) => deleteMenuSectionById(id, getAccessToken, handleResponse),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["menuSections"] });
+      queryClient.invalidateQueries({ queryKey: ["menu-sections"] });
     },
   });
 }

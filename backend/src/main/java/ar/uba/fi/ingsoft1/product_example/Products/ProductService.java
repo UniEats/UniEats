@@ -55,13 +55,6 @@ class ProductService {
     public Optional<ProductDTO> createProduct(ProductCreateDTO dto, MultipartFile image) {
         Product product = new Product(dto.name(), dto.description(), dto.price());
 
-        List<Tag> tags = dto.tagIds().stream()
-            .map(tagId -> tagRepository.findById(tagId)
-                .orElseThrow(() -> new EntityNotFoundException("Tag not found: " + tagId)))
-            .toList();
-
-        product.setTags(tags);
-
         MultipartFile file = image;
         if (file != null && !file.isEmpty()) {
             if (file.getSize() > MAX_IMAGE_SIZE) {
@@ -74,16 +67,29 @@ class ProductService {
             }
         }
 
-        Product finalProduct = product;
+        List<Tag> tags = dto.tagIds().stream()
+            .map(tagId -> tagRepository.findById(tagId)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found: " + tagId)))
+            .toList();
+        product.setTags(tags);
+
+        if (dto.menuSectionIds() != null && !dto.menuSectionIds().isEmpty()) {
+            List<MenuSection> sections = dto.menuSectionIds().stream()
+                    .map(sectionId -> menuSectionRepository.findById(sectionId)
+                            .orElseThrow(() -> new EntityNotFoundException("Menu section not found: " + sectionId)))
+                    .toList();
+            product.setMenuSections(sections);
+            sections.forEach(section -> section.getProducts().add(product));
+        }
+
         List<ProductIngredient> productIngredients = dto.ingredientIds().stream()
             .map(ingredientId -> {
                 Ingredient ingredient = ingredientRepository.findById(ingredientId)
                     .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientId));
 
                 ProductIngredient pi = new ProductIngredient();
-                ProductIngredientId piId = new ProductIngredientId(finalProduct.getId(), ingredient.getId());
-                pi.setId(piId);
-                pi.setProduct(finalProduct);
+                pi.setId(new ProductIngredientId());
+                pi.setProduct(product);
                 pi.setIngredient(ingredient);
 
                 return pi;
@@ -92,17 +98,9 @@ class ProductService {
 
         product.setProductIngredients(productIngredients);
 
-        if (dto.menuSectionIds() != null && !dto.menuSectionIds().isEmpty()) {
-            List<MenuSection> sections = dto.menuSectionIds().stream()
-                    .map(sectionId -> menuSectionRepository.findById(sectionId)
-                            .orElseThrow(() -> new EntityNotFoundException("Menu section not found: " + sectionId)))
-                    .toList();
-            product.setMenuSections(sections);
-        }
+        Product savedProduct = productRepository.save(product);
 
-        productRepository.save(product);
-
-        return Optional.of(product.toDTO());
+        return Optional.of(savedProduct.toDTO());
     }
 
     public Optional<ProductDTO> updateProduct(Long id, ProductUpdateDTO update) {
