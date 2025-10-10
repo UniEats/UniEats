@@ -4,6 +4,7 @@ import { IngredientForm } from "@/components/AdminForms/IngredientForm";
 import { TagForm } from "@/components/AdminForms/TagForm";
 import { ProductForm } from "@/components/AdminForms/ProductForm";
 import { ProductUpdateForm } from "@/components/AdminForms/ProductUpdateForm";
+import { MenuSectionForm } from "@/components/AdminForms/MenuSectionForm";
 import { Modal } from "@/components/Modal/Modal";
 import { useUserRole } from "@/services/TokenContext";
 import styles from "./MainScreen.module.css";
@@ -11,7 +12,7 @@ import styles from "./MainScreen.module.css";
 export const MainScreen = () => {
   const role = useUserRole();
   const [openModal, setOpenModal] = useState<
-    "ingredient" | "tag" | "product-create" | "product-update" | null
+    "ingredient" | "tag" | "product-create" | "product-update" | "menu-section" | null
   >(null);
 
   const closeModal = useCallback(() => setOpenModal(null), []);
@@ -68,6 +69,14 @@ export const MainScreen = () => {
             <span className={styles.icon}>🧾</span>
             <span>Update Product</span>
           </button>
+
+          <button
+            className={styles.panelButton}
+            onClick={() => setOpenModal("menu-section")}
+          >
+            <span className={styles.icon}>📋</span>
+            <span>Add Menu Section</span>
+          </button>
         </div>
       </section>
 
@@ -89,6 +98,11 @@ export const MainScreen = () => {
       {openModal === "product-update" && (
         <Modal onClose={closeModal}>
           <ProductUpdateForm />
+        </Modal>
+      )}
+      {openModal === "menu-section" && (
+        <Modal onClose={closeModal}>
+          <MenuSectionForm />
         </Modal>
       )}
     </CommonLayout>
