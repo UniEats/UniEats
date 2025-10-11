@@ -75,30 +75,34 @@ export const Menu = ({ menuSections }: MenuProps) => {
     <div className="menu-page">
       <nav className="menu-categories" aria-label="Menu sections">
         <ul role="tablist">
-          {menuSections.map((section) => {
-            if (section.products.length === 0) return null; 
-            const isActive = section.id === activeCategoryId;
-            return (
-              <li key={section.id} role="presentation">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls="menu-section"
-                  className={`menu-category ${isActive ? "active" : ""}`}
-                  onClick={() => handleCategoryClick(section.id)}
-                  disabled={isSwitching}
-                >
-                  {section.label}
-                </button>
-              </li>
-            );
-          })}
+          {menuSections.length === 0 ? (
+            <p>No menu sections available</p>
+          ) : (
+            menuSections.map((section) => {
+              if (section.products.length === 0) return null; 
+              const isActive = section.id === activeCategoryId;
+              return (
+                <li key={section.id} role="presentation">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="menu-section"
+                    className={`menu-category ${isActive ? "active" : ""}`}
+                    onClick={() => handleCategoryClick(section.id)}
+                    disabled={isSwitching}
+                  >
+                    {section.label}
+                  </button>
+                </li>
+              );
+            })
+          )}
         </ul>
       </nav>
 
       <main id="menu-section">
-        {activeSection ? (
+        {activeSection && activeSection.products.length > 0 ? (
           <>
             <section className="menu-hero">
               <h1>{activeSection.label}</h1>
@@ -123,7 +127,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
             </section>
           </>
         ) : (
-          <p>Cargando menú...</p>
+          <p>No products available...</p>
         )}
       </main>
     </div>
