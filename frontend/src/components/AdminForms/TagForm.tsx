@@ -10,7 +10,11 @@ const TAG_DEFAULT_VALUES: TagFormValues = {
   tag: "",
 };
 
-export const TagForm = () => {
+type TagFormProps = {
+  onClose: () => void;
+};
+
+export const TagForm = ({ onClose }: TagFormProps) => {
   const createTag = useCreateTag();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -41,7 +45,7 @@ export const TagForm = () => {
         <formData.FormContainer extraError={submissionError}>
           <formData.AppField name="tag" children={(field) => <field.TextField label="Tag name" />} />
         <div className={styles.formActions}>
-          <button type="button" className={styles.cancelButton} onClick={() => window.history.back()}>
+          <button type="button" className={styles.cancelButton} onClick={onClose}>
             Cancel
           </button>
           <button type="submit" className={styles.submitButton}>

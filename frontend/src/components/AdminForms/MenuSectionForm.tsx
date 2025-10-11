@@ -11,7 +11,11 @@ const MENU_SECTION_DEFAULT_VALUES: MenuSectionFormValues = {
   description: "",
 };
 
-export const MenuSectionForm = () => {
+type MenuSectionFormProps = {
+  onClose: () => void;
+};
+
+export const MenuSectionForm = ({ onClose }: MenuSectionFormProps) => {
   const createMenuSection = useCreateMenuSection();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -54,7 +58,7 @@ export const MenuSectionForm = () => {
             <button
               type="button"
               className={styles.cancelButton}
-              onClick={() => window.history.back()}
+              onClick={onClose}
             >
               Cancel
             </button>

@@ -12,7 +12,11 @@ const INGREDIENT_DEFAULT_VALUES: IngredientFormValues = {
   stock: "",
 };
 
-export const IngredientForm = () => {
+type IngredientFormProps = {
+  onClose: () => void;
+};
+
+export const IngredientForm = ({ onClose }: IngredientFormProps) => {
   const createIngredient = useCreateIngredient();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -42,22 +46,16 @@ export const IngredientForm = () => {
       <formData.AppForm>
         <formData.FormContainer extraError={submissionError}>
           <formData.AppField name="name" children={(field) => <field.TextField label="Name" />} />
-          <formData.AppField name="description" children={(field) => <field.TextField label="Description" />} />
-          <formData.AppField name="stock" children={(field) => <field.TextField label="Initial stock" />} />
-
-          <div className={styles.formActions}>
             <button
               type="button"
               className={styles.cancelButton}
-              onClick={() => window.history.back()}
+              onClick={onClose}
             >
               Cancel
             </button>
-
             <button type="submit" className={styles.submitButton}>
               Add Item
             </button>
-          </div>
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}

@@ -82,27 +82,27 @@ export const MainScreen = () => {
 
       {openModal === "ingredient" && (
         <Modal onClose={closeModal}>
-          <IngredientForm />
+          <IngredientForm onClose={closeModal} />
         </Modal>
       )}
       {openModal === "tag" && (
         <Modal onClose={closeModal}>
-          <TagForm />
+          <TagForm onClose={closeModal} />
         </Modal>
       )}
       {openModal === "product-create" && (
         <Modal onClose={closeModal}>
-          <ProductForm />
+          <ProductForm onClose={closeModal} />
         </Modal>
       )}
       {openModal === "product-update" && (
         <Modal onClose={closeModal}>
-          <ProductUpdateForm />
+          <ProductUpdateForm onClose={closeModal} />
         </Modal>
       )}
       {openModal === "menu-section" && (
         <Modal onClose={closeModal}>
-          <MenuSectionForm />
+          <MenuSectionForm onClose={closeModal} />
         </Modal>
       )}
     </CommonLayout>

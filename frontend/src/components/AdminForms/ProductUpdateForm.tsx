@@ -20,7 +20,11 @@ const PRODUCT_UPDATE_DEFAULT_VALUES: ProductUpdateFormValues = {
   description: "",
 };
 
-export const ProductUpdateForm = () => {
+type ProductUpdateFormProps = {
+  onClose: () => void;
+};
+
+export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
   const updateProduct = useUpdateProduct();
   const productsQuery = useProductList();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -132,7 +136,7 @@ export const ProductUpdateForm = () => {
             children={(field) => <field.TextField label="New description" />}
           />
         <div className={styles.formActions}>
-          <button type="button" className={styles.cancelButton} onClick={() => window.history.back()}>
+          <button type="button" className={styles.cancelButton} onClick={onClose}>
             Cancel
           </button>
           <button type="submit" className={styles.submitButton}>

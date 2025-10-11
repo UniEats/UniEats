@@ -27,7 +27,11 @@ const PRODUCT_DEFAULT_VALUES: ProductFormValues = {
   image: null,
 };
 
-export const ProductForm = () => {
+type ProductFormProps = {
+  onClose: () => void;
+};
+
+export const ProductForm = ({ onClose }: ProductFormProps) => {
   const createProduct = useCreateProduct();
   const ingredientsQuery = useIngredientList();
   const tagsQuery = useTagList();
@@ -227,7 +231,7 @@ export const ProductForm = () => {
             )}
           />
         <div className={styles.formActions}>
-          <button type="button" className={styles.cancelButton} onClick={() => window.history.back()}>
+          <button type="button" className={styles.cancelButton} onClick={onClose}>
             Cancel
           </button>
           <button type="submit" className={styles.submitButton}>
