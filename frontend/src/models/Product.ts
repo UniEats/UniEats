@@ -21,7 +21,14 @@ export const ProductFormSchema = z.object({
   price: z
     .string()
     .min(1, "Price is required")
-    .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, "Price must be a non-negative number"),
+    .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, "Price must be a non-negative number")
+    .refine(
+      (value) => {
+        const parts = value.split(".");
+        return parts.length <= 2 && (parts.length === 1 || parts[1].length <= 2);
+      },
+      "Price cannot have more than two decimal places"
+    ),
   ingredientIds: z.array(z.string()).min(1, "Select at least one ingredient"),
   tagIds: z.array(z.string()),
   menuSectionIds: z.array(z.string()).min(1, "Select at least one menu section"),
