@@ -1,9 +1,9 @@
 package ar.uba.fi.ingsoft1.product_example.Products;
 
 import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
-
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
+import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,6 +27,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "product")
@@ -57,7 +59,7 @@ public class Product {
     @Column(name = "image", columnDefinition = "BYTEA")
     private byte[] image;
 
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<ProductIngredient> productIngredients = new ArrayList<>();
 
     @ManyToMany
@@ -75,6 +77,14 @@ public class Product {
         List<String> tagNames = tags != null
             ? tags.stream().map(Tag::getTag).toList()
             : List.of();
+        Map<Long, String> ingredients = productIngredients != null
+            ? productIngredients.stream()
+                .map(ProductIngredient::getIngredient)
+                .collect(Collectors.toMap(
+                    Ingredient::getId,  
+                    Ingredient::getName 
+                ))
+            : Map.of();
 
         return new ProductDTO(
             this.getId(),
@@ -82,6 +92,7 @@ public class Product {
             this.getDescription(),
             this.getPrice(),
             tagNames,
+            ingredients,
             this.getImage()
         );
     }  

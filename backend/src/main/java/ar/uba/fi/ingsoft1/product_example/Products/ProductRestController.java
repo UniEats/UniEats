@@ -60,16 +60,7 @@ class ProductRestController {
     ) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         ProductCreateDTO dto = mapper.readValue(product, ProductCreateDTO.class);
-        /*
-        ProductCreateDTO dtoWithImage = new ProductCreateDTO(
-                dto.name(),
-                dto.description(),
-                dto.price(),
-                dto.ingredientIds(),
-                dto.tagIds(),
-                image
-        );
-        */
+
         return productService.createProduct(dto, image)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -80,9 +71,12 @@ class ProductRestController {
     @PatchMapping("/{id}")
     public Optional<ProductDTO> updateProduct(
             @PathVariable Long id,
-            @NonNull @RequestBody ProductUpdateDTO data
-    ) {
-        return productService.updateProduct(id, data);
+            @RequestPart("product") String product,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        ProductUpdateDTO dto = mapper.readValue(product, ProductUpdateDTO.class);
+        return productService.updateProduct(id, dto, image);
     }
 
     @DeleteMapping("/{id}")

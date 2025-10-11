@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/products/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/menu-sections/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/menu-sections").authenticated()
                         .requestMatchers(HttpMethod.GET, "/tags/**").hasRole("ADMIN")
