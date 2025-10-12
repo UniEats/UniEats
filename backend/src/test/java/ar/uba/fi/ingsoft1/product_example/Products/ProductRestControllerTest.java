@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
@@ -48,7 +49,7 @@ class ProductRestControllerTest {
 
     @BeforeEach
     void setUp() {
-        productDTO = new ProductDTO(1L, "Pizza", "Delicious pizza", new BigDecimal("500.00"), List.of(), new byte[5 * 1024]);
+        productDTO = new ProductDTO(1L, "Pizza", "Delicious pizza", new BigDecimal("500.00"), Map.of(), Map.of(), Map.of(), new byte[5 * 1024]);
     }
 
     @Test
@@ -98,7 +99,8 @@ class ProductRestControllerTest {
             "Delicious pizza",
             new BigDecimal("500.00"),
             List.of(1L),
-            List.of(2L)
+            List.of(2L),
+            List.of(3L)
         );
 
         MockMultipartFile image = new MockMultipartFile(
@@ -128,7 +130,8 @@ class ProductRestControllerTest {
                 "Delicious pizza",
                 new BigDecimal("500.00"),
                 List.of(1L),
-                List.of(2L)
+                List.of(2L),
+                List.of(3L)
         );
 
         MockMultipartFile image = new MockMultipartFile(
@@ -152,23 +155,43 @@ class ProductRestControllerTest {
     @WithMockUser(roles = {"ADMIN"})
     void updateProduct_success() throws Exception {
         ProductUpdateDTO updateDTO = new ProductUpdateDTO(
-                Optional.of("Updated Pizza"),
-                Optional.of("Updated Description"),
-                Optional.of(new BigDecimal("600.00"))
+                "Pizza Updated",
+                "Updated Description",
+                new BigDecimal("550.00"),
+                List.of(1L),
+                List.of(2L),
+                List.of(3L)
         );
 
-        ProductDTO updated = new ProductDTO(
-            1L, "Updated Pizza", "Updated Description", new BigDecimal("600.00"), List.of(), new byte[5 * 1024]
+        String updateDTOJson = objectMapper.writeValueAsString(updateDTO);
+
+        MockMultipartFile image = new MockMultipartFile(
+                "image", "pizza_updated.jpg", MediaType.IMAGE_JPEG_VALUE, "updatedimage".getBytes()
         );
 
-        Mockito.when(productService.updateProduct(Mockito.eq(1L), any())).thenReturn(Optional.of(updated));
+        MockMultipartFile json = new MockMultipartFile(
+                "product", "", "application/json", updateDTOJson.getBytes()
+        );
 
-        mockMvc.perform(patch("/products/1")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updateDTO))
-            )
+        ProductDTO updatedDTO = new ProductDTO(
+                1L, "Pizza Updated", "Updated Description", new BigDecimal("550.00"),
+                Map.of(), Map.of(), Map.of(), new byte[5 * 1024]
+        );
+
+        Mockito.when(productService.updateProduct(Mockito.eq(1L), any(), any()))
+                .thenReturn(Optional.of(updatedDTO));
+
+        mockMvc.perform(multipart("/products/1")
+                        .file(json)
+                        .file(image)
+                        .with(req -> {
+                            req.setMethod("PATCH");
+                            return req;
+                        })
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("Updated Pizza")));
+                .andExpect(jsonPath("$.name", is("Pizza Updated")))
+                .andExpect(jsonPath("$.description", is("Updated Description")));
     }
 
     @Test

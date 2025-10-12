@@ -6,7 +6,7 @@ import ar.uba.fi.ingsoft1.product_example.Tags.TagRepository;
 import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientRepository;
-import ar.uba.fi.ingsoft1.product_example.MenuSection.MenuSectionRepository;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSectionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -74,7 +74,7 @@ class ProductServiceTest {
 
     @Test
     void testCreateProduct_Success() throws Exception {
-        ProductCreateDTO dto = new ProductCreateDTO("Product 1", "Description", new BigDecimal("100.0"), List.of(1L), List.of(1L));
+        ProductCreateDTO dto = new ProductCreateDTO("Product 1", "Description", new BigDecimal("100.0"), List.of(1L), List.of(1L), List.of());
         MockMultipartFile image = new MockMultipartFile("image", "image.png", "image/png", new byte[1]);
 
         Tag tag = new Tag();
@@ -98,7 +98,7 @@ class ProductServiceTest {
     @Test
     void testCreateProduct_ImageTooLarge() throws Exception {
         ProductCreateDTO dto = new ProductCreateDTO(
-            "Product 1", "Description", new BigDecimal("100.0"), List.of(1L), List.of(1L)
+            "Product 1", "Description", new BigDecimal("100.0"), List.of(1L), List.of(1L), List.of(1L)
         );
 
         MockMultipartFile image = new MockMultipartFile("image", "image.png", "image/png", new byte[3 * 1024 * 1024]);
@@ -124,15 +124,18 @@ class ProductServiceTest {
         existingProduct.setId(1L);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
-        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0)); // devuelve el producto actualizado
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ProductUpdateDTO updateDTO = new ProductUpdateDTO(
-            Optional.of("Updated Product"),
-            Optional.of("Updated Description"),
-            Optional.of(new BigDecimal("150.0"))
+            "Updated Product",
+            "Updated Description",
+            new BigDecimal("150.0"),
+            List.of(),
+            List.of(), 
+            List.of()
         );
 
-        Optional<ProductDTO> result = productService.updateProduct(1L, updateDTO);
+        Optional<ProductDTO> result = productService.updateProduct(1L, updateDTO, any());
 
         assertTrue(result.isPresent());
         assertEquals("Updated Product", result.get().name());
