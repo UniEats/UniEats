@@ -60,4 +60,22 @@ class MenuSectionRestController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<MenuSectionDTO> updateMenuSection(
+            @PathVariable long id,
+            @RequestBody MenuSectionCreateDTO data
+    ) {
+        return menuSectionsService.updateMenuSection(id, data)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMenuSection(@PathVariable long id) {
+        boolean deleted = menuSectionsService.deleteMenuSection(id);
+        return deleted
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }

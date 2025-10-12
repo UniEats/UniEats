@@ -26,5 +26,21 @@ class TagService {
     public TagDTO createTag(TagCreateDTO data) {
         var tag = data.asTag();
         return new TagDTO(tagRepository.save(tag));
-    }   
+    }
+
+    public Optional<TagDTO> updateTag(long id, TagCreateDTO data) {
+        return tagRepository.findById(id)
+                .map(tag -> {
+                    tag.setTag(data.tag());
+                    return new TagDTO(tagRepository.save(tag));
+                });
+    }
+
+    public boolean deleteTag(long id) {
+        if (tagRepository.existsById(id)) {
+            tagRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }

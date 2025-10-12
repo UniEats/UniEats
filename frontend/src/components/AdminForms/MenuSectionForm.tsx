@@ -5,6 +5,7 @@ import { MenuSectionFormSchema, MenuSectionFormValues } from "@/models/MenuSecti
 import { useCreateMenuSection } from "@/services/MenuSectionServices";
 
 import styles from "./AdminForms.module.css";
+import { MenuSectionList } from "./MenuSectionList";
 
 const MENU_SECTION_DEFAULT_VALUES: MenuSectionFormValues = {
   label: "",
@@ -72,6 +73,9 @@ export const MenuSectionForm = ({ onClose }: MenuSectionFormProps) => {
       </formData.AppForm>
 
       {successMessage && <p className={styles.formMessage}>{successMessage}</p>}
+          <hr />
+          <h3 style={{ margin: "0.5rem 0" }}>Existing menu sections</h3>
+          <MenuSectionList />
     </section>
   );
 };

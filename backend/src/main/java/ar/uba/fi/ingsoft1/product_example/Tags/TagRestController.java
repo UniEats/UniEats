@@ -46,5 +46,21 @@ class TagRestController {
     ) {
         return tagService.createTag(data);
     }
+    @PatchMapping("/{id}")
+    public ResponseEntity<TagDTO> updateTag(
+            @PathVariable long id,
+            @RequestBody TagCreateDTO data
+    ) {
+        return tagService.updateTag(id, data)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
 
+    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTag(@PathVariable long id) {
+        boolean deleted = tagService.deleteTag(id);
+        return deleted
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }

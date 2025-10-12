@@ -5,6 +5,7 @@ import { IngredientFormSchema, IngredientFormValues } from "@/models/Ingredient"
 import { useCreateIngredient } from "@/services/IngredientServices";
 
 import styles from "./AdminForms.module.css";
+import { IngredientList } from "./IngredientList";
 
 const INGREDIENT_DEFAULT_VALUES: IngredientFormValues = {
   name: "",
@@ -64,6 +65,9 @@ export const IngredientForm = ({ onClose }: IngredientFormProps) => {
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}
+      <hr />
+      <h3 style={{ margin: "0.5rem 0" }}>Existing ingredients</h3>
+      <IngredientList />
     </section>
   );
 };

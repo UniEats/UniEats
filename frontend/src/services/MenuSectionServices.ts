@@ -89,7 +89,58 @@ export function useDeleteMenuSection() {
 
   return useMutation({
     mutationFn: (id: number) => deleteMenuSectionById(id, getAccessToken, handleResponse),
-    onSuccess: () => {
+    onMutate: async (id: number) => {
+      await queryClient.cancelQueries({ queryKey: ["menu-sections"] });
+      const previous = queryClient.getQueryData<any[]>(["menu-sections"]);
+      queryClient.setQueryData(["menu-sections"], (old: any[] | undefined) => (old ? old.filter((s) => s.id !== id) : old));
+      return { previous };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previous) queryClient.setQueryData(["menu-sections"], context.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["menu-sections"] });
+    },
+  });
+}
+
+export function useUpdateMenuSection() {
+  const getAccessToken = useAccessTokenGetter();
+  const handleResponse = useHandleResponse();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, values }: { id: number; values: MenuSectionFormValues }) => {
+      const response = await fetch(`${BASE_API_URL}/menu-sections/${id}`, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getAccessToken()}`,
+        },
+        body: JSON.stringify({ label: values.label, description: values.description }),
+      });
+
+      if (response.ok) {
+        const text = await response.text();
+        if (!text) return null;
+        return JSON.parse(text);
+      }
+
+      return handleResponse(response, (json) => MenuSectionSchema.parse(json));
+    },
+    onMutate: async ({ id, values }: { id: number; values: MenuSectionFormValues }) => {
+      await queryClient.cancelQueries({ queryKey: ["menu-sections"] });
+      const previous = queryClient.getQueryData<any[]>(["menu-sections"]);
+      queryClient.setQueryData(["menu-sections"], (old: any[] | undefined) =>
+        old ? old.map((s) => (s.id === id ? { ...s, label: values.label, description: values.description } : s)) : old,
+      );
+      return { previous };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previous) queryClient.setQueryData(["menu-sections"], context.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-sections"] });
     },
   });

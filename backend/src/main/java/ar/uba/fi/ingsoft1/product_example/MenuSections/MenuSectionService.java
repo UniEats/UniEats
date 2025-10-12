@@ -34,6 +34,23 @@ public class MenuSectionService {
         return Optional.of(new MenuSectionDTO(menuSectionRepository.save(dto.asMenuSection())));
     }
 
+    public Optional<MenuSectionDTO> updateMenuSection(long id, MenuSectionCreateDTO dto) {
+        return menuSectionRepository.findById(id)
+                .map(section -> {
+                    section.setLabel(dto.label());
+                    section.setDescription(dto.description());
+                    return new MenuSectionDTO(menuSectionRepository.save(section));
+                });
+    }
+
+    public boolean deleteMenuSection(long id) {
+        if (menuSectionRepository.existsById(id)) {
+            menuSectionRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
     @Transactional
     public Optional<MenuSectionDTO> addProductsToMenuSection(Long menuSectionId, List<Long> productIds) {
         Optional<MenuSection> menuSectionOpt = menuSectionRepository.findById(menuSectionId);

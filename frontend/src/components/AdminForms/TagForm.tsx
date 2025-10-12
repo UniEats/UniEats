@@ -5,6 +5,7 @@ import { TagFormSchema, TagFormValues } from "@/models/Tag";
 import { useCreateTag } from "@/services/TagServices";
 
 import styles from "./AdminForms.module.css";
+import { TagList } from "./TagList";
 
 const TAG_DEFAULT_VALUES: TagFormValues = {
   tag: "",
@@ -55,6 +56,9 @@ export const TagForm = ({ onClose }: TagFormProps) => {
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}
+      <hr />
+      <h3 style={{ margin: "0.5rem 0" }}>Existing tags</h3>
+      <TagList />
     </section>
   );
 };
