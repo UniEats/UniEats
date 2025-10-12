@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
-import { IngredientCreateRequest, IngredientFormValues, IngredientSchema } from "@/models/Ingredient";
+import { IngredientCreateRequest, IngredientFormValues, IngredientSchema, Ingredient } from "@/models/Ingredient";
 import { useAccessTokenGetter, useHandleResponse } from "@/services/TokenContext";
 
 async function postIngredient(
@@ -90,8 +90,8 @@ export function useUpdateIngredient() {
     },
     onMutate: async ({ id, values }: { id: number; values: IngredientFormValues }) => {
       await queryClient.cancelQueries({ queryKey: ["ingredients"] });
-      const previous = queryClient.getQueryData<any[]>(["ingredients"]);
-      queryClient.setQueryData(["ingredients"], (old: any[] | undefined) =>
+      const previous = queryClient.getQueryData<Ingredient[]>(["ingredients"]);
+      queryClient.setQueryData(["ingredients"], (old: Ingredient[] | undefined) =>
         old ? old.map((i) => (i.id === id ? { ...i, name: values.name, description: values.description, stock: Number.parseInt(values.stock, 10) } : i)) : old,
       );
       return { previous };
@@ -125,8 +125,8 @@ export function useDeleteIngredient() {
     },
     onMutate: async (id: number) => {
       await queryClient.cancelQueries({ queryKey: ["ingredients"] });
-      const previous = queryClient.getQueryData<any[]>(["ingredients"]);
-      queryClient.setQueryData(["ingredients"], (old: any[] | undefined) => (old ? old.filter((i) => i.id !== id) : old));
+      const previous = queryClient.getQueryData<Ingredient[]>(["ingredients"]);
+      queryClient.setQueryData(["ingredients"], (old: Ingredient[] | undefined) => (old ? old.filter((i) => i.id !== id) : old));
       return { previous };
     },
     onError: (_err, _variables, context) => {

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
-import { TagCreateRequest, TagFormValues, TagSchema } from "@/models/Tag";
+import { TagCreateRequest, TagFormValues, TagSchema, Tag } from "@/models/Tag";
 import { useAccessTokenGetter, useHandleResponse } from "@/services/TokenContext";
 
 async function postTag(
@@ -90,8 +90,8 @@ export function useUpdateTag() {
     },
     onMutate: async ({ id, values }: { id: number; values: TagFormValues }) => {
       await queryClient.cancelQueries({ queryKey: ["tags"] });
-      const previous = queryClient.getQueryData<any[]>(["tags"]);
-      queryClient.setQueryData(["tags"], (old: any[] | undefined) =>
+      const previous = queryClient.getQueryData<Tag[]>(["tags"]);
+      queryClient.setQueryData(["tags"], (old: Tag[] | undefined) =>
         old ? old.map((t) => (t.id === id ? { ...t, tag: values.tag } : t)) : old,
       );
       return { previous };
@@ -130,7 +130,7 @@ export function useDeleteTag() {
           // if there is a body, return parsed value (not expected but safe)
           return JSON.parse(text) as null;
         } catch (e) {
-          return null;
+          return e;
         }
       }
 
@@ -138,8 +138,8 @@ export function useDeleteTag() {
     },
     onMutate: async (id: number) => {
       await queryClient.cancelQueries({ queryKey: ["tags"] });
-      const previous = queryClient.getQueryData<any[]>(["tags"]);
-      queryClient.setQueryData(["tags"], (old: any[] | undefined) => (old ? old.filter((t) => t.id !== id) : old));
+      const previous = queryClient.getQueryData<Tag[]>(["tags"]);
+      queryClient.setQueryData(["tags"], (old: Tag[] | undefined) => (old ? old.filter((t) => t.id !== id) : old));
       return { previous };
     },
     onError: (_err, _variables, context) => {

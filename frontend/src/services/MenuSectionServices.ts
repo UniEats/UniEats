@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
-import { MenuSectionCreateRequest, MenuSectionFormValues, MenuSectionSchema } from "@/models/MenuSection";
+import { MenuSectionCreateRequest, MenuSectionFormValues, MenuSectionSchema, MenuSection } from "@/models/MenuSection";
 import { useAccessTokenGetter, useHandleResponse } from "@/services/TokenContext";
 
 async function postMenuSection(
@@ -91,8 +91,8 @@ export function useDeleteMenuSection() {
     mutationFn: (id: number) => deleteMenuSectionById(id, getAccessToken, handleResponse),
     onMutate: async (id: number) => {
       await queryClient.cancelQueries({ queryKey: ["menu-sections"] });
-      const previous = queryClient.getQueryData<any[]>(["menu-sections"]);
-      queryClient.setQueryData(["menu-sections"], (old: any[] | undefined) => (old ? old.filter((s) => s.id !== id) : old));
+      const previous = queryClient.getQueryData<MenuSection[]>(["menu-sections"]);
+      queryClient.setQueryData(["menu-sections"], (old: MenuSection[] | undefined) => (old ? old.filter((s) => s.id !== id) : old));
       return { previous };
     },
     onError: (_err, _variables, context) => {
@@ -131,8 +131,8 @@ export function useUpdateMenuSection() {
     },
     onMutate: async ({ id, values }: { id: number; values: MenuSectionFormValues }) => {
       await queryClient.cancelQueries({ queryKey: ["menu-sections"] });
-      const previous = queryClient.getQueryData<any[]>(["menu-sections"]);
-      queryClient.setQueryData(["menu-sections"], (old: any[] | undefined) =>
+      const previous = queryClient.getQueryData<MenuSection[]>(["menu-sections"]);
+      queryClient.setQueryData(["menu-sections"], (old: MenuSection[] | undefined) =>
         old ? old.map((s) => (s.id === id ? { ...s, label: values.label, description: values.description } : s)) : old,
       );
       return { previous };
