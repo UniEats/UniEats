@@ -1,7 +1,7 @@
 package ar.uba.fi.ingsoft1.product_example.Menus;
 
-import ar.uba.fi.ingsoft1.product_example.MenuSection.MenuSectionDTO;
-import ar.uba.fi.ingsoft1.product_example.MenuSection.MenuSectionService;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSectionDTO;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSectionService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.NonNull;

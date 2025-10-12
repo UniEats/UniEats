@@ -8,12 +8,16 @@ import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientRepository;
-import ar.uba.fi.ingsoft1.product_example.MenuSection.MenuSectionRepository;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSectionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import java.io.IOException;
 import java.util.List;
@@ -54,13 +58,6 @@ class ProductService {
     public Optional<ProductDTO> createProduct(ProductCreateDTO dto, MultipartFile image) {
         Product product = new Product(dto.name(), dto.description(), dto.price());
 
-        List<Tag> tags = dto.tagIds().stream()
-            .map(tagId -> tagRepository.findById(tagId)
-                .orElseThrow(() -> new EntityNotFoundException("Tag not found: " + tagId)))
-            .toList();
-
-        product.setTags(tags);
-
         MultipartFile file = image;
         if (file != null && !file.isEmpty()) {
             if (file.getSize() > MAX_IMAGE_SIZE) {
@@ -72,37 +69,111 @@ class ProductService {
                 throw new RuntimeException("Error reading the image", e);
             }
         }
- 
-        product = productRepository.save(product);
 
-        Product finalProduct = product;
+        List<Tag> tags = dto.tagIds().stream()
+            .map(tagId -> tagRepository.findById(tagId)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found: " + tagId)))
+            .toList();
+        product.setTags(tags);
+
+        if (dto.menuSectionIds() != null && !dto.menuSectionIds().isEmpty()) {
+            List<MenuSection> sections = dto.menuSectionIds().stream()
+                    .map(sectionId -> menuSectionRepository.findById(sectionId)
+                            .orElseThrow(() -> new EntityNotFoundException("Menu section not found: " + sectionId)))
+                    .toList();
+            product.setMenuSections(sections);
+            sections.forEach(section -> section.getProducts().add(product));
+        }
+
         List<ProductIngredient> productIngredients = dto.ingredientIds().stream()
             .map(ingredientId -> {
                 Ingredient ingredient = ingredientRepository.findById(ingredientId)
                     .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientId));
 
                 ProductIngredient pi = new ProductIngredient();
-                ProductIngredientId piId = new ProductIngredientId(finalProduct.getId(), ingredient.getId());
-                pi.setId(piId);
-                pi.setProduct(finalProduct);
+                pi.setId(new ProductIngredientId());
+                pi.setProduct(product);
                 pi.setIngredient(ingredient);
 
                 return pi;
             })
             .toList();
 
-        productIngredientRepository.saveAll(productIngredients);
         product.setProductIngredients(productIngredients);
 
-        return Optional.of(product.toDTO());
+        Product savedProduct = productRepository.save(product);
+
+        return Optional.of(savedProduct.toDTO());
     }
 
-    public Optional<ProductDTO> updateProduct(Long id, ProductUpdateDTO update) {
-        return productRepository.findById(id)
-                .map(update::applyTo)
-                .map(productRepository::save)
-                .map(ProductDTO::new);
+    @Transactional
+    public Optional<ProductDTO> updateProduct(Long id, ProductUpdateDTO dto, MultipartFile image) {
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+
+        if (dto.name() != null) {
+            product.setName(dto.name());
+        }
+        if (dto.description() != null) {
+            product.setDescription(dto.description());
+        }
+        if (dto.price() != null) {
+            product.setPrice(dto.price());
+        }
+
+        if (image != null && !image.isEmpty()) {
+            if (image.getSize() > MAX_IMAGE_SIZE) {
+                throw new IllegalArgumentException("Image cannot be greater than 2 MB");
+            }
+            try {
+                product.setImage(image.getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException("Error reading the image", e);
+            }
+        }
+
+        product.getTags().clear();
+        List<Tag> tags = dto.tagIds().stream()
+            .map(tagId -> tagRepository.findById(tagId)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found: " + tagId)))
+            .collect(Collectors.toList());
+        product.setTags(tags);
+
+        
+        for (MenuSection section : new ArrayList<>(product.getMenuSections())) {
+            section.getProducts().remove(product);
+        }
+        product.getMenuSections().clear();
+        List<MenuSection> sections = dto.menuSectionIds().stream()
+                    .map(sectionId -> menuSectionRepository.findById(sectionId)
+                            .orElseThrow(() -> new EntityNotFoundException("Menu section not found: " + sectionId)))
+                    .collect(Collectors.toList());
+            product.setMenuSections(sections);
+            sections.forEach(section -> section.getProducts().add(product));
+
+        
+        product.getProductIngredients().clear();
+        List<ProductIngredient> productIngredients = dto.ingredientIds().stream()
+            .map(ingredientId -> {
+                Ingredient ingredient = ingredientRepository.findById(ingredientId)
+                    .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientId));
+
+                ProductIngredient pi = new ProductIngredient();
+                pi.setId(new ProductIngredientId(product.getId(), ingredient.getId()));
+                pi.setProduct(product);
+                pi.setIngredient(ingredient);
+
+                return pi;
+            })
+            .collect(Collectors.toList());
+        product.getProductIngredients().addAll(productIngredients);
+
+
+        Product savedProduct = productRepository.save(product);
+
+        return Optional.of(savedProduct.toDTO());
     }
+
 
     public boolean deleteProduct(long id) {
         if (!productRepository.existsById(id)) {

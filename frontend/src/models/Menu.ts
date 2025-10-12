@@ -5,7 +5,7 @@ export const MenuItemSchema = z.object({
   name: z.string(),
   description: z.string(),
   price: z.number(),
-  tags: z.array(z.string()).optional(),
+  tags: z.record(z.string(), z.string()).optional(),
   image: z.string().transform((base64) => Uint8Array.from(atob(base64), c => c.charCodeAt(0))),
 });
 

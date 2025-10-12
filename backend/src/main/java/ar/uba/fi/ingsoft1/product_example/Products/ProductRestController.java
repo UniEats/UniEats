@@ -71,9 +71,12 @@ class ProductRestController {
     @PatchMapping("/{id}")
     public Optional<ProductDTO> updateProduct(
             @PathVariable Long id,
-            @NonNull @RequestBody ProductUpdateDTO data
-    ) {
-        return productService.updateProduct(id, data);
+            @RequestPart("product") String product,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        ProductUpdateDTO dto = mapper.readValue(product, ProductUpdateDTO.class);
+        return productService.updateProduct(id, dto, image);
     }
 
     @DeleteMapping("/{id}")

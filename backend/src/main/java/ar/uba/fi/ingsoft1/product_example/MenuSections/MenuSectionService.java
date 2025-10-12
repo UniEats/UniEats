@@ -1,4 +1,4 @@
-package ar.uba.fi.ingsoft1.product_example.MenuSection;
+package ar.uba.fi.ingsoft1.product_example.MenuSections;
 
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
@@ -32,6 +32,23 @@ public class MenuSectionService {
 
     public Optional<MenuSectionDTO> createMenuSection(MenuSectionCreateDTO dto) {
         return Optional.of(new MenuSectionDTO(menuSectionRepository.save(dto.asMenuSection())));
+    }
+
+    public Optional<MenuSectionDTO> updateMenuSection(long id, MenuSectionCreateDTO dto) {
+        return menuSectionRepository.findById(id)
+                .map(section -> {
+                    section.setLabel(dto.label());
+                    section.setDescription(dto.description());
+                    return new MenuSectionDTO(menuSectionRepository.save(section));
+                });
+    }
+
+    public boolean deleteMenuSection(long id) {
+        if (menuSectionRepository.existsById(id)) {
+            menuSectionRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     @Transactional

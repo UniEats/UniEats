@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDeleteProduct } from "@/services/ProductServices";
 import Product from "../Product/Product";
 import "./Menu.css";
@@ -8,7 +8,7 @@ type MenuItem = {
   name: string;
   description: string;
   price: number;
-  tags?: string[] | undefined;
+  tags?: Record<number, string> | undefined;
   image?: Uint8Array;
 };
 
@@ -27,7 +27,10 @@ export const Menu = ({ menuSections }: MenuProps) => {
   const [activeCategoryId, setActiveCategoryId] = useState<MenuSection["id"] | null>(
     menuSections.length > 0 ? menuSections[0].id : null
   );
-  
+
+  const [isSwitching, setIsSwitching] = useState(false);
+  const switchingRef = useRef(false);
+
   const deleteProduct = useDeleteProduct();
 
   const handleDelete = async (id: number) => {
@@ -39,6 +42,30 @@ export const Menu = ({ menuSections }: MenuProps) => {
     }
   };
 
+  const handleCategoryClick = (id: number) => {
+    if (switchingRef.current || id === activeCategoryId) return;
+
+    switchingRef.current = true;
+    setIsSwitching(true);
+    setActiveCategoryId(id);
+
+    setTimeout(() => {
+      switchingRef.current = false;
+      setIsSwitching(false);
+    }, 300);
+  };
+
+  useEffect(() => {
+    if (!menuSections || menuSections.length === 0) {
+      setActiveCategoryId(null);
+      return;
+    }
+    setActiveCategoryId((prev) => {
+      if (prev && menuSections.some((s) => s.id === prev)) return prev;
+      return menuSections[0].id;
+    });
+  }, [menuSections]);
+
   const activeSection = useMemo(() => {
     if (!menuSections || menuSections.length === 0) return undefined;
     return menuSections.find((section) => section.id === activeCategoryId) ?? menuSections[0];
@@ -48,28 +75,34 @@ export const Menu = ({ menuSections }: MenuProps) => {
     <div className="menu-page">
       <nav className="menu-categories" aria-label="Menu sections">
         <ul role="tablist">
-          {menuSections.map((section) => {
-            const isActive = section.id === activeCategoryId;
-            return (
-              <li key={section.id} role="presentation">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls="menu-section"
-                  className={`menu-category${isActive ? " menu-category--active" : ""}`}
-                  onClick={() => setActiveCategoryId(section.id)}
-                >
-                  {section.label}
-                </button>
-              </li>
-            );
-          })}
+          {menuSections.length === 0 ? (
+            <p>No menu sections available</p>
+          ) : (
+            menuSections.map((section) => {
+              if (section.products.length === 0) return null; 
+              const isActive = section.id === activeCategoryId;
+              return (
+                <li key={section.id} role="presentation">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="menu-section"
+                    className={`menu-category ${isActive ? "active" : ""}`}
+                    onClick={() => handleCategoryClick(section.id)}
+                    disabled={isSwitching}
+                  >
+                    {section.label}
+                  </button>
+                </li>
+              );
+            })
+          )}
         </ul>
       </nav>
 
       <main id="menu-section">
-        {activeSection ? (
+        {activeSection && activeSection.products.length > 0 ? (
           <>
             <section className="menu-hero">
               <h1>{activeSection.label}</h1>
@@ -79,24 +112,24 @@ export const Menu = ({ menuSections }: MenuProps) => {
             <section className="menu-grid-section">
               <div className="menu-grid">
                 {activeSection.products.map((item) => (
-                  <Product 
-                    key={item.name} 
+                  <Product
+                    key={item.id}
                     id={item.id}
-                    image={item.image} 
-                    title={item.name} 
-                    description={item.description} 
-                    price={item.price} 
-                    tags={item.tags ?? []} 
-                    onDelete={handleDelete} 
+                    image={item.image}
+                    title={item.name}
+                    description={item.description}
+                    price={item.price}
+                    tags={item.tags ? Object.values(item.tags) : []}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
             </section>
           </>
         ) : (
-          <p>Cargando menú...</p>
+          <p>No products available...</p>
         )}
       </main>
     </div>
   );
-}
+};

@@ -23,7 +23,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
         <nav className={styles.siteNav} aria-label="Primary navigation">
           {isAuthenticated ? (
             <>
-              <Link href="/under-construction" className={styles.siteNavLink}>
+              <Link href="/" className={styles.siteNavLink}>
                 Main Page
               </Link>
               <Link href="/menu" className={styles.siteNavLink}>
@@ -75,6 +75,16 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
       <div className={styles.body}>
         <ErrorBoundary>{children}</ErrorBoundary>
       </div>
+      <footer className={styles.siteFooter}>
+        <div className={styles.siteFooterContent}>
+            <p className={styles.siteFooterBrand}>
+                University Cafeteria | Campus Dining Services
+            </p>
+            <p className={styles.siteFooterDisclaimer}>
+                For dietary restrictions or allergen information, please speak with our staff
+            </p>
+        </div>
+      </footer>
     </div>
   );
 };

@@ -60,4 +60,22 @@ class IngredientRestController {
         return ResponseEntity.badRequest().build();
     }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<IngredientDTO> updateIngredient(
+            @PathVariable long id,
+            @RequestBody IngredientCreateDTO data
+    ) {
+        return ingredientService.updateIngredient(id, data)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteIngredient(@PathVariable long id) {
+        boolean deleted = ingredientService.deleteIngredient(id);
+        return deleted
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }

@@ -17,4 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findProductsWithAllIngredientsInStock();
     
     List<Product> findAll();
+
+    // find products that have a tag with the given id
+    List<Product> findByTags_Id(Long tagId);
 }
