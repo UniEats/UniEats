@@ -75,6 +75,6 @@ class UserService implements UserDetailsService {
                 user.getRole()
         ));
         RefreshToken refreshToken = refreshTokenService.createFor(user);
-        return new TokenDTO(accessToken, refreshToken.value());
+        return new TokenDTO(accessToken, refreshToken.value(), user.getRole());
     }
 }

@@ -90,3 +90,11 @@ const getInitialTokenState = (): TokenContextData => {
   }
   return { state: "LOGGED_OUT" };
 };
+
+export function useUserRole() {
+  const [tokenState] = useToken();
+  if (tokenState.state === "LOGGED_IN") {
+    return tokenState.tokens.role;
+  }
+  return null;
+}

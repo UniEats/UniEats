@@ -1,0 +1,116 @@
+.adminPanel {
+  background-color: #D2B48C;
+  border-radius: 1.25rem;
+  padding: 2.5rem 1.5rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  max-width: 480px;
+  margin: 3rem auto;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.panelTitle {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #6F4E37;
+  margin-bottom: 0.25rem;
+}
+
+.panelSubtitle {
+  font-size: 1rem;
+  color: #81613E;
+  margin-bottom: 2rem;
+}
+
+.buttonList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.panelButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 1rem;
+  background: #7C0902;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(249, 112, 112, 0.2);
+  transition: all 0.25s ease;
+}
+
+.panelButton:hover {
+  background: #f87171;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(249, 112, 112, 0.3);
+}
+
+.icon {
+  font-size: 1.5rem;
+  display: flex;
+}
+
+.infoBox {
+  padding: 1.5rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.75rem;
+  background-color: #f9fafb;
+  text-align: center;
+}
+
+.infoTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.actionsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 768px) {
+  .actionsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.actionButton {
+  padding: 1rem 1.25rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2);
+}
+
+.actionButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.3);
+  filter: brightness(1.05);
+}
+
+.actionButton:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2);
+}
+
+.actionButton:focus-visible {
+  outline: 3px solid #ef4444;
+  outline-offset: 3px;
+}
