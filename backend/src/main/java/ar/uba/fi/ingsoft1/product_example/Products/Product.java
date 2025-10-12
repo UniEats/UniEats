@@ -74,7 +74,7 @@ public class Product {
     private List<MenuSection> menuSections = new ArrayList<>();
 
     public ProductDTO toDTO() {
-        Map<Long, String> tagNames = tags != null
+        Map<Long, String> tags_ = tags != null
                 ? tags.stream()
                     .collect(Collectors.toMap(
                         Tag::getId,
@@ -89,14 +89,23 @@ public class Product {
                     Ingredient::getName 
                 ))
             : Map.of();
+        
+        Map<Long, String> menuSections_ = menuSections != null
+                ? menuSections.stream()
+                    .collect(Collectors.toMap(
+                        MenuSection::getId,
+                        MenuSection::getLabel
+                    ))
+                : Map.of();
 
         return new ProductDTO(
             this.getId(),
             this.getName(),
             this.getDescription(),
             this.getPrice(),
-            tagNames,
+            tags_,
             ingredients,
+            menuSections_,
             this.getImage()
         );
     }  

@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const IngredientsMapSchema = z.record(z.string(), z.string()); 
-
 export const TagsMapSchema = z.record(z.string(), z.string()); 
+export const MenuSectionsMapSchema = z.record(z.string(), z.string()); 
 
 export const ProductSchema = z.object({
   id: z.number(),
@@ -11,7 +11,7 @@ export const ProductSchema = z.object({
   price: z.number(),
   tags: TagsMapSchema,
   ingredients: IngredientsMapSchema,
-  menuSections: z.array(z.string()).optional(),
+  menuSections: MenuSectionsMapSchema,
   image: z.string().optional(),
 });
 
@@ -19,6 +19,7 @@ export const ProductListSchema = z.array(ProductSchema);
 
 export type IngredientsMap = Record<number, string>;
 export type TagsMap = Record<number, string>;
+export type MenuSectionsMap = Record<number, string>;
 export type Product = z.infer<typeof ProductSchema>;
 
 export type ProductList = z.infer<typeof ProductListSchema>;
@@ -69,8 +70,7 @@ export const ProductUpdateFormSchema = z
     menuSectionIds: z.array(z.string()),
     image: z
       .instanceof(File)
-      .or(z.null())
-      .refine((file) => file !== null, "Image is required"),
+      .or(z.null()),
   })
   .superRefine((data, ctx) => {
     if (data.name.trim().length === 0 && data.description.trim().length === 0) {

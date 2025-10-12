@@ -109,10 +109,6 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
           <formData.Field
             name="productId"
             children={(field) => {
-              const currentProduct = field.state.value
-                ? products.find((product) => product.id.toString() === field.state.value) ?? null
-                : null;
-
               return (
                 <div className={styles.formFields}>
                   <label className={styles.fieldLabel} htmlFor={productSelectId}>
@@ -132,8 +128,12 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
                       formData.setFieldValue("name", matchedProduct?.name ?? "");
                       formData.setFieldValue("description", matchedProduct?.description ?? "");
                       formData.setFieldValue("price", matchedProduct?.price?.toString() ?? "");
+
+                      formData.setFieldValue("ingredientIds", Object.keys(matchedProduct?.ingredients || {}));
+                      formData.setFieldValue("tagIds", Object.keys(matchedProduct?.tags || {}));
+                      formData.setFieldValue("menuSectionIds", Object.keys(matchedProduct?.menuSections || {}));
+                   
                       setSuccessMessage(null);
-                      console.log("matchedProduct:", matchedProduct);
                     }}
 
                     onBlur={field.handleBlur}
@@ -148,9 +148,6 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
                   <ErrorContainer
                     errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
                   />
-                  {currentProduct ? (
-                    <p className={styles.helperText}>Current description: {currentProduct.description}</p>
-                  ) : null}
                 </div>
               );
             }}
@@ -298,7 +295,7 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
             Cancel
           </button>
           <button type="submit" className={styles.submitButton}>
-            Add Item
+            Update Item
           </button>
         </div>
         </formData.FormContainer>
