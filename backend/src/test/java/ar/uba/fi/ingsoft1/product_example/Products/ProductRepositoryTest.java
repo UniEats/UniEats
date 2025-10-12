@@ -1,0 +1,72 @@
+package ar.uba.fi.ingsoft1.product_example.Products;
+
+import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
+import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
+import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
+import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
+import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@DataJpaTest
+class ProductRepositoryTest {
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private IngredientRepository ingredientRepository;
+
+    @Autowired
+    private ProductIngredientRepository productIngredientRepository;
+
+    ProductIngredient setAllProductIngredient(Product product, Ingredient ingredient) {
+        ProductIngredient pi = new ProductIngredient();
+        ProductIngredientId piId = new ProductIngredientId();
+        piId.setProductId(product.getId());
+        piId.setIngredientId(ingredient.getId());
+        pi.setId(piId);
+        pi.setProduct(product);
+        pi.setIngredient(ingredient);
+        return pi;
+    }
+
+    @Test
+    void findProductsWithAllIngredientsInStock() {
+        // Ingredients
+        Ingredient flour = ingredientRepository.save(new Ingredient("Flour", "-", 5));
+        Ingredient sugar = ingredientRepository.save(new Ingredient("Sugar", "-", 3));
+        Ingredient eggs = ingredientRepository.save(new Ingredient("Eggs", "-", 0));
+
+        // All ingredients in stock
+        Product cake = new Product();
+        cake.setName("Cake");
+        productRepository.save(cake);
+
+        productIngredientRepository.save(setAllProductIngredient(cake, flour));
+        productIngredientRepository.save(setAllProductIngredient(cake, sugar));
+
+        // One ingredient without stock
+        Product pancake = new Product();
+        pancake.setName("Pancake");
+        productRepository.save(pancake);
+
+        productIngredientRepository.save(setAllProductIngredient(pancake, flour));
+        productIngredientRepository.save(setAllProductIngredient(pancake, eggs));
+
+        // Without ingredients
+        Product air = new Product();
+        air.setName("Air");
+        productRepository.save(air);
+
+        List<Product> result = productRepository.findProductsWithAllIngredientsInStock();
+
+        assertEquals(1, result.size());
+        assertEquals("Cake", result.get(0).getName());
+    }
+}
