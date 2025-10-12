@@ -45,19 +45,34 @@ async function postProduct(
 
 async function patchProduct(
   id: number,
-  payload: ProductUpdateRequest,
+  data: ProductUpdateRequest,
   getAccessToken: () => Promise<string>,
   handleResponse: ReturnType<typeof useHandleResponse>,
 ) {
   const token = await getAccessToken();
+
+  const formData = new FormData();
+  formData.append(
+    "product",
+    JSON.stringify({
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      ingredientIds: data.ingredientIds,
+      tagIds: data.tagIds,
+      menuSectionIds: data.menuSectionIds,
+    }),
+  );
+  if (data.image) {
+    formData.append("image", data.image);
+  }
+
   const response = await fetch(`${BASE_API_URL}/products/${id}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
     },
-    body: JSON.stringify(payload),
+    body: formData,
   });
 
   return handleResponse(response, (json) => ProductSchema.parse(json));
@@ -176,7 +191,31 @@ export function useUpdateProduct() {
         payload.description = values.description.trim();
       }
 
-      if (!payload.name && !payload.description) {
+      if (values.price !== undefined) {
+        payload.price = Number(values.price);
+      }
+
+      if (values.ingredientIds.length > 0) {
+        payload.ingredientIds = values.ingredientIds.map((id) => Number.parseInt(id, 10));
+      }
+
+      if (values.tagIds.length > 0) {
+        payload.tagIds = values.tagIds.map((id) => Number.parseInt(id, 10));
+      } else {
+        payload.tagIds = [];
+      }
+
+      if (values.menuSectionIds.length > 0) {
+        payload.menuSectionIds = values.menuSectionIds.map((id) => Number.parseInt(id, 10));
+      } else {
+        payload.menuSectionIds = [];
+      }
+
+      if (values.image) {
+        payload.image = values.image;
+      }
+
+      if (!payload.name && !payload.description && !payload.price && !payload.ingredientIds && !payload.tagIds && !payload.menuSectionIds && !payload.image) {
         throw new Error("Nothing to update");
       }
 

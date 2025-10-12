@@ -8,7 +8,7 @@ type MenuItem = {
   name: string;
   description: string;
   price: number;
-  tags?: string[] | undefined;
+  tags?: Record<number, string> | undefined;
   image?: Uint8Array;
 };
 
@@ -119,7 +119,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
                     title={item.name}
                     description={item.description}
                     price={item.price}
-                    tags={item.tags ?? []}
+                    tags={item.tags ? Object.values(item.tags) : []}
                     onDelete={handleDelete}
                   />
                 ))}

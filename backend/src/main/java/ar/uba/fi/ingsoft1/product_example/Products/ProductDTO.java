@@ -4,7 +4,6 @@ import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,7 +12,7 @@ public record ProductDTO(
         String name,
         String description,
         BigDecimal price,
-        List<String> tags,
+        Map<Long, String> tags,
         Map<Long, String> ingredients,
         byte[] image
 ) {
@@ -24,8 +23,12 @@ public record ProductDTO(
             product.getDescription(),
             product.getPrice(),
             product.getTags() != null
-                ? product.getTags().stream().map(Tag::getTag).toList()
-                : List.of(),
+                ? product.getTags().stream()
+                    .collect(Collectors.toMap(
+                        Tag::getId,
+                        Tag::getTag
+                    ))
+                : Map.of(),
             product.getProductIngredients() != null
                 ? product.getProductIngredients().stream()
                 .map(ProductIngredient::getIngredient)

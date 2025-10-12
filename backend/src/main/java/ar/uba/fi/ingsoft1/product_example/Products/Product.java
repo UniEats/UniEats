@@ -74,9 +74,13 @@ public class Product {
     private List<MenuSection> menuSections = new ArrayList<>();
 
     public ProductDTO toDTO() {
-        List<String> tagNames = tags != null
-            ? tags.stream().map(Tag::getTag).toList()
-            : List.of();
+        Map<Long, String> tagNames = tags != null
+                ? tags.stream()
+                    .collect(Collectors.toMap(
+                        Tag::getId,
+                        Tag::getTag
+                    ))
+                : Map.of();
         Map<Long, String> ingredients = productIngredients != null
             ? productIngredients.stream()
                 .map(ProductIngredient::getIngredient)

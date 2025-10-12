@@ -159,7 +159,7 @@ class ProductService {
                     .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientId));
 
                 ProductIngredient pi = new ProductIngredient();
-                pi.setId(new ProductIngredientId());
+                pi.setId(new ProductIngredientId(product.getId(), ingredient.getId()));
                 pi.setProduct(product);
                 pi.setIngredient(ingredient);
 

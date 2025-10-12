@@ -59,12 +59,4 @@ public class MenuSectionService {
         return Optional.of(new MenuSectionDTO(menuSection));
     }
 
-/*
-    public List<MenuSectionDTO> getAllMenuSections() {
-    return menuSectionRepository.findAll()
-            .stream()
-            .map(MenuSectionDTO::new)
-            .collect(Collectors.toList());
-    }
-*/
 }   

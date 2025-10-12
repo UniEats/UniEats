@@ -46,6 +46,10 @@ export const IngredientForm = ({ onClose }: IngredientFormProps) => {
       <formData.AppForm>
         <formData.FormContainer extraError={submissionError}>
           <formData.AppField name="name" children={(field) => <field.TextField label="Name" />} />
+          <formData.AppField name="description" children={(field) => <field.TextField label="Description" />} />
+          <formData.AppField name="stock" children={(field) => <field.TextField label="Initial stock" />} />
+
+          <div className={styles.formActions}>
             <button
               type="button"
               className={styles.cancelButton}
@@ -56,6 +60,7 @@ export const IngredientForm = ({ onClose }: IngredientFormProps) => {
             <button type="submit" className={styles.submitButton}>
               Add Item
             </button>
+          </div>
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}

@@ -6,6 +6,9 @@ import { ProductUpdateFormSchema, ProductUpdateFormValues } from "@/models/Produ
 import { useProductList, useUpdateProduct } from "@/services/ProductServices";
 
 import styles from "./AdminForms.module.css";
+import { useMenuSectionList } from "@/services/MenuSectionServices";
+import { useTagList } from "@/services/TagServices";
+import { useIngredientList } from "@/services/IngredientServices";
 
 type FieldError = { message: string };
 
@@ -18,6 +21,11 @@ const PRODUCT_UPDATE_DEFAULT_VALUES: ProductUpdateFormValues = {
   productId: "",
   name: "",
   description: "",
+  price: "",
+  ingredientIds: [],
+  tagIds: [],
+  menuSectionIds: [],
+  image: null,
 };
 
 type ProductUpdateFormProps = {
@@ -27,6 +35,9 @@ type ProductUpdateFormProps = {
 export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
   const updateProduct = useUpdateProduct();
   const productsQuery = useProductList();
+  const ingredientsQuery = useIngredientList();
+  const tagsQuery = useTagList();
+  const menuSectionsQuery = useMenuSectionList();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const productSelectId = useId();
 
@@ -39,8 +50,6 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
       setSuccessMessage(null);
       const updatedProduct = await updateProduct.mutateAsync(value);
       setSuccessMessage(`Product "${updatedProduct.name}" updated successfully.`);
-      formData.setFieldValue("name", updatedProduct.name ?? "");
-      formData.setFieldValue("description", updatedProduct.description ?? "");
     },
   });
 
@@ -50,17 +59,25 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
       : new Error(String(updateProduct.error))
     : null;
 
-  if (productsQuery.isLoading) {
+  if (productsQuery.isLoading || ingredientsQuery.isLoading || tagsQuery.isLoading || menuSectionsQuery.isLoading) {
     return (
       <section className={styles.formSection} aria-live="polite">
-        Loading products...
+        Loading products, ingredients, tags and menu sections...
       </section>
     );
   }
 
-  if (productsQuery.error) {
-    const error = productsQuery.error;
-    const errorMessage = error instanceof Error ? error.message : String(error);
+  if (productsQuery.error || ingredientsQuery.error || tagsQuery.error || menuSectionsQuery.error) {
+    const productError = productsQuery.error;
+    const ingredientError = ingredientsQuery.error;
+    const tagError = tagsQuery.error;
+    const menuError = menuSectionsQuery.error;
+    const errorMessage =
+      productError instanceof Error ? productError.message :
+      ingredientError instanceof Error ? ingredientError.message :
+      tagError instanceof Error ? tagError.message :
+      menuError instanceof Error ? menuError.message :
+      "Failed to load data";
     return (
       <section className={styles.formSection} aria-live="assertive">
         <p>{errorMessage}</p>
@@ -69,6 +86,9 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
   }
 
   const products = productsQuery.data ?? [];
+  const ingredients = ingredientsQuery.data ?? [];
+  const tags = tagsQuery.data ?? [];
+  const menuSections = menuSectionsQuery.data ?? [];
 
   if (products.length === 0) {
     return (
@@ -105,12 +125,17 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
                     onChange={(event) => {
                       const value = event.target.value;
                       field.handleChange(value);
+
                       const matchedProduct =
                         products.find((product) => product.id.toString() === value) ?? null;
+
                       formData.setFieldValue("name", matchedProduct?.name ?? "");
                       formData.setFieldValue("description", matchedProduct?.description ?? "");
+                      formData.setFieldValue("price", matchedProduct?.price?.toString() ?? "");
                       setSuccessMessage(null);
+                      console.log("matchedProduct:", matchedProduct);
                     }}
+
                     onBlur={field.handleBlur}
                   >
                     <option value="">Select a product</option>
@@ -134,6 +159,139 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
           <formData.AppField
             name="description"
             children={(field) => <field.TextField label="New description" />}
+          />
+          <formData.AppField name="price" children={(field) => <field.TextField label="Price" />} />
+          <formData.Field
+            name="ingredientIds"
+            children={(field) => (
+              <div className={styles.formFields}>
+                <span className={styles.fieldLabel}>Ingredients</span>
+                <div className={styles.optionsGrid}>
+                  {ingredients.map((ingredient) => {
+                    const optionValue = ingredient.id.toString();
+                    const isChecked = field.state.value.includes(optionValue);
+                    return (
+                      <label key={ingredient.id} className={styles.optionRow}>
+                        <input
+                          type="checkbox"
+                          value={optionValue}
+                          checked={isChecked}
+                          onChange={(event) => {
+                            const { checked, value } = event.target;
+                            const nextValue = checked
+                              ? [...field.state.value, value]
+                              : field.state.value.filter((item) => item !== value);
+                            field.handleChange(nextValue);
+                          }}
+                          onBlur={field.handleBlur}
+                        />
+                        <span>
+                          {ingredient.name}
+                          {ingredient.description ? ` – ${ingredient.description}` : ""}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+              </div>
+            )}
+          />
+          <formData.Field
+            name="tagIds"
+            children={(field) => (
+              <div className={styles.formFields}>
+                <span className={styles.fieldLabel}>Tags (optional)</span>
+                <div className={styles.optionsGrid}>
+                  {tags.length === 0 ? (
+                    <span>No tags available yet.</span>
+                  ) : (
+                    tags.map((tag) => {
+                      const optionValue = tag.id.toString();
+                      const isChecked = field.state.value.includes(optionValue);
+                      return (
+                        <label key={tag.id} className={styles.optionRow}>
+                          <input
+                            type="checkbox"
+                            value={optionValue}
+                            checked={isChecked}
+                            onChange={(event) => {
+                              const { checked, value } = event.target;
+                              const nextValue = checked
+                                ? [...field.state.value, value]
+                                : field.state.value.filter((item) => item !== value);
+                              field.handleChange(nextValue);
+                            }}
+                            onBlur={field.handleBlur}
+                          />
+                          <span>{tag.tag}</span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+              </div>
+            )}
+          />
+          <formData.Field
+            name="menuSectionIds"
+            children={(field) => (
+              <div className={styles.formFields}>
+                <span className={styles.fieldLabel}>Menu Sections</span>
+                <div className={styles.optionsGrid}>
+                  {menuSections.length === 0 ? (
+                    <span>No menu sections available yet.</span>
+                  ) : (
+                    menuSections.map((section) => {
+                      const optionValue = section.id.toString();
+                      const isChecked = field.state.value.includes(optionValue);
+                      return (
+                        <label key={section.id} className={styles.optionRow}>
+                          <input
+                            type="checkbox"
+                            value={optionValue}
+                            checked={isChecked}
+                            onChange={(event) => {
+                              const { checked, value } = event.target;
+                              const nextValue = checked
+                                ? [...field.state.value, value]
+                                : field.state.value.filter((item) => item !== value);
+                              field.handleChange(nextValue);
+                            }}
+                            onBlur={field.handleBlur}
+                          />
+                          <span>{section.label}</span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+              </div>
+            )}
+          />
+          <formData.Field
+            name="image"
+            children={(field) => (
+              <div>
+                <label className={styles.fieldLabel} htmlFor="product-image">
+                  Image
+                </label>
+                <input
+                  id="product-image"
+                  className={styles.fileInput}
+                  type="file"
+                  accept="image/*"
+                  onBlur={field.handleBlur}
+                  onChange={(event) => {
+                    const file = event.currentTarget.files ? event.currentTarget.files[0] ?? null : null;
+                    field.handleChange(file);
+                  }}
+                />
+                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+              </div>
+            )}
           />
         <div className={styles.formActions}>
           <button type="button" className={styles.cancelButton} onClick={onClose}>
