@@ -8,7 +8,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   max-width: 700px;
   margin: 0 auto;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .formTitle {
@@ -37,11 +37,12 @@ input[type="number"]:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #bf0c2b;
   background-color: #ffffff;
 }
 
-.selectInput, input[type="text"] {
+.selectInput,
+input[type="text"] {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid #ccc;
@@ -99,33 +100,34 @@ button {
 }
 
 .cancelButton {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   padding: 0.6rem 1.25rem;
 }
 
 .cancelButton:hover {
-  background-color: #e5e7eb;
+  background-color: #f9fafb;
 }
 
 .submitButton {
-  background-color: #111827;
+  background-color: #bf0c2b;
   color: white;
   border-radius: 0.5rem;
   padding: 0.6rem 1.25rem;
 }
 
 .submitButton:hover {
-  background-color: #1f2937;
+  background-color: #a60b25;
 }
 
 .formMessage {
   margin: 0;
   font-size: 0.95rem;
-  color: #065f46;
-  background-color: #d1fae5;
-  border: 1px solid #a7f3d0;
+  color: #374151;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
 }
