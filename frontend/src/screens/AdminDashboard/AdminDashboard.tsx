@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "wouter";
 
 import { IngredientForm } from "@/components/AdminForms/IngredientForm";
 import { MenuSectionForm } from "@/components/AdminForms/MenuSectionForm";
@@ -446,6 +447,9 @@ export const AdminDashboard = () => {
             <p className={styles.topbarSubtitle}>Admin panel · Control every detail of your cafeteria service.</p>
           </div>
           <div className={styles.topbarActions}>
+            <Link href="/menu" className={styles.primaryButton}>
+              View Live Menu
+            </Link>
             <input
               className={styles.searchField}
               type="search"
