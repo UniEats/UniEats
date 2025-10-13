@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static ar.uba.fi.ingsoft1.product_example.config.security.SecurityConfig.PUBLIC_ENDPOINTS;
+import static ar.uba.fi.ingsoft1.product_example.config.security.SecurityConfig.PUBLIC_POST_ENDPOINTS;
 
 @OpenAPIDefinition(
         info = @Info(title = "Simple Product App Backend")
@@ -36,9 +37,18 @@ public class OpenApiConfiguration {
 
             // Iterate over what spring calls controllers (OpenAPI paths) and paths (OpenAPI operations)
             for (var entry: openApi.getPaths().entrySet()) {
-                for (var operation: entry.getValue().readOperations()) {
+                var operations = entry.getValue().readOperationsMap();
+                for (var methodEntry : operations.entrySet()) {
+                    var httpMethod = methodEntry.getKey();
+                    var operation = methodEntry.getValue();
                     tags.addAll(operation.getTags());
-                    if (Arrays.asList(PUBLIC_ENDPOINTS).contains(entry.getKey())) {
+
+                    boolean isPublicPath = Arrays.asList(PUBLIC_ENDPOINTS).contains(entry.getKey());
+                    boolean isWhitelistedPost = httpMethod != null
+                            && httpMethod.equals(io.swagger.v3.oas.models.PathItem.HttpMethod.POST)
+                            && Arrays.asList(PUBLIC_POST_ENDPOINTS).contains(entry.getKey());
+
+                    if (isPublicPath || isWhitelistedPost) {
                         operation.getResponses().remove("403");
                     } else {
                         operation.addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH_SCHEME_KEY));

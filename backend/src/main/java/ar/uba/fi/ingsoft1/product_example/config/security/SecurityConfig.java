@@ -1,5 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.config.security;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,13 +17,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Configuration
 @EnableWebSecurity(debug = false)
 public class SecurityConfig {
 
-    public static final String[] PUBLIC_ENDPOINTS = {"/users", "/sessions"};
+    public static final String[] PUBLIC_ENDPOINTS = { "/sessions" };
+    public static final String[] PUBLIC_POST_ENDPOINTS = { "/users" };
 
     private final JwtAuthFilter authFilter;
 
@@ -32,34 +32,52 @@ public class SecurityConfig {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    AuthenticationManager authenticationManager(
+        AuthenticationConfiguration config
+    ) throws Exception {
         return config.getAuthenticationManager();
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http)
+        throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers("/ingredients/**").hasRole("ADMIN")
-                        .requestMatchers("/products/**").hasRole("ADMIN")
-                        .requestMatchers("/tags/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/menu-sections/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/menu-sections/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/menu-sections/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/tags/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/tags/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/menu-sections").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/menus").permitAll()
-                        .anyRequest().denyAll())
-                .sessionManagement(sessionManager -> sessionManager
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth ->
+                auth
+                    .requestMatchers(
+                        "/error",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**"
+                    )
+                    .permitAll()
+                    .requestMatchers(PUBLIC_ENDPOINTS)
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/menus")
+                    .permitAll()
+                    .requestMatchers("/products/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers("/menu-sections/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers("/tags/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers("/ingredients/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/users/count")
+                    .hasRole("ADMIN")
+                    .anyRequest()
+                    .denyAll()
+            )
+            .sessionManagement(sessionManager ->
+                sessionManager.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS
+                )
+            )
+            .addFilterBefore(
+                authFilter,
+                UsernamePasswordAuthenticationFilter.class
+            )
+            .build();
     }
 
     @Bean
@@ -68,7 +86,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }

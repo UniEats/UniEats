@@ -1,8 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
 import { AuthResponseSchema, LoginRequest, SignupRequest } from "@/models/Login";
-import { useToken } from "@/services/TokenContext";
+import { UserCountSchema } from "@/models/User";
+import { useAccessTokenGetter, useHandleResponse, useToken } from "@/services/TokenContext";
 
 export function useLogin() {
   const [, setToken] = useToken();
@@ -21,18 +22,21 @@ export function useRefresh() {
   return useMutation({
     mutationFn: async () => {
       if (tokenState.state !== "LOGGED_IN") {
-        return;
+        throw new Error("User is not logged in.");
       }
 
-      try {
-        const refreshToken = tokenState.tokens.refreshToken;
-        const tokenPromise = auth("PUT", "/sessions", { refreshToken });
-        setToken({ state: "REFRESHING", tokenPromise });
-        setToken({ state: "LOGGED_IN", tokens: await tokenPromise });
-      } catch (err) {
-        setToken({ state: "LOGGED_OUT" });
-        throw err;
-      }
+      const refreshToken = tokenState.tokens.refreshToken;
+      const tokenPromise = auth("PUT", "/sessions", { refreshToken });
+
+      setToken({ state: "REFRESHING", tokenPromise });
+      return tokenPromise;
+    },
+    onSuccess: (data) => {
+      setToken({ state: "LOGGED_IN", tokens: data });
+    },
+    // 4. Handle error: This runs if the tokenPromise rejects.
+    onError: () => {
+      setToken({ state: "LOGGED_OUT" });
     },
   });
 }
@@ -63,4 +67,24 @@ async function auth(method: "PUT" | "POST", endpoint: string, data: object) {
   } else {
     throw new Error(`Failed with status ${response.status}: ${await response.text()}`);
   }
+}
+
+export function useUserCount() {
+  const getAccessToken = useAccessTokenGetter();
+  const handleResponse = useHandleResponse();
+
+  return useQuery({
+    queryKey: ["users", "count"],
+    queryFn: async () => {
+      const response = await fetch(`${BASE_API_URL}/users/count`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${await getAccessToken()}`,
+        },
+      });
+
+      return handleResponse(response, (json) => UserCountSchema.parse(json));
+    },
+  });
 }

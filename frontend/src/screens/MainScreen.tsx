@@ -1,21 +1,11 @@
-import { useCallback, useState } from "react";
 import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
-import { IngredientForm } from "@/components/AdminForms/IngredientForm";
-import { TagForm } from "@/components/AdminForms/TagForm";
-import { ProductForm } from "@/components/AdminForms/ProductForm";
-import { ProductUpdateForm } from "@/components/AdminForms/ProductUpdateForm";
-import { MenuSectionForm } from "@/components/AdminForms/MenuSectionForm";
-import { Modal } from "@/components/Modal/Modal";
+import { AdminDashboard } from "@/screens/AdminDashboard/AdminDashboard";
 import { useUserRole } from "@/services/TokenContext";
+
 import styles from "./MainScreen.module.css";
 
 export const MainScreen = () => {
   const role = useUserRole();
-  const [openModal, setOpenModal] = useState<
-    "ingredient" | "tag" | "product-create" | "product-update" | "menu-section" | null
-  >(null);
-
-  const closeModal = useCallback(() => setOpenModal(null), []);
 
   if (role !== "ROLE_ADMIN") {
     return (
@@ -29,82 +19,5 @@ export const MainScreen = () => {
     );
   }
 
-  return (
-    <CommonLayout>
-      <section className={styles.adminPanel}>
-        <h2 className={styles.panelTitle}>☕ Admin Control Panel</h2>
-        <p className={styles.panelSubtitle}>
-          Manage your café menu with ease
-        </p>
-
-        <div className={styles.buttonList}>
-          <button
-            className={styles.panelButton}
-            onClick={() => setOpenModal("ingredient")}
-          >
-            <span className={styles.icon}>🥦</span>
-            <span>Add Ingredient</span>
-          </button>
-
-          <button
-            className={styles.panelButton}
-            onClick={() => setOpenModal("tag")}
-          >
-            <span className={styles.icon}>🏷️</span>
-            <span>Add Tag</span>
-          </button>
-
-          <button
-            className={styles.panelButton}
-            onClick={() => setOpenModal("product-create")}
-          >
-            <span className={styles.icon}>🍰</span>
-            <span>Add Product</span>
-          </button>
-
-          <button
-            className={styles.panelButton}
-            onClick={() => setOpenModal("product-update")}
-          >
-            <span className={styles.icon}>🧾</span>
-            <span>Update Product</span>
-          </button>
-
-          <button
-            className={styles.panelButton}
-            onClick={() => setOpenModal("menu-section")}
-          >
-            <span className={styles.icon}>📋</span>
-            <span>Add Menu Section</span>
-          </button>
-        </div>
-      </section>
-
-      {openModal === "ingredient" && (
-        <Modal onClose={closeModal}>
-          <IngredientForm onClose={closeModal} />
-        </Modal>
-      )}
-      {openModal === "tag" && (
-        <Modal onClose={closeModal}>
-          <TagForm onClose={closeModal} />
-        </Modal>
-      )}
-      {openModal === "product-create" && (
-        <Modal onClose={closeModal}>
-          <ProductForm onClose={closeModal} />
-        </Modal>
-      )}
-      {openModal === "product-update" && (
-        <Modal onClose={closeModal}>
-          <ProductUpdateForm onClose={closeModal} />
-        </Modal>
-      )}
-      {openModal === "menu-section" && (
-        <Modal onClose={closeModal}>
-          <MenuSectionForm onClose={closeModal} />
-        </Modal>
-      )}
-    </CommonLayout>
-  );
+  return <AdminDashboard />;
 };

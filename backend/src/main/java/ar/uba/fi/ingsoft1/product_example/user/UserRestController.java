@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +38,11 @@ class UserRestController {
         return userService.createUser(data)
                 .map(tk -> ResponseEntity.status(HttpStatus.CREATED).body(tk))
                 .orElse(ResponseEntity.status(HttpStatus.CONFLICT).build());
+    }
+
+    @GetMapping(path = "/count", produces = "application/json")
+    @Operation(summary = "Get total registered users")
+    UserCountDTO getUserCount() {
+        return new UserCountDTO(userService.getUserCount());
     }
 }

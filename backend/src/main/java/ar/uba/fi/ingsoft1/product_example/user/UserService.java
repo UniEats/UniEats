@@ -69,6 +69,10 @@ class UserService implements UserDetailsService {
                 .map(this::generateTokens);
     }
 
+    long getUserCount() {
+        return userRepository.count();
+    }
+
     private TokenDTO generateTokens(User user) {
         String accessToken = jwtService.createToken(new JwtUserDetails(
                 user.getUsername(),
