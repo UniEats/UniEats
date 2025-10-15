@@ -9,3 +9,8 @@ afterEach(() => {
   // Testing library uses global state that can interfere between tests
   cleanup();
 });
+
+globalThis.window ??= globalThis;
+window._env_ = {
+  baseApiUrl: "http://localhost/api",
+};
