@@ -53,6 +53,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(PUBLIC_ENDPOINTS)
                     .permitAll()
+                    .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
+                    .permitAll()
                     .requestMatchers(HttpMethod.GET, "/menus")
                     .permitAll()
                     .requestMatchers("/products/**")
