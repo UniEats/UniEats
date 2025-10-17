@@ -22,7 +22,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     public static final String[] PUBLIC_ENDPOINTS = { "/sessions" };
-    public static final String[] PUBLIC_POST_ENDPOINTS = { "/users" };
+    public static final String[] PUBLIC_POST_ENDPOINTS = {
+            "/users",
+            "/users/register",
+            "/users/verify",
+    };
 
     private final JwtAuthFilter authFilter;
 
@@ -43,34 +47,32 @@ public class SecurityConfig {
             throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(
-                        auth ->
-                                auth
-                                        // .requestMatchers(
-                                        //     "/error",
-                                        //     "/swagger-ui/**",
-                                        //     "/v3/api-docs/**"
-                                        // )
-                                        // .permitAll()
-                                        // .requestMatchers(PUBLIC_ENDPOINTS)
-                                        // .permitAll()
-                                        // .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
-                                        // .permitAll()
-                                        // .requestMatchers(HttpMethod.GET, "/menus")
-                                        // .permitAll()
-                                        // .requestMatchers("/products/**")
-                                        // .hasRole("ADMIN")
-                                        // .requestMatchers("/menu-sections/**")
-                                        // .hasRole("ADMIN")
-                                        // .requestMatchers("/tags/**")
-                                        // .hasRole("ADMIN")
-                                        // .requestMatchers("/ingredients/**")
-                                        // .hasRole("ADMIN")
-                                        // .requestMatchers(HttpMethod.GET, "/users/count")
-                                        // .hasRole("ADMIN")
-                                        .anyRequest()
-                                        .permitAll()
-                        // .denyAll()
+                .authorizeHttpRequests(auth ->
+                        auth
+                                .requestMatchers(
+                                        "/error",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**"
+                                )
+                                .permitAll()
+                                .requestMatchers(PUBLIC_ENDPOINTS)
+                                .permitAll()
+                                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/menus")
+                                .permitAll()
+                                .requestMatchers("/products/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/menu-sections/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/tags/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/ingredients/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/users/count")
+                                .hasRole("ADMIN")
+                                .anyRequest()
+                                .denyAll()
                 )
                 .sessionManagement(sessionManager ->
                         sessionManager.sessionCreationPolicy(
