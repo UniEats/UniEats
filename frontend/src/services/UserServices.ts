@@ -42,15 +42,13 @@ export function useRefresh() {
 }
 
 export function useSignup() {
-  const [, setToken] = useToken();
-
   return useMutation({
-    mutationFn: async (req: SignupRequest) => {
-      const tokens = await auth("POST", "/users", req);
-      setToken({ state: "LOGGED_IN", tokens });
+    mutationFn: async (data: SignupRequest) => {
+      return auth("POST", "/users/register", data);
     },
   });
 }
+
 
 async function auth(method: "PUT" | "POST", endpoint: string, data: object) {
   const response = await fetch(BASE_API_URL + endpoint, {
