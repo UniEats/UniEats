@@ -39,7 +39,9 @@ export const SignupScreen = () => {
 
   const { AppForm, FormContainer, AppField } = formData;
 
-  return (
+  console.log("BASE_API_URL:", import.meta.env.VITE_BASE_API_URL);
+
+    return (
     <CommonLayout>
       <div className={styles.signupContainer}>
         <div className={styles.signupCard}>
