@@ -34,3 +34,9 @@ export const AuthResponseSchema = z.object({
 });
 
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+
+export const MessageResponseSchema = z.object({
+  message: z.string(),
+});
+
+export type SignUpResponse = z.infer<typeof MessageResponseSchema>;

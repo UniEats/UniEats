@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
-import { AuthResponseSchema, LoginRequest, SignupRequest, VerifyRequest } from "@/models/Login";
+import { MessageResponseSchema, AuthResponseSchema, LoginRequest, SignupRequest, VerifyRequest } from "@/models/Login";
 import { UserCountSchema } from "@/models/User";
 import { useAccessTokenGetter, useHandleResponse, useToken } from "@/services/TokenContext";
 
@@ -44,7 +44,16 @@ export function useRefresh() {
 export function useSignup() {
   return useMutation({
     mutationFn: async (data: SignupRequest) => {
-      return auth("POST", "/users/register", data);
+      const response = await fetch(BASE_API_URL + "/users/register", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      return MessageResponseSchema.parse(await response.json());
     },
   });
 }
@@ -52,7 +61,22 @@ export function useSignup() {
 export function useVerify() {
   return useMutation({
     mutationFn: async (data: VerifyRequest) => {
-      return auth("POST", "/users/verify", data);
+      const response = await fetch(BASE_API_URL + "/users/verify", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.message || "Error verificando el código");
+      }
+
+      return MessageResponseSchema.parse(json);
     },
   });
 }

@@ -3,12 +3,10 @@ import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
 import { useAppForm } from "@/config/use-app-form";
 import { VerifyRequest, VerifyRequestSchema } from "@/models/Login";
 import { useVerify } from "@/services/UserServices";
-
-// Reuse login styles for a consistent look
 import styles from "./LoginScreen.module.css";
 
 export const VerifyScreen = () => {
-  const { mutate, error, isPending, isSuccess } = useVerify();
+  const { mutate, error, isPending, isSuccess, data } = useVerify();
 
   const formData = useAppForm({
     defaultValues: {
@@ -28,9 +26,9 @@ export const VerifyScreen = () => {
       <div className={styles.loginContainer}>
         <div className={styles.loginCard}>
           <h1>Verify Your Email</h1>
-          {isSuccess ? (
+          {isSuccess && !error ? (
             <div style={{ textAlign: "center", color: "green" }}>
-              <p>Success</p>
+              <p>{data?.message || "Verification successful!"}</p>
               <a href="/login" className={styles.loginLink} style={{ marginTop: "1rem" }}>
                 Click here to Login
               </a>

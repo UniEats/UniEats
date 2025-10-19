@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -76,7 +78,9 @@ class UserRestController {
         userRepository.save(newUser);
         emailService.sendVerificationEmail(data.email(), verificationCode);
 
-        return ResponseEntity.ok("Código de verificación enviado a " + data.email());
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Código de verificación enviado a " + data.email());
+        return ResponseEntity.ok(response);
     }
 
     // --- Endpoint de testeo (solo GET, sin lógica real)
@@ -95,14 +99,17 @@ class UserRestController {
             return ResponseEntity.badRequest().body("Usuario no encontrado");
         }
 
+        Map<String, String> response = new HashMap<>();
         User user = optionalUser.get();
         if (user.getVerificationCode().equals(request.code())) {
             user.setVerified(true);
             user.setVerificationCode(null);
             userRepository.save(user);
-            return ResponseEntity.ok("Correo verificado con éxito");
+            response.put("message", "Correo verificado con éxito");
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.badRequest().body("Código incorrecto");
+            response.put("message", "Código incorrecto");
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
