@@ -57,7 +57,9 @@ class UserRestController {
     @Operation(summary = "Register a new user and send verification code")
     public ResponseEntity<?> register(@RequestBody UserRegisterDTO data) {
         if (userRepository.findByUsername(data.email()).isPresent()) {
-            return ResponseEntity.badRequest().body("El email ya está registrado");
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "El email ya está registrado");
+            return ResponseEntity.badRequest().body(response);
         }
 
         String verificationCode = UUID.randomUUID().toString().substring(0, 6);

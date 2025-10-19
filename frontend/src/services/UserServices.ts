@@ -52,8 +52,14 @@ export function useSignup() {
         },
         body: JSON.stringify(data),
       });
+      
+      const json = await response.json();
 
-      return MessageResponseSchema.parse(await response.json());
+      if (!response.ok) {
+        throw new Error(json.message || "Error inesperado durante el registro");
+      }
+
+      return MessageResponseSchema.parse(json);
     },
   });
 }
@@ -94,7 +100,7 @@ async function auth(method: "PUT" | "POST", endpoint: string, data: object) {
   if (response.ok) {
     return AuthResponseSchema.parse(await response.json());
   } else {
-    throw new Error(`Failed with status ${response.status}: ${await response.text()}`);
+    throw new Error(`Error en la autenticación`);
   }
 }
 

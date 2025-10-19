@@ -9,7 +9,7 @@ export const SignupScreen = () => {
     const { mutate, error, data, isSuccess } = useSignup();
 
     useEffect(() => {
-        if (isSuccess && data?.message) {
+        if (isSuccess && data?.message && !error) {
             setSuccessMessage(data.message);
             const timer = setTimeout(() => {
                 window.location.href = "/verify";
