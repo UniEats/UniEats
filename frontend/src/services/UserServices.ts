@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
-import { AuthResponseSchema, LoginRequest, SignupRequest } from "@/models/Login";
+import { AuthResponseSchema, LoginRequest, SignupRequest, VerifyRequest } from "@/models/Login";
 import { UserCountSchema } from "@/models/User";
 import { useAccessTokenGetter, useHandleResponse, useToken } from "@/services/TokenContext";
 
@@ -49,6 +49,13 @@ export function useSignup() {
   });
 }
 
+export function useVerify() {
+  return useMutation({
+    mutationFn: async (data: VerifyRequest) => {
+      return auth("POST", "/users/verify", data);
+    },
+  });
+}
 
 async function auth(method: "PUT" | "POST", endpoint: string, data: object) {
   const response = await fetch(BASE_API_URL + endpoint, {

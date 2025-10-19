@@ -13,6 +13,12 @@ export const SignupRequestSchema = z.object({
 
 export type SignupRequest = z.infer<typeof SignupRequestSchema>;
 
+export const VerifyRequestSchema = z.object({
+  email: z.string().min(1, "El email no puede estar vacío").email("Debe ser un email válido"),
+  code: z.string().min(6, "El código debe tener 6 caracteres").max(6, "El código debe tener 6 caracteres"),
+});
+
+export type VerifyRequest = z.infer<typeof VerifyRequestSchema>;
 
 export const LoginRequestSchema = z.object({
   username: z.string().min(1, "Username must not be empty"),
