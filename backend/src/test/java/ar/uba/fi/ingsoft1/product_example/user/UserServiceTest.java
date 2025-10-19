@@ -26,11 +26,14 @@ class UserServiceTest {
         var passwordEncoder = new BCryptPasswordEncoder();
         var passwordHash = passwordEncoder.encode(PASSWORD);
 
+        var user = new User(USERNAME, passwordHash, "ROLE_USER");
+        user.setVerified(true);
+
         UserRepository userRepository = mock();
         when(userRepository.findByUsername(anyString()))
                 .thenReturn(Optional.empty());
         when(userRepository.findByUsername(USERNAME))
-                .thenReturn(Optional.of(new User(USERNAME, passwordHash, "ROLE_USER")));
+                .thenReturn(Optional.of(user));
 
         var key = "0".repeat(64);
         userService = new UserService(
