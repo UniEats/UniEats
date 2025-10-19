@@ -42,44 +42,44 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http)
         throws Exception {
         return http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth ->
-                auth
-                    .requestMatchers(
-                        "/error",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**"
-                    )
-                    .permitAll()
-                    .requestMatchers(PUBLIC_ENDPOINTS)
-                    .permitAll()
-                    .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
-                    .permitAll()
-                    .requestMatchers(HttpMethod.GET, "/menus")
-                    .permitAll()
-                    .requestMatchers("/products/**")
-                    .hasRole("ADMIN")
-                    .requestMatchers("/menu-sections/**")
-                    .hasRole("ADMIN")
-                    .requestMatchers("/tags/**")
-                    .hasRole("ADMIN")
-                    .requestMatchers("/ingredients/**")
-                    .hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.GET, "/users/count")
-                    .hasRole("ADMIN")
-                    .anyRequest()
-                    .denyAll()
-            )
-            .sessionManagement(sessionManager ->
-                sessionManager.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth ->
+                        auth
+                                .requestMatchers(
+                                        "/error",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**"
+                                )
+                                .permitAll()
+                                .requestMatchers(PUBLIC_ENDPOINTS)
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/menus")
+                                .permitAll()
+                                .requestMatchers("/products/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/menu-sections/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/combos/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/tags/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/ingredients/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/users/count")
+                                .hasRole("ADMIN")
+                                .anyRequest()
+                                .denyAll()
                 )
-            )
-            .addFilterBefore(
-                authFilter,
-                UsernamePasswordAuthenticationFilter.class
-            )
-            .build();
+                .sessionManagement(sessionManager ->
+                        sessionManager.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+                .addFilterBefore(
+                        authFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .build();
     }
 
     @Bean

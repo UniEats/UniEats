@@ -1,10 +1,8 @@
-package ar.uba.fi.ingsoft1.product_example.Products;
+package ar.uba.fi.ingsoft1.product_example.Combos;
 
 import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
-import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
-import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
-import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
+import ar.uba.fi.ingsoft1.product_example.Products.Product;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,18 +24,20 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "product")
+@Table(name = "combo")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class Product {
+public class Combo {
 
     @Id
     @GeneratedValue
@@ -60,59 +60,45 @@ public class Product {
     @Column(name = "image", columnDefinition = "BYTEA")
     private byte[] image;
 
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    private List<ProductIngredient> productIngredients = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "combo", cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<ComboProduct> comboProducts = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "product_tag",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
-    private List<Tag> tags = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "products")
+    @ManyToMany(mappedBy = "combos")
     private List<MenuSection> menuSections = new ArrayList<>();
 
-    public ProductDTO toDTO() {
-        Map<Long, String> tags_ = tags != null
-                ? tags.stream()
-                    .collect(Collectors.toMap(
-                        Tag::getId,
-                        Tag::getTag
-                    ))
-                : Map.of();
-        Map<Long, String> ingredients = productIngredients != null
-            ? productIngredients.stream()
-                .map(ProductIngredient::getIngredient)
+    public ComboDTO toDTO() {
+        Map<Long, String> products = comboProducts != null
+                ? comboProducts.stream()
                 .collect(Collectors.toMap(
-                    Ingredient::getId,  
-                    Ingredient::getName 
+                        cp -> cp.getProduct().getId(),
+                        cp -> cp.getProduct().getName()
                 ))
-            : Map.of();
-        
+                : Map.of();
+
+        Map<Long, Integer> quantities = comboProducts != null
+                ? comboProducts.stream()
+                .collect(Collectors.toMap(
+                        cp -> cp.getProduct().getId(),
+                        ComboProduct::getQuantity
+                ))
+                : Map.of();
+
         Map<Long, String> menuSections_ = menuSections != null
                 ? menuSections.stream()
-                    .collect(Collectors.toMap(
+                .collect(Collectors.toMap(
                         MenuSection::getId,
                         MenuSection::getLabel
-                    ))
+                ))
                 : Map.of();
 
-        return new ProductDTO(
-            this.getId(),
-            this.getName(),
-            this.getDescription(),
-            this.getPrice(),
-            tags_,
-            ingredients,
-            menuSections_,
-            this.getImage()
+        return new ComboDTO(
+                this.getId(),
+                this.getName(),
+                this.getDescription(),
+                this.getPrice(),
+                products,
+                menuSections_,
+                this.getImage()
         );
-    }  
-
-
+    }
 }
