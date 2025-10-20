@@ -85,10 +85,11 @@ class UserRestController {
         return ResponseEntity.ok(response);
     }
 
+    // --- Endpoint de testeo (solo GET, sin lógica real)
     @GetMapping("/register")
     @Operation(summary = "Test endpoint for user registration (no action performed)")
     public ResponseEntity<String> testRegisterEndpoint() {
-        return ResponseEntity.ok("Endpoint /users/register operativo");
+        return ResponseEntity.ok("✅ Endpoint /users/register operativo");
     }
 
 
