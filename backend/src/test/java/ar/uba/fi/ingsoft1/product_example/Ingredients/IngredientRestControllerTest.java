@@ -13,12 +13,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -124,5 +124,55 @@ class IngredientRestControllerTest {
                 .param("amount", "-100")
         )
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateIngredient_success() throws Exception {
+        IngredientCreateDTO updateDTO = new IngredientCreateDTO("Updated Tomato", "Updated description", 20);
+        IngredientDTO updatedDTO = new IngredientDTO(1L, "Updated Tomato", "Updated description", 20);
+
+        Mockito.when(ingredientService.updateIngredient(eq(1L), any())).thenReturn(Optional.of(updatedDTO));
+
+        mockMvc.perform(patch("/ingredients/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO))
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("Updated Tomato")))
+                .andExpect(jsonPath("$.description", is("Updated description")))
+                .andExpect(jsonPath("$.stock", is(20)));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateIngredient_notFound_returns404() throws Exception {
+        IngredientCreateDTO updateDTO = new IngredientCreateDTO("Updated Tomato", "Updated description", 20);
+
+        Mockito.when(ingredientService.updateIngredient(eq(999L), any())).thenReturn(Optional.empty());
+
+        mockMvc.perform(patch("/ingredients/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO))
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deleteIngredient_success() throws Exception {
+        Mockito.when(ingredientService.deleteIngredient(1L)).thenReturn(true);
+
+        mockMvc.perform(delete("/ingredients/1"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deleteIngredient_notFound_returns404() throws Exception {
+        Mockito.when(ingredientService.deleteIngredient(999L)).thenReturn(false);
+
+        mockMvc.perform(delete("/ingredients/999"))
+                .andExpect(status().isNotFound());
     }
 }
