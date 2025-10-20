@@ -10,6 +10,7 @@ import {
 
 import { MenuScreen } from "./screens/MenuScreen";
 import { VerifyScreen } from "./screens/VerifyScreen";
+import { ForgotPasswordScreen } from "./screens/ForgotPasswordScreen";
 
 export const Navigation = () => {
   const [tokenState] = useToken();
@@ -42,6 +43,9 @@ export const Navigation = () => {
           </Route>
           <Route path="/signup">
             <SignupScreen />
+          </Route>
+          <Route path="/forgot-password">
+            <ForgotPasswordScreen />
           </Route>
           <Route path="/verify">
             <VerifyScreen />

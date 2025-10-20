@@ -49,7 +49,8 @@
   background-color: #ffffff;
 }
 
-.loginCard button {
+/* Estilo específico para el botón de submit */
+.loginCard button[type="submit"] {
   background-color: #660000;
   color: white;
   font-weight: 600;
@@ -83,4 +84,23 @@
 
 .loginCard .loginLink:hover {
   text-decoration: underline;
+}
+
+.forgotButton {
+  background: none !important;
+  background-color: transparent !important;
+  border: none;
+  color: #800020;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.95rem;
+  margin-top: 0 !important;
+}
+
+
+.forgotButton:hover {
+  background: none;
+  transform: none;
+  text-decoration: none;
 }
