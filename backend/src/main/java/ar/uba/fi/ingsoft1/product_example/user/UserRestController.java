@@ -85,6 +85,12 @@ class UserRestController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/register")
+    @Operation(summary = "Test endpoint for user registration (no action performed)")
+    public ResponseEntity<String> testRegisterEndpoint() {
+        return ResponseEntity.ok("Endpoint /users/register operativo");
+    }
+
 
     @PostMapping("/verify")
     @Operation(summary = "Verify a user's email using a verification code")
