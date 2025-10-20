@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const ProductsMapSchema = z.array(z.object({ id: z.string(), quantity: z.number() }));
+export const ProductsMapSchema = z.array(
+  z.object({
+    id: z.number(),
+    name: z.string(),
+    quantity: z.number(),
+  })
+);
 export const MenuSectionsMapSchema = z.record(z.string(), z.string());
 
 export const ComboSchema = z.object({

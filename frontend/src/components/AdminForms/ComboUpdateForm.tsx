@@ -123,7 +123,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                       formData.setFieldValue("price", matchedCombo?.price?.toString() ?? "");
                       formData.setFieldValue(
                         "productIds",
-                        (matchedCombo?.products || []).map((p) => ({ id: p.id, quantity: p.quantity }))
+                        (matchedCombo?.products || []).map(p => ({ id: String(p.id), quantity: p.quantity }))
                       );
                       formData.setFieldValue("menuSectionIds", Object.keys(matchedCombo?.menuSections || {}));
 

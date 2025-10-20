@@ -6,13 +6,17 @@ import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public record ComboDTO(
         long id,
         String name,
         String description,
         BigDecimal price,
-        Map<Long, String> products,
+        List<Map<String, Object>> products,
         Map<Long, String> menuSections,
         byte[] image
 ) {
@@ -24,11 +28,15 @@ public record ComboDTO(
                 combo.getPrice(),
                 combo.getComboProducts() != null
                         ? combo.getComboProducts().stream()
-                        .collect(Collectors.toMap(
-                                cp -> cp.getProduct().getId(),
-                                cp -> cp.getProduct().getName() + " x" + cp.getQuantity()
-                        ))
-                        : Map.of(),
+                                .map(cp -> {
+                                Map<String, Object> productMap = new HashMap<>();
+                                productMap.put("id", cp.getProduct().getId());
+                                productMap.put("name", cp.getProduct().getName());
+                                productMap.put("quantity", cp.getQuantity());
+                                return productMap;
+                                })
+                                .collect(Collectors.toList())
+                        : Collections.emptyList(),
                 combo.getMenuSections() != null
                         ? combo.getMenuSections().stream()
                         .collect(Collectors.toMap(
