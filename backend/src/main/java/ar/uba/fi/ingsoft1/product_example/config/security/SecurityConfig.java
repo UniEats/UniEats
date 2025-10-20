@@ -26,6 +26,8 @@ public class SecurityConfig {
             "/users",
             "/users/register",
             "/users/verify",
+            "/users/password-reset/request",
+            "/users/password-reset/reset"
     };
 
     private final JwtAuthFilter authFilter;

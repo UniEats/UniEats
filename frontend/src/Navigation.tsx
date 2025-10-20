@@ -11,6 +11,7 @@ import {
 import { MenuScreen } from "./screens/MenuScreen";
 import { VerifyScreen } from "./screens/VerifyScreen";
 import { ForgotPasswordScreen } from "./screens/ForgotPasswordScreen";
+import { ResetPasswordScreen } from "./screens/ResetPasswordScreen";
 
 export const Navigation = () => {
   const [tokenState] = useToken();
@@ -46,6 +47,9 @@ export const Navigation = () => {
           </Route>
           <Route path="/forgot-password">
             <ForgotPasswordScreen />
+          </Route>
+          <Route path="/reset-password">
+            <ResetPasswordScreen />
           </Route>
           <Route path="/verify">
             <VerifyScreen />

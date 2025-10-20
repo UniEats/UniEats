@@ -9,47 +9,28 @@ type Props = {
 
 export function Login({ onSubmit, submitError }: Props) {
   const formData = useAppForm({
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-    validators: {
-      onChange: LoginRequestSchema,
-    },
+    defaultValues: { username: "", password: "" },
+    validators: { onChange: LoginRequestSchema },
     onSubmit: async ({ value }) => onSubmit(value),
   });
 
+  const { AppForm, FormContainer, AppField } = formData;
+
   return (
-    <>
-      <formData.AppForm>
-        <formData.FormContainer extraError={submitError}>
-          <formData.AppField
-            name="username"
-            children={(field) => <field.TextField label="Username" />}
-          />
+    <AppForm>
+      <FormContainer extraError={submitError}>
+        <AppField name="username" children={(field) => <field.TextField label="Username" />} />
+        <AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
 
-          <formData.AppField
-            name="password"
-            children={(field) => <field.PasswordField label="Password" />}
-          />
+        <div style={{ marginTop: 8, marginBottom: 8 }}>
+          <a href="/forgot-password" className={styles.forgotButton}>
+            Forgot password?
+          </a>
+        </div>
 
-          {/* Enlace para recuperar contraseña */}
-          {/* Botón 'Olvidé mi contraseña' (no funcional por ahora) */}
-          <div style={{ marginTop: 8, marginBottom: 8 }}>
-            <button
-              type="button"
-              // onClick={() => {
-              //   // ejemplo: para saber
-              // }}
-              className={styles.forgotButton}
-            >
-              Forgot password?
-            </button>
-          </div>
-
-          <button type="submit">Log In</button>
-        </formData.FormContainer>
-      </formData.AppForm>
-    </>
+        <button type="submit">Log In</button>
+      </FormContainer>
+    </AppForm>
   );
 }
+

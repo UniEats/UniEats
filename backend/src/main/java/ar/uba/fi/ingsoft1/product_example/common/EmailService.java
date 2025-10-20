@@ -18,4 +18,13 @@ public class EmailService {
         message.setText("Tu código de verificación es: " + code);
         mailSender.send(message);
     }
+
+    public void sendPasswordResetEmail(String to, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Recuperación de contraseña");
+        message.setText("Tu código de verificación para recuperar tu contraseña es: " + code + "\n\n" +
+                      "Si no solicitaste recuperar tu contraseña, ignora este mensaje.");
+        mailSender.send(message);
+    }
 }
