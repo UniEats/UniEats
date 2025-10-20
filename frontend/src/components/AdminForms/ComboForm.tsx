@@ -94,7 +94,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
               <div className={styles.formFields}>
                 <span className={styles.fieldLabel}>Products</span>
                 {products.map((product) => {
-                  const selectedProduct = field.state.value.find((p: any) => p.id === product.id.toString());
+                  const selectedProduct = field.state.value.find((p: {id: string; quantity: number;}) => p.id === product.id.toString());
                   const quantity = selectedProduct?.quantity ?? 1;
 
                   return (
@@ -107,7 +107,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
                           if (e.target.checked) {
                             nextValue.push({ id: product.id.toString(), quantity });
                           } else {
-                            nextValue = nextValue.filter((p: any) => p.id !== product.id.toString());
+                            nextValue = nextValue.filter((p: {id: string; quantity: number;}) => p.id !== product.id.toString());
                           }
                           field.handleChange(nextValue);
                         }}
@@ -119,7 +119,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
                           min={1}
                           value={quantity}
                           onChange={(e) => {
-                            const nextValue = field.state.value.map((p: any) =>
+                            const nextValue = field.state.value.map((p: {id: string; quantity: number;}) =>
                               p.id === product.id.toString() ? { ...p, quantity: parseInt(e.target.value, 10) || 1 } : p
                             );
                             field.handleChange(nextValue);

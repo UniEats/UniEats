@@ -450,29 +450,31 @@ export const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {comboList.map((combo) => (
-                <tr key={combo.id}>
-                  <td>{combo.name}</td>
-                  <td className={styles.descriptionCell}>{combo.description}</td>
-                  <td>{formatCurrency(combo.price)}</td>
-                  <td>
-                    {Object.keys(combo.products).length > 0
-                      ? Object.values(combo.products).join(", ")
-                      : "—"}
-                  </td>
-                  <td>
-                    <button
-                      className={styles.dangerButton}
-                      onClick={() => handleDeleteCombo(combo.id)}
-                      disabled={deleteComboMutation.isPending}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {comboList.length === 0 && (
+              {comboList.length > 0 ? (
+                comboList.map((combo) => (
+                  <tr key={combo.id}>
+                    <td>{combo.name}</td>
+                    <td className={styles.descriptionCell}>{combo.description}</td>
+                    <td>{formatCurrency(combo.price)}</td>
+                    <td>
+                      {combo.products.length > 0
+                        ? combo.products
+                            .map((product) => `${product.quantity} x ${product.name}`)
+                            .join(", ")
+                        : "—"}
+                    </td>
+                    <td>
+                      <button
+                        className={styles.dangerButton}
+                        onClick={() => handleDeleteCombo(combo.id)}
+                        disabled={deleteComboMutation.isPending}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td colSpan={5} className={styles.emptyCell}>
                     No combos loaded. Add your first combo to get started.

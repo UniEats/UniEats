@@ -29,7 +29,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Entity
 @Table(name = "combo")
@@ -67,21 +69,17 @@ public class Combo {
     private List<MenuSection> menuSections = new ArrayList<>();
 
     public ComboDTO toDTO() {
-        Map<Long, String> products = comboProducts != null
+        List<Map<String, Object>> productList = comboProducts != null
                 ? comboProducts.stream()
-                .collect(Collectors.toMap(
-                        cp -> cp.getProduct().getId(),
-                        cp -> cp.getProduct().getName()
-                ))
-                : Map.of();
-
-        Map<Long, Integer> quantities = comboProducts != null
-                ? comboProducts.stream()
-                .collect(Collectors.toMap(
-                        cp -> cp.getProduct().getId(),
-                        ComboProduct::getQuantity
-                ))
-                : Map.of();
+                        .map(cp -> {
+                        Map<String, Object> productMap = new HashMap<>();
+                        productMap.put("id", cp.getProduct().getId());
+                        productMap.put("name", cp.getProduct().getName());
+                        productMap.put("quantity", cp.getQuantity());
+                        return productMap;
+                        })
+                        .collect(Collectors.toList())
+                : Collections.emptyList();
 
         Map<Long, String> menuSections_ = menuSections != null
                 ? menuSections.stream()
@@ -96,7 +94,7 @@ public class Combo {
                 this.getName(),
                 this.getDescription(),
                 this.getPrice(),
-                products,
+                productList,
                 menuSections_,
                 this.getImage()
         );
