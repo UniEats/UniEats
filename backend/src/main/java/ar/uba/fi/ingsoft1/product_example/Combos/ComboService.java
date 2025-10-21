@@ -2,6 +2,8 @@ package ar.uba.fi.ingsoft1.product_example.Combos;
 
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
+import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
+import ar.uba.fi.ingsoft1.product_example.Tags.TagRepository;
 
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProductRepository;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
@@ -29,6 +31,7 @@ public class ComboService {
     private final ComboRepository comboRepository;
     private final ProductRepository productRepository;
     private final ComboProductRepository comboProductRepository;
+    private final TagRepository tagRepository;
     private final MenuSectionRepository menuSectionRepository;
 
     private static final long MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2 MB
@@ -66,6 +69,12 @@ public class ComboService {
                 throw new RuntimeException("Error reading the image", e);
             }
         }
+
+        List<Tag> tags = dto.tagIds().stream()
+                .map(tagId -> tagRepository.findById(tagId)
+                        .orElseThrow(() -> new EntityNotFoundException("Tag not found: " + tagId)))
+                .toList();
+        combo.setTags(tags);
 
         if (dto.menuSectionIds() != null && !dto.menuSectionIds().isEmpty()) {
             List<MenuSection> sections = dto.menuSectionIds().stream()
@@ -123,6 +132,13 @@ public class ComboService {
                 throw new RuntimeException("Error reading the image", e);
             }
         }
+
+        combo.getTags().clear();
+        List<Tag> tags = dto.tagIds().stream()
+                .map(tagId -> tagRepository.findById(tagId)
+                        .orElseThrow(() -> new EntityNotFoundException("Tag not found: " + tagId)))
+                .collect(Collectors.toList());
+        combo.setTags(tags);
 
         for (MenuSection section : new ArrayList<>(combo.getMenuSections())) {
             section.getCombos().remove(combo);

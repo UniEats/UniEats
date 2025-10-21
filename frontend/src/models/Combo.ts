@@ -7,6 +7,7 @@ export const ProductsMapSchema = z.array(
     quantity: z.number(),
   })
 );
+export const TagsMapSchema = z.record(z.string(), z.string());
 export const MenuSectionsMapSchema = z.record(z.string(), z.string());
 
 export const ComboSchema = z.object({
@@ -14,6 +15,7 @@ export const ComboSchema = z.object({
   name: z.string(),
   description: z.string(),
   price: z.number(),
+  tags: TagsMapSchema,
   products: ProductsMapSchema,
   menuSections: MenuSectionsMapSchema,
   image: z.string().optional(),
@@ -21,6 +23,7 @@ export const ComboSchema = z.object({
 
 export const ComboListSchema = z.array(ComboSchema);
 
+export type TagsMap = Record<number, string>;
 export type MenuSectionsMap = Record<number, string>;
 export type Combo = z.infer<typeof ComboSchema>;
 
@@ -46,6 +49,7 @@ export const ComboFormSchema = z.object({
       quantity: z.number().min(1, "Quantity must be at least 1"),
     })
   ).min(1, "Select at least one product"),
+  tagIds: z.array(z.string()),
   menuSectionIds: z.array(z.string()),
   image: z
     .instanceof(File)
@@ -77,6 +81,7 @@ export const ComboUpdateFormSchema = z
         quantity: z.number().min(1, "Quantity must be at least 1"),
       })
     ).min(1, "Select at least one product"),
+    tagIds: z.array(z.string()),
     menuSectionIds: z.array(z.string()),
 
     image: z.instanceof(File).or(z.null()),
@@ -103,6 +108,7 @@ export type ComboCreateRequest = {
   description: string;
   price: number;
   productIds: { productId: number; quantity: number }[];
+  tagIds: number[];
   menuSectionIds: number[];
   image: File;
 };
@@ -112,6 +118,7 @@ export type ComboUpdateRequest = {
   description?: string;
   price?: number;
   productIds?: { productId: number; quantity: number }[];
+  tagIds?: number[];
   menuSectionIds?: number[];
   image?: File;
 };

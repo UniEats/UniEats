@@ -5,6 +5,7 @@ import { useAppForm } from "@/config/use-app-form";
 import { ComboUpdateFormSchema, ComboFormValues } from "@/models/Combo";
 import { useComboList, useUpdateCombo } from "@/services/ComboServices";
 import { useProductList } from "@/services/ProductServices";
+import { useTagList } from "@/services/TagServices";
 import { useMenuSectionList } from "@/services/MenuSectionServices";
 
 import styles from "./AdminForms.module.css";
@@ -23,6 +24,7 @@ const COMBO_UPDATE_DEFAULT_VALUES: ComboFormValues & { comboId: number } = {
   price: "",
   image: null,
   productIds: [],
+  tagIds: [],
   menuSectionIds: [],
 };
 
@@ -34,6 +36,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
   const updateCombo = useUpdateCombo();
   const combosQuery = useComboList();
   const productsQuery = useProductList();
+  const tagsQuery = useTagList();
   const menuSectionsQuery = useMenuSectionList();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const comboSelectId = useId();
@@ -56,21 +59,23 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
       : new Error(String(updateCombo.error))
     : null;
 
-  if (combosQuery.isLoading || productsQuery.isLoading || menuSectionsQuery.isLoading) {
+  if (combosQuery.isLoading || productsQuery.isLoading || tagsQuery.isLoading || menuSectionsQuery.isLoading) {
     return (
       <section className={styles.formSection} aria-live="polite">
-        Loading combos, products and menu sections...
+        Loading combos, products, tags and menu sections...
       </section>
     );
   }
 
-  if (combosQuery.error || productsQuery.error || menuSectionsQuery.error) {
+  if (combosQuery.error || productsQuery.error || tagsQuery.error || menuSectionsQuery.error) {
     const comboError = combosQuery.error;
     const productError = productsQuery.error;
+    const tagError = tagsQuery.error;
     const menuError = menuSectionsQuery.error;
     const errorMessage =
       comboError instanceof Error ? comboError.message :
       productError instanceof Error ? productError.message :
+      tagError instanceof Error ? tagError.message :
       menuError instanceof Error ? menuError.message :
       "Failed to load data.";
     return (
@@ -82,6 +87,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
 
   const combos = combosQuery.data ?? [];
   const products = productsQuery.data ?? [];
+  const tags = tagsQuery.data ?? [];
   const menuSections = menuSectionsQuery.data ?? [];
 
   if (combos.length === 0) {
@@ -125,6 +131,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                         "productIds",
                         (matchedCombo?.products || []).map(p => ({ id: String(p.id), quantity: p.quantity }))
                       );
+                      formData.setFieldValue("tagIds", Object.keys(matchedCombo?.tags || {}));
                       formData.setFieldValue("menuSectionIds", Object.keys(matchedCombo?.menuSections || {}));
 
                       setSuccessMessage(null);
@@ -194,6 +201,44 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                   <ErrorContainer errors={normalizeErrors(field.state.meta.errors)} />
                 </div>
               )}
+          />
+
+          <formData.Field
+            name="tagIds"
+            children={(field) => (
+              <div className={styles.formFields}>
+                <span className={styles.fieldLabel}>Tags (optional)</span>
+                <div className={styles.optionsGrid}>
+                  {tags.length === 0 ? (
+                    <span>No tags available yet.</span>
+                  ) : (
+                    tags.map((tag) => {
+                      const optionValue = tag.id.toString();
+                      const isChecked = field.state.value.includes(optionValue);
+                      return (
+                        <label key={tag.id} className={styles.optionRow}>
+                          <input
+                            type="checkbox"
+                            value={optionValue}
+                            checked={isChecked}
+                            onChange={(event) => {
+                              const { checked, value } = event.target;
+                              const nextValue = checked
+                                ? [...field.state.value, value]
+                                : field.state.value.filter((item) => item !== value);
+                              field.handleChange(nextValue);
+                            }}
+                            onBlur={field.handleBlur}
+                          />
+                          <span>{tag.tag}</span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+              </div>
+            )}
           />
 
           <formData.Field

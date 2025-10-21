@@ -2,6 +2,9 @@ package ar.uba.fi.ingsoft1.product_example.Tags;
 
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
+import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
+import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,7 @@ import java.util.Optional;
 class TagService {
     private final TagRepository tagRepository;
     private final ProductRepository productRepository;
+    private final ComboRepository comboRepository;
 
     public List<TagDTO> getTags() {
         return tagRepository.findAll().stream()
@@ -54,6 +58,15 @@ class TagService {
                     }
                     // ensure changes are flushed so FK constraints are updated
                     productRepository.flush();
+                }
+
+                List<Combo> combos = comboRepository.findByTags_Id(id);
+                if (combos != null && !combos.isEmpty()) {
+                    for (Combo c : combos) {
+                        c.getTags().removeIf(t -> t.getId().equals(id));
+                        comboRepository.save(c);
+                    }
+                    comboRepository.flush();
                 }
 
                 tagRepository.deleteById(id);

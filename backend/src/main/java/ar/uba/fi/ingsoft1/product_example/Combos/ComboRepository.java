@@ -22,4 +22,6 @@ public interface ComboRepository extends JpaRepository<Combo, Long> {
     List<Combo> findCombosWithAllProductsInStock();
 
     List<Combo> findAll();
+
+    List<Combo> findByTags_Id(Long tagId);
 }

@@ -24,6 +24,7 @@ async function postCombo(
       name: data.name,
       description: data.description,
       price: data.price,
+      tagIds: data.tagIds,
       productIds: data.productIds,
       menuSectionIds: data.menuSectionIds,
     }),
@@ -56,6 +57,7 @@ export async function patchCombo(
           name: data.name,
           description: data.description,
           price: data.price,
+          tagIds: data.tagIds,
           productIds: data.productIds,
           menuSectionIds: data.menuSectionIds,
       })
@@ -126,6 +128,7 @@ export function useDeleteCombo() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });
       queryClient.invalidateQueries({ queryKey: ["combos"] });
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["menu-sections"] });
     },
@@ -147,6 +150,7 @@ export function useCreateCombo() {
         name: values.name,
         description: values.description,
         price: Number(values.price),
+        tagIds: values.tagIds.map((id) => Number.parseInt(id, 10)),
         productIds: values.productIds.map((p) => ({
           productId: Number(p.id),
           quantity: p.quantity
@@ -160,6 +164,7 @@ export function useCreateCombo() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });
       queryClient.invalidateQueries({ queryKey: ["combos"] });
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["menu-sections"] });
     },
@@ -192,6 +197,12 @@ export function useUpdateCombo() {
         payload.price = Number(values.price);
       }
 
+      if (values.tagIds.length > 0) {
+        payload.tagIds = values.tagIds.map((id) => Number.parseInt(id, 10));
+      } else {
+        payload.tagIds = [];
+      }
+
       if (values.productIds.length > 0) {
         payload.productIds = values.productIds.map((p) => ({
           productId: Number.parseInt(p.id, 10),
@@ -209,7 +220,7 @@ export function useUpdateCombo() {
         payload.image = values.image;
       }
 
-      if (!payload.name && !payload.description && !payload.price && !payload.productIds && !payload.menuSectionIds && !payload.image) {
+      if (!payload.name && !payload.description && !payload.price && !payload.productIds && !payload.tagIds && !payload.menuSectionIds && !payload.image) {
         throw new Error("Nothing to update");
       }
 
@@ -219,6 +230,7 @@ export function useUpdateCombo() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });
       queryClient.invalidateQueries({ queryKey: ["combos"] });
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["menu-sections"] });
     },

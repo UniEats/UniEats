@@ -445,6 +445,7 @@ export const AdminDashboard = () => {
                 <th scope="col">Name</th>
                 <th scope="col">Description</th>
                 <th scope="col">Price</th>
+                <th scope="col">Tags</th>
                 <th scope="col">Products</th>
                 <th scope="col">Actions</th>
               </tr>
@@ -456,6 +457,7 @@ export const AdminDashboard = () => {
                     <td>{combo.name}</td>
                     <td className={styles.descriptionCell}>{combo.description}</td>
                     <td>{formatCurrency(combo.price)}</td>
+                    <td>{Object.keys(combo.tags).length > 0 ? Object.values(combo.tags).join(", ") : "—"}</td>
                     <td>
                       {combo.products.length > 0
                         ? combo.products
