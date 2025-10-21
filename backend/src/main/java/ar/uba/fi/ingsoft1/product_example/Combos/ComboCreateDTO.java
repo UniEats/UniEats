@@ -4,6 +4,7 @@ import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProductId;
 
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
+import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 import ar.uba.fi.ingsoft1.product_example.Combos.ProductQuantity;
 import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
 
@@ -26,10 +27,12 @@ public record ComboCreateDTO(
         @NonNull @Size(min = 1, max = 500) String description,
         @NonNull @Digits(integer = 10, fraction = 2) @DecimalMin("0.00") BigDecimal price,
         @NonNull List<ProductQuantity> productIds,
+        @NonNull List<Long> tagIds,
         @NonNull @Size(min = 1) List<Long> menuSectionIds
 ) {
-    public Combo toComboWithProducts(
+    public Combo toComboWithProductsAndTags(
             Function<Long, Product> productFetcher,
+            Function<Long, Tag> tagFetcher,
             Function<Long, MenuSection> menuSectionFetcher
     ) {
         Combo combo = new Combo(name, description, price);
@@ -47,6 +50,11 @@ public record ComboCreateDTO(
                     return cp;
                 })
                 .collect(Collectors.toList());
+
+        List<Tag> tags = tagIds.stream()
+                .map(tagFetcher)
+                .collect(Collectors.toList());
+        combo.setTags(tags);
 
         List<MenuSection> menuSections = menuSectionIds.stream()
                 .map(menuSectionFetcher)

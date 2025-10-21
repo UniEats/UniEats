@@ -3,6 +3,7 @@ package ar.uba.fi.ingsoft1.product_example.Combos;
 import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
+import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -68,7 +69,23 @@ public class Combo {
     @ManyToMany(mappedBy = "combos")
     private List<MenuSection> menuSections = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "combo_tag",
+            joinColumns = @JoinColumn(name = "combo_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags = new ArrayList<>();
+
     public ComboDTO toDTO() {
+        Map<Long, String> tags_ = tags != null
+                ? tags.stream()
+                .collect(Collectors.toMap(
+                        Tag::getId,
+                        Tag::getTag
+                ))
+                : Map.of();
+
         List<Map<String, Object>> productList = comboProducts != null
                 ? comboProducts.stream()
                         .map(cp -> {
@@ -94,6 +111,7 @@ public class Combo {
                 this.getName(),
                 this.getDescription(),
                 this.getPrice(),
+                tags_,
                 productList,
                 menuSections_,
                 this.getImage()

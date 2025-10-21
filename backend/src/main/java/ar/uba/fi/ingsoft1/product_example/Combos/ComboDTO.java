@@ -1,4 +1,5 @@
 package ar.uba.fi.ingsoft1.product_example.Combos;
+import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
 import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
@@ -16,6 +17,7 @@ public record ComboDTO(
         String name,
         String description,
         BigDecimal price,
+        Map<Long, String> tags,
         List<Map<String, Object>> products,
         Map<Long, String> menuSections,
         byte[] image
@@ -26,6 +28,13 @@ public record ComboDTO(
                 combo.getName(),
                 combo.getDescription(),
                 combo.getPrice(),
+                combo.getTags() != null
+                        ? combo.getTags().stream()
+                        .collect(Collectors.toMap(
+                                Tag::getId,
+                                Tag::getTag
+                        ))
+                        : Map.of(),
                 combo.getComboProducts() != null
                         ? combo.getComboProducts().stream()
                                 .map(cp -> {

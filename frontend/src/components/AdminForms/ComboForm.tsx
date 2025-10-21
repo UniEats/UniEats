@@ -4,6 +4,7 @@ import { useAppForm } from "@/config/use-app-form";
 import { ComboFormSchema, ComboFormValues } from "@/models/Combo";
 import { useCreateCombo } from "@/services/ComboServices";
 import { useProductList } from "@/services/ProductServices";
+import { useTagList } from "@/services/TagServices";
 import { useMenuSectionList } from "@/services/MenuSectionServices";
 
 import styles from "./AdminForms.module.css";
@@ -20,6 +21,7 @@ const COMBO_DEFAULT_VALUES: ComboFormValues = {
   price: "",
   image: null,
   productIds: [],
+  tagIds: [],
   menuSectionIds: [],
 };
 
@@ -30,6 +32,7 @@ type ComboFormProps = {
 export const ComboForm = ({ onClose }: ComboFormProps) => {
   const createCombo = useCreateCombo();
   const productsQuery = useProductList();
+  const tagsQuery = useTagList();
   const menuSectionsQuery = useMenuSectionList()
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -49,20 +52,23 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
       : new Error(String(createCombo.error))
       : null;
 
-  if (productsQuery.isLoading || menuSectionsQuery.isLoading) {
+  if (productsQuery.isLoading || tagsQuery.isLoading || menuSectionsQuery.isLoading) {
     return (
       <section className={styles.formSection} aria-live="polite">
-        Loading products and menu sections...
+        Loading products, tags and menu sections...
       </section>
     );
   }
 
-  if (productsQuery.error || menuSectionsQuery.error) {
+  if (productsQuery.error || tagsQuery.error || menuSectionsQuery.error) {
     const productError = productsQuery.error;
+    const tagError = tagsQuery.error;
     const menuError = menuSectionsQuery.error;
     const errorMessage =
        productError instanceof Error
           ? productError.message
+          : tagError instanceof Error
+          ? tagError.message
           : menuError instanceof Error
           ? menuError.message
           : "Failed to load required data.";
@@ -74,6 +80,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
   }
 
   const products = productsQuery.data ?? [];
+  const tags = tagsQuery.data ?? [];
   const menuSections = menuSectionsQuery.data ?? [];
 
   return (
@@ -130,6 +137,44 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
                   );
                 })}
                 <ErrorContainer errors={normalizeErrors(field.state.meta.errors)} />
+              </div>
+            )}
+          />
+
+          <formData.Field
+            name="tagIds"
+            children={(field) => (
+              <div className={styles.formFields}>
+                <span className={styles.fieldLabel}>Tags (optional)</span>
+                <div className={styles.optionsGrid}>
+                  {tags.length === 0 ? (
+                    <span>No tags available yet.</span>
+                  ) : (
+                    tags.map((tag) => {
+                      const optionValue = tag.id.toString();
+                      const isChecked = field.state.value.includes(optionValue);
+                      return (
+                        <label key={tag.id} className={styles.optionRow}>
+                          <input
+                            type="checkbox"
+                            value={optionValue}
+                            checked={isChecked}
+                            onChange={(event) => {
+                              const { checked, value } = event.target;
+                              const nextValue = checked
+                                ? [...field.state.value, value]
+                                : field.state.value.filter((item) => item !== value);
+                              field.handleChange(nextValue);
+                            }}
+                            onBlur={field.handleBlur}
+                          />
+                          <span>{tag.tag}</span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
               </div>
             )}
           />

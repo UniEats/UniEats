@@ -1,7 +1,7 @@
 package ar.uba.fi.ingsoft1.product_example.Tags;
 
-import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
+import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -32,5 +32,8 @@ public class Tag {
     private String tag;
     
     @ManyToMany(mappedBy = "tags")
-    private List<Product> products  = new ArrayList<>();;
+    private List<Product> products  = new ArrayList<>();
+
+    @ManyToMany(mappedBy ="tags")
+    private List<Combo> combos = new ArrayList<>();
 }
