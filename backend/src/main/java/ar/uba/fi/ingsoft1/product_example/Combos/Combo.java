@@ -69,6 +69,14 @@ public class Combo {
     @ManyToMany(mappedBy = "combos")
     private List<MenuSection> menuSections = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "combo_tag",
+            joinColumns = @JoinColumn(name = "combo_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags = new ArrayList<>();
+
     public ComboDTO toDTO() {
         Map<Long, String> tags_ = tags != null
                 ? tags.stream()
@@ -103,7 +111,8 @@ public class Combo {
                 this.getName(),
                 this.getDescription(),
                 this.getPrice(),
-                products,
+                tags_,
+                productList,
                 menuSections_,
                 this.getImage()
         );
