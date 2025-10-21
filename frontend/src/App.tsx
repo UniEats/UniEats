@@ -9,11 +9,11 @@ export function App() {
   return (
     <QueryClientProvider client={appQueryClient}>
       <TokenProvider>
-        <CartProvider>
-          <ProductsProvider>
+        <ProductsProvider>
+          <CartProvider>
             <Navigation />
-          </ProductsProvider>
-        </CartProvider>
+          </CartProvider>
+        </ProductsProvider>
       </TokenProvider>
     </QueryClientProvider>
   );

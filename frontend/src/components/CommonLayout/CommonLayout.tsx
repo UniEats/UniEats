@@ -13,24 +13,11 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
   const [tokenState, setTokenState] = useToken();
   const userRole = useUserRole();
   const isAuthenticated = tokenState.state !== "LOGGED_OUT";
-
-  const handleLogout = () => {
-    setTokenState({ state: "LOGGED_OUT" });
-  };
-
-  const { items, clearCart, setCart } = useCart();
-  const [showCart, setShowCart] = useState(false);
-
-  const toggleCart = () => setShowCart(prev => !prev);
+  const handleLogout = () => { setTokenState({ state: "LOGGED_OUT" }); };
+  const { validItems, clearCart, totalPrice } = useCart();
   const { productsMap } = useProducts();
-
-  const filteredItems = React.useMemo(() => {
-    const filtered = items.filter(item => productsMap[item.id]);
-    if (filtered.length !== items.length) {
-      setCart(filtered); // actualiza el estado inmediatamente
-    }
-    return filtered;
-  }, [items, productsMap, setCart]);
+  const [showCart, setShowCart] = useState(false);
+  const toggleCart = () => setShowCart(prev => !prev);
 
   return (
     <div className={styles.mainLayout}>
@@ -91,7 +78,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
                            7.59-1.35 2.44C5.16 16.37 5 16.68 5 17a2 2 0
                            0 0 2 2h12v-2H7l1.1-2z"/>
                 </svg>
-                {filteredItems.length > 0 && <span className={styles.cartBadge}>{filteredItems.length}</span>}
+                {validItems.length > 0 && <span className={styles.cartBadge}>{validItems.length}</span>}
               </button>
             </>
           ) : (
@@ -109,28 +96,34 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
       {showCart && (
         <Modal onClose={toggleCart} ariaLabelledBy="cart-title">
           <h3 id="cart-title">Your Cart</h3>
-          {items.length === 0 ? (
+          {validItems.length === 0 ? (
             <p>Your cart is empty</p>
           ) : (
-            <ul>
-              {items.map(item => {
-                const product = productsMap[item.id];
-                if (!product) return null;
-                const subtotal = product.price * item.quantity;
-                return (
-                  <li key={item.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                    <span>{product.name} × {item.quantity}</span>
-                    <span>${subtotal.toFixed(2)}</span>
-                  </li>
-                );
-              })}
-            </ul>
+            <>
+              <ul>
+                {validItems.map(item => {
+                  const product = productsMap[item.id];
+                  if (!product) return null;
+                  const subtotal = product.price * item.quantity;
+                  return (
+                    <li key={item.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                      <span>{product.name} × {item.quantity}</span>
+                      <span>${subtotal.toFixed(2)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <hr />
+                <p style={{ textAlign: "right", fontWeight: "bold" }}>
+                  Total: ${totalPrice.toFixed(2)}
+                </p>
+                <div style={{ marginTop: "1rem", textAlign: "right" }}>
+                  <button onClick={clearCart} className={`${styles.siteButton} ${styles.siteButtonCta}`}>
+                    Clear cart
+                  </button>
+                </div>
+            </>
           )}
-          <div style={{ marginTop: "1rem", textAlign: "right" }}>
-            <button onClick={clearCart} className={`${styles.siteButton} ${styles.siteButtonCta}`}>
-              Clear cart
-            </button>
-          </div>
         </Modal>
       )}
       <div className={styles.body}>
