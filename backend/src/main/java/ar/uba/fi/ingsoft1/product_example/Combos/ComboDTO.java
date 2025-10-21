@@ -1,5 +1,4 @@
 package ar.uba.fi.ingsoft1.product_example.Combos;
-import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
 import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
