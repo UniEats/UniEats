@@ -28,26 +28,31 @@ export const ForgotPasswordScreen = () => {
           <h1>Recover Password</h1>
 
           {isSuccess && !error ? (
-            <div style={{ textAlign: "center", color: "green" }}>
-              <p>{data?.message || "Code sent successfully!"}</p>
-              <p style={{ fontSize: "0.9rem", color: "#666", margin: "1rem 0" }}>
-                Please check your email for the verification code.
+            <div style={{ textAlign: "center" }}>
+              <p
+                className={`${styles.responseMessage} ${
+                  data?.message === "Invalid email"
+                    ? styles.error
+                    : styles.success
+                }`}
+              >
+                {data?.message}
               </p>
-              <a href="/reset-password" className={styles.loginLink}>
-                Enter verification code
-              </a>
+
+              {data?.message !== "Invalid email" && (
+                <>
+                  <p className={styles.infoText}>
+                    Please check your email for the verification code.
+                  </p>
+                  <a href="/reset-password" className={styles.loginLink}>
+                    Enter verification code
+                  </a>
+                </>
+              )}
             </div>
           ) : (
             <>
-              <p
-                style={{
-                  textAlign: "center",
-                  fontSize: "0.9rem",
-                  color: "#666",
-                  marginTop: "-1rem",
-                  marginBottom: "1rem",
-                }}
-              >
+              <p className={styles.instructionsText}>
                 Enter your email to receive a verification code.
               </p>
 

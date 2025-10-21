@@ -39,7 +39,7 @@ class PasswordResetController {
         Optional<User> optionalUser = userRepository.findByUsername(request.email());
         if (optionalUser.isEmpty()) {
             Map<String, String> response = new HashMap<>();
-            response.put("message", "If the email exists, you will receive a recovery code");
+            response.put("message", "Invalid email");
             return ResponseEntity.ok(response);
         }
 
@@ -51,7 +51,7 @@ class PasswordResetController {
         emailService.sendPasswordResetEmail(request.email(), resetCode);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "If the email exists, you will receive a recovery code");
+        response.put("message", "You will receive a recovery code");
         return ResponseEntity.ok(response);
     }
 

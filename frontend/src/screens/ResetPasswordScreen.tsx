@@ -22,22 +22,34 @@ export const ResetPasswordScreen = () => {
           <h1>Reset Password</h1>
 
           {isSuccess && !error ? (
-            <div style={{ textAlign: "center", color: "green" }}>
+            <div className={styles.resetMessage}>
               <p>{data?.message || "Password reset successful!"}</p>
-              <button className={styles.loginLink} onClick={() => window.location.href = "/login"}>
+              <button
+                className={styles.resetButton}
+                onClick={() => (window.location.href = "/login")}
+              >
                 Return to Login
               </button>
             </div>
           ) : (
             <>
-              <p style={{ textAlign: "center", fontSize: "0.9rem", color: "#666", margin: "1rem 0" }}>
+              <p className={styles.resetInfoText}>
                 Enter the verification code from your email and choose a new password.
               </p>
               <AppForm>
                 <FormContainer extraError={error}>
-                  <AppField name="email" children={(field) => <field.TextField label="Email" />} />
-                  <AppField name="code" children={(field) => <field.TextField label="Verification Code" />} />
-                  <AppField name="newPassword" children={(field) => <field.PasswordField label="New Password" />} />
+                  <AppField
+                    name="email"
+                    children={(field) => <field.TextField label="Email" />}
+                  />
+                  <AppField
+                    name="code"
+                    children={(field) => <field.TextField label="Verification Code" />}
+                  />
+                  <AppField
+                    name="newPassword"
+                    children={(field) => <field.PasswordField label="New Password" />}
+                  />
                   <button type="submit" disabled={isPending}>
                     {isPending ? "Resetting..." : "Reset Password"}
                   </button>
@@ -49,4 +61,5 @@ export const ResetPasswordScreen = () => {
       </div>
     </CommonLayout>
   );
+
 };

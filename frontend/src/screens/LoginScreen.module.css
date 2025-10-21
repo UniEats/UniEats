@@ -104,3 +104,64 @@
   transform: none;
   text-decoration: none;
 }
+
+.responseMessage {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.responseMessage.success {
+  color: green;
+}
+
+.responseMessage.error {
+  color: red;
+}
+
+.infoText {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.instructionsText {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+}
+
+.resetInfoText {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  margin: 1rem 0;
+}
+
+.resetMessage {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: green;
+}
+
+.resetButton {
+  display: inline-block;
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #660000;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.resetButton:hover {
+  text-decoration: underline;
+}
