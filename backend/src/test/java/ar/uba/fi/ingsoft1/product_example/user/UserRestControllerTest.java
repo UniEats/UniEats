@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -123,9 +124,24 @@ class UserRestControllerTest {
         Mockito.when(passwordEncoder.encode(Mockito.anyString()))
                 .thenReturn("encodedPassword");
 
-        mockMvc.perform(post("/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRegisterDTO)))
+        MockMultipartFile userPart = new MockMultipartFile(
+                "user",
+                "user",
+                MediaType.APPLICATION_JSON_VALUE,
+                objectMapper.writeValueAsBytes(userRegisterDTO)
+        );
+
+        MockMultipartFile photoPart = new MockMultipartFile(
+                "photo",
+                "photo.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "fake-image-content".getBytes()
+        );
+
+        mockMvc.perform(multipart("/users/register")
+                        .file(userPart)
+                        .file(photoPart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Código de verificación enviado a " + userRegisterDTO.email()));
     }
@@ -140,14 +156,29 @@ class UserRestControllerTest {
                 "F",
                 "Calle Falsa 123",
                 "securePassword"
-                );
+        );
 
         Mockito.when(userRepository.findByUsername(userRegisterDTO.email()))
                 .thenReturn(Optional.of(new User()));
 
-        mockMvc.perform(post("/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRegisterDTO)))
+        MockMultipartFile userPart = new MockMultipartFile(
+                "user",
+                "user",
+                MediaType.APPLICATION_JSON_VALUE,
+                objectMapper.writeValueAsBytes(userRegisterDTO)
+        );
+
+        MockMultipartFile photoPart = new MockMultipartFile(
+                "photo",
+                "photo.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "fake-image-content".getBytes()
+        );
+
+        mockMvc.perform(multipart("/users/register")
+                        .file(userPart)
+                        .file(photoPart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("El email ya está registrado"));
     }
