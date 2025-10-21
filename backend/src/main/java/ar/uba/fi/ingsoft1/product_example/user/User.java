@@ -36,13 +36,15 @@ public class User implements UserDetails, UserCredentials {
 
     private String nombre;
     private String apellido;
-    private String foto;
     private Integer edad;
     private String genero;
     private String domicilio;
 
     @Column(nullable = false)
     private boolean verified = false;
+
+    @Column(name = "foto", columnDefinition = "BYTEA")
+    private byte[] foto;
 
     @Column
     private String verificationCode;
@@ -56,6 +58,13 @@ public class User implements UserDetails, UserCredentials {
     public String getEmail() { return this.username; }
 
     public void setEmail(String email) { this.username = email; }
+
+    public void setDomicilio(String domicilio) { this.domicilio = domicilio; }
+
+    public void setEdad(Integer edad) { this.edad = edad; }
+
+    public void setGenero(String genero) { this.genero = genero; }
+
 
     @Override
     public String username() {
@@ -85,7 +94,7 @@ public class User implements UserDetails, UserCredentials {
 
     public String getApellido() { return apellido; }
 
-    public String getFoto() { return foto; }
+    public byte[] getFoto() { return foto; }
 
     public Integer getEdad() { return edad; }
 

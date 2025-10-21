@@ -42,26 +42,41 @@ export function useRefresh() {
 }
 
 export function useSignup() {
-  return useMutation({
-    mutationFn: async (data: SignupRequest) => {
-      const response = await fetch(BASE_API_URL + "/users/register", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
+    return useMutation({
+        mutationFn: async (data: SignupRequest) => {
+            const formData = new FormData();
+
+            formData.append(
+                "user",
+                JSON.stringify({
+                    nombre: data.nombre,
+                    apellido: data.apellido,
+                    email: data.email,
+                    password: data.password,
+                    edad: data.edad,
+                    genero: data.genero,
+                    domicilio: data.domicilio
+                })
+            );
+
+            if (data.foto) {
+                formData.append("photo", data.foto);
+            }
+
+            const response = await fetch(BASE_API_URL + "/users/register", {
+                method: "POST",
+                body: formData,
+            });
+
+            const json = await response.json();
+
+            if (!response.ok) {
+                throw new Error(json.message || "Error inesperado durante el registro");
+            }
+
+            return MessageResponseSchema.parse(json);
         },
-        body: JSON.stringify(data),
-      });
-      
-      const json = await response.json();
-
-      if (!response.ok) {
-        throw new Error(json.message || "Error inesperado durante el registro");
-      }
-
-      return MessageResponseSchema.parse(json);
-    },
-  });
+    });
 }
 
 export function useVerify() {

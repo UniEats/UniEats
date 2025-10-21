@@ -13,6 +13,12 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.http.MediaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -53,9 +59,15 @@ class UserRestController {
                 .orElse(ResponseEntity.status(HttpStatus.CONFLICT).build());
     }
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Register a new user and send verification code")
-    public ResponseEntity<?> register(@RequestBody UserRegisterDTO data) {
+    public ResponseEntity<?> register(
+            @RequestPart("user") String userJson,
+            @RequestPart(value = "photo", required = false) MultipartFile photo
+    ) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        UserRegisterDTO data = mapper.readValue(userJson, UserRegisterDTO.class);
+
         if (userRepository.findByUsername(data.email()).isPresent()) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "El email ya está registrado");
@@ -70,12 +82,19 @@ class UserRestController {
         newUser.setRole("ROLE_USER");
         newUser.setNombre(data.nombre());
         newUser.setApellido(data.apellido());
-        newUser.setFoto(data.foto());
         newUser.setEdad(data.edad());
         newUser.setGenero(data.genero());
         newUser.setDomicilio(data.domicilio());
         newUser.setVerificationCode(verificationCode);
         newUser.setVerified(false);
+
+        if (photo != null && !photo.isEmpty()) {
+            try {
+                newUser.setFoto(photo.getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException("Error uploading the image.", e);
+            }
+        }
 
         userRepository.save(newUser);
         emailService.sendVerificationEmail(data.email(), verificationCode);
