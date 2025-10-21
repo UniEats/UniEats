@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDeleteProduct } from "@/services/ProductServices";
+import { useCart } from "@/components/Cart/Cart";
 import Product from "../Product/Product";
 import "./Menu.css";
 
@@ -53,6 +54,13 @@ export const Menu = ({ menuSections }: MenuProps) => {
       switchingRef.current = false;
       setIsSwitching(false);
     }, 300);
+  };
+
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (id: number, quantity: number) => {
+    addToCart(id, quantity);
+    alert(`Added ${quantity} of product ${id} to cart`);
   };
 
   useEffect(() => {
@@ -121,6 +129,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
                     price={item.price}
                     tags={item.tags ? Object.values(item.tags) : []}
                     onDelete={handleDelete}
+                    onAddToCart={handleAddToCart}
                   />
                 ))}
               </div>

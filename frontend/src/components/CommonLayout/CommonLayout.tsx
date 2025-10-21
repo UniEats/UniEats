@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "wouter";
-
+import { useCart } from "@/components/Cart/Cart";
+import { useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
 import { useToken } from "@/services/TokenContext";
 
@@ -13,6 +14,11 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
   const handleLogout = () => {
     setTokenState({ state: "LOGGED_OUT" });
   };
+
+  const { items, clearCart } = useCart();
+  const [showCart, setShowCart] = useState(false);
+
+  const toggleCart = () => setShowCart(prev => !prev);
 
   return (
     <div className={styles.mainLayout}>
@@ -56,9 +62,22 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
               <button type="button" onClick={handleLogout} className={`${styles.siteButton} ${styles.siteButtonGhost}`}>
                 Log out
               </button>
-              <Link href="/menu" className={`${styles.siteButton} ${styles.siteButtonCta}`}>
-                Order now
-              </Link>
+              <button type="button" onClick={toggleCart} className={`${styles.siteButton} ${styles.siteButtonCta}`} aria-label="Go to cart">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10
+                           0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zm-9.83-3h11.31
+                           c.75 0 1.41-.41 1.75-1.03L23 6H6.21l-.94-2H1v2h3l3.6
+                           7.59-1.35 2.44C5.16 16.37 5 16.68 5 17a2 2 0
+                           0 0 2 2h12v-2H7l1.1-2z"/>
+                </svg>
+                {items.length > 0 && <span className={styles.cartBadge}>{items.length}</span>}
+              </button>
             </>
           ) : (
             <>
@@ -72,6 +91,23 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
           )}
         </div>
       </header>
+      {showCart && (
+        <div className={styles.cartModal}>
+          <h3>Your Cart</h3>
+          {items.length === 0 ? (
+            <p>Cart is empty</p>
+          ) : (
+            <ul>
+              {items.map(item => (
+                <li key={item.id}>
+                  Product #{item.id} – Qty: {item.quantity}
+                </li>
+              ))}
+            </ul>
+          )}
+          <button onClick={clearCart}>Clear cart</button>
+        </div>
+      )}
       <div className={styles.body}>
         <ErrorBoundary>{children}</ErrorBoundary>
       </div>
