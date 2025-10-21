@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useToken } from "@/services/TokenContext";
 
 type CartItem = {
   id: number;
@@ -16,14 +17,22 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const [tokenState] = useToken();
+  const userId = tokenState.state === "LOGGED_IN" ? tokenState.tokens.id : null;
+  const storageKey = `cart_${userId}`;
   const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem("cart");
+    const saved = localStorage.getItem(storageKey);
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    const saved = localStorage.getItem(storageKey);
+    setCart(saved ? JSON.parse(saved) : []);
+  }, [storageKey]);
+
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(cart));
+  }, [cart, storageKey]);
 
   const addToCart = (id: number, quantity: number = 1) => {
     setCart(prevItems => {

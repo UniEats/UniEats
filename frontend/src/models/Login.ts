@@ -19,6 +19,7 @@ export const AuthResponseSchema = z.object({
   accessToken: z.string().min(1),
   refreshToken: z.string().min(1),
   role: z.string(),
+  id: z.number(),
 });
 
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;

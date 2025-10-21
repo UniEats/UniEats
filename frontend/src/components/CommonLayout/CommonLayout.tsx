@@ -18,11 +18,19 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
     setTokenState({ state: "LOGGED_OUT" });
   };
 
-  const { items, clearCart } = useCart();
+  const { items, clearCart, setCart } = useCart();
   const [showCart, setShowCart] = useState(false);
 
   const toggleCart = () => setShowCart(prev => !prev);
   const { productsMap } = useProducts();
+
+  const filteredItems = React.useMemo(() => {
+    const filtered = items.filter(item => productsMap[item.id]);
+    if (filtered.length !== items.length) {
+      setCart(filtered); // actualiza el estado inmediatamente
+    }
+    return filtered;
+  }, [items, productsMap, setCart]);
 
   return (
     <div className={styles.mainLayout}>
@@ -83,7 +91,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
                            7.59-1.35 2.44C5.16 16.37 5 16.68 5 17a2 2 0
                            0 0 2 2h12v-2H7l1.1-2z"/>
                 </svg>
-                {items.length > 0 && <span className={styles.cartBadge}>{items.length}</span>}
+                {filteredItems.length > 0 && <span className={styles.cartBadge}>{filteredItems.length}</span>}
               </button>
             </>
           ) : (

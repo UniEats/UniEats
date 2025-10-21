@@ -29,10 +29,11 @@ public class User implements UserDetails, UserCredentials {
     @Column(nullable = false)
     private String role;
 
-    public User(String username, String password, String role) {
+    public User(String username, String password, String role, Long id) {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.id = id;
     }
 
     @Override
@@ -57,6 +58,10 @@ public class User implements UserDetails, UserCredentials {
 
     public String getRole() {
         return role;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     @Override
