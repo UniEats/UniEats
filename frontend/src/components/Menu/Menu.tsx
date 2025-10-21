@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDeleteProduct } from "@/services/ProductServices";
 import { useCart } from "@/components/Cart/Cart";
+import { useProducts } from "@/components/Product/ProductContext";
 import Product from "../Product/Product";
 import "./Menu.css";
 
@@ -57,8 +58,19 @@ export const Menu = ({ menuSections }: MenuProps) => {
   };
 
   const { addToCart } = useCart();
+  const { productsMap, setProducts } = useProducts();
+
+  useEffect(() => {
+    const allProducts = menuSections.flatMap(section => section.products);
+    setProducts(allProducts);
+  }, [menuSections, setProducts]);
 
   const handleAddToCart = (id: number, quantity: number) => {
+    const product = productsMap[id];
+    if (!product) {
+      alert("Product not found");
+      return;
+    }
     addToCart(id, quantity);
     alert(`Added ${quantity} of product ${id} to cart`);
   };

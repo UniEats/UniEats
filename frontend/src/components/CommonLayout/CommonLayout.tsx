@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "wouter";
 import { useCart } from "@/components/Cart/Cart";
+import { useProducts } from "@/components/Product/ProductContext";
 import { useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
 import { useToken } from "@/services/TokenContext";
+import { Modal } from "@/components/Modal/Modal";
 
 import styles from "./CommonLayout.module.css";
 
@@ -19,6 +21,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
   const [showCart, setShowCart] = useState(false);
 
   const toggleCart = () => setShowCart(prev => !prev);
+  const { productsMap } = useProducts();
 
   return (
     <div className={styles.mainLayout}>
@@ -92,21 +95,31 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
         </div>
       </header>
       {showCart && (
-        <div className={styles.cartModal}>
-          <h3>Your Cart</h3>
+        <Modal onClose={toggleCart} ariaLabelledBy="cart-title">
+          <h3 id="cart-title">Your Cart</h3>
           {items.length === 0 ? (
-            <p>Cart is empty</p>
+            <p>Your cart is empty</p>
           ) : (
             <ul>
-              {items.map(item => (
-                <li key={item.id}>
-                  Product #{item.id} – Qty: {item.quantity}
-                </li>
-              ))}
+              {items.map(item => {
+                const product = productsMap[item.id];
+                if (!product) return null;
+                const subtotal = product.price * item.quantity;
+                return (
+                  <li key={item.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                    <span>{product.name} × {item.quantity}</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </li>
+                );
+              })}
             </ul>
           )}
-          <button onClick={clearCart}>Clear cart</button>
-        </div>
+          <div style={{ marginTop: "1rem", textAlign: "right" }}>
+            <button onClick={clearCart} className={`${styles.siteButton} ${styles.siteButtonCta}`}>
+              Clear cart
+            </button>
+          </div>
+        </Modal>
       )}
       <div className={styles.body}>
         <ErrorBoundary>{children}</ErrorBoundary>
