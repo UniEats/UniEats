@@ -3,23 +3,17 @@ import { Redirect, Route, Switch } from "wouter";
 import { LoginScreen } from "@/screens/LoginScreen";
 import { MainScreen } from "@/screens/MainScreen";
 import { SignupScreen } from "@/screens/SignupScreen";
-import { useToken, 
-  //useUserRole 
-} from "@/services/TokenContext";
+import { useToken } from "@/services/TokenContext";
 
 import { MenuScreen } from "./screens/MenuScreen";
 
 export const Navigation = () => {
   const [tokenState] = useToken();
-  //const userRole = useUserRole();
 
   switch (tokenState.state) {
     case "LOGGED_IN":
     case "REFRESHING":
       return (
-        // TO restringe access to certain routes based on user role
-            // {userRole === "ROLE_ADMIN" && (
-            // <></> )}
         <Switch>
           <Route path="/menu">
             <MenuScreen />

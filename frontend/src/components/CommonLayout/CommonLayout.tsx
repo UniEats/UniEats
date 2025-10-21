@@ -4,13 +4,14 @@ import { useCart } from "@/components/Cart/Cart";
 import { useProducts } from "@/components/Product/ProductContext";
 import { useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
-import { useToken } from "@/services/TokenContext";
+import { useToken, useUserRole } from "@/services/TokenContext";
 import { Modal } from "@/components/Modal/Modal";
 
 import styles from "./CommonLayout.module.css";
 
 export const CommonLayout = ({ children }: React.PropsWithChildren) => {
   const [tokenState, setTokenState] = useToken();
+  const userRole = useUserRole();
   const isAuthenticated = tokenState.state !== "LOGGED_OUT";
 
   const handleLogout = () => {
@@ -32,9 +33,12 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
         <nav className={styles.siteNav} aria-label="Primary navigation">
           {isAuthenticated ? (
             <>
-              <Link href="/" className={styles.siteNavLink}>
-                Main Page
-              </Link>
+              {userRole === "ROLE_ADMIN" && (
+              <>
+                <Link href="/" className={styles.siteNavLink}>
+                  Main Page
+                </Link>
+              </> )}
               <Link href="/menu" className={styles.siteNavLink}>
                 Menu
               </Link>
