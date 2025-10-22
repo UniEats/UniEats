@@ -1,7 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.user;
 
 import io.swagger.v3.oas.annotations.Operation;
-import ar.uba.fi.ingsoft1.product_example.common.EmailService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import ar.uba.fi.ingsoft1.product_example.common.EmailService;
+import java.util.Random;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/users/password-reset")
@@ -71,6 +72,11 @@ class PasswordResetController {
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         user.setVerificationCode(null);
+
+        // logic for the account-blocking functionality
+        user.setLocked(false);
+        user.setFailedLoginAttempts(0);
+
         userRepository.save(user);
 
         return ResponseEntity.ok(Map.of("message", "Password updated successfully"));

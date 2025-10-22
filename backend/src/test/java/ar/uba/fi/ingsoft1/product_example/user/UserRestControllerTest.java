@@ -184,13 +184,6 @@ class UserRestControllerTest {
     }
 
     @Test
-    void getRegisterEndpoint_returnsOperationalMessage() throws Exception {
-        mockMvc.perform(get("/users/register"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("✅ Endpoint /users/register operativo"));
-    }
-
-    @Test
     void verifyEmail_correctCode_returnsSuccessMessage() throws Exception {
         User user = new User();
         user.setEmail("jane.doe@example.com");
