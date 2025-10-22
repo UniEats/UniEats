@@ -279,30 +279,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
             )}
           />
 
-          <formData.Field
-            name="image"
-            children={(field) => (
-              <div>
-                <label className={styles.fieldLabel} htmlFor="combo-image">
-                  Image
-                </label>
-                <input
-                  id="combo-image"
-                  className={styles.fileInput}
-                  type="file"
-                  accept="image/*"
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    const file = event.currentTarget.files ? event.currentTarget.files[0] ?? null : null;
-                    field.handleChange(file);
-                  }}
-                />
-                <ErrorContainer
-                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
-                />
-              </div>
-            )}
-          />
+          <formData.AppField name="image" children={(field) => <field.FileField label="Image" />} />
 
           <div className={styles.formActions}>
             <button type="button" className={styles.cancelButton} onClick={onClose}>

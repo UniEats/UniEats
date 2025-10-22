@@ -54,7 +54,8 @@ export const ComboFormSchema = z.object({
   image: z
     .instanceof(File)
     .or(z.null())
-    .refine((file) => file !== null, "Image is required"),
+    .refine((file) => file !== null, "Image is required")
+    .refine((file) => file && file.size <= 2 * 1024 * 1024, "Image must be less than 2MB."),
 });
 
 export type ComboFormValues = z.infer<typeof ComboFormSchema>;
@@ -84,7 +85,9 @@ export const ComboUpdateFormSchema = z
     tagIds: z.array(z.string()),
     menuSectionIds: z.array(z.string()),
 
-    image: z.instanceof(File).or(z.null()),
+    image: z.instanceof(File)
+      .refine((file) => file && file.size <= 2 * 1024 * 1024, "Image must be less than 2MB.")
+      .or(z.null()),
   })
   .superRefine((data, ctx) => {
     if (data.name.trim().length === 0 && data.description.trim().length === 0) {

@@ -216,26 +216,8 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
               </div>
             )}
           />
-
-          <formData.Field
-            name="image"
-            children={(field) => (
-              <div>
-                <label className={styles.fieldLabel} htmlFor="combo-image">
-                  Image
-                </label>
-                <input
-                  id="combo-image"
-                  className={styles.fileInput}
-                  type="file"
-                  accept="image/*"
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.currentTarget.files?.[0] ?? null)}
-                />
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
-              </div>
-            )}
-          />
+          
+          <formData.AppField name="image" children={(field) => <field.FileField label="Image" />} />
 
           <div className={styles.formActions}>
             <button type="button" className={styles.cancelButton} onClick={onClose}>

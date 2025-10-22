@@ -44,7 +44,8 @@ export const ProductFormSchema = z.object({
   image: z
     .instanceof(File)
     .or(z.null())
-    .refine((file) => file !== null, "Image is required"),
+    .refine((file) => file !== null, "Image is required")
+    .refine((file) => file && file.size <= 2 * 1024 * 1024, "Image must be less than 2MB."),
 });
 
 export type ProductFormValues = z.infer<typeof ProductFormSchema>;
@@ -70,6 +71,7 @@ export const ProductUpdateFormSchema = z
     menuSectionIds: z.array(z.string()),
     image: z
       .instanceof(File)
+      .refine((file) => file && file.size <= 2 * 1024 * 1024, "Image must be less than 2MB.")
       .or(z.null()),
   })
   .superRefine((data, ctx) => {
