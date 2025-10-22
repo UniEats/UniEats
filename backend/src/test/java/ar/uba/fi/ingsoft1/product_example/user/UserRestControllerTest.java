@@ -60,8 +60,8 @@ class UserRestControllerTest {
 
     @BeforeEach
     void setUp() {
-        userCreateDTO = new UserCreateDTO("john.doe@example.com", "password123", "ADMIN");
-        tokenDTO = new TokenDTO("mocked-jwt-token", "", "");
+        userCreateDTO = new UserCreateDTO("john.doe@example.com", "password123", "ADMIN", 1L);
+        tokenDTO = new TokenDTO("mocked-jwt-token", "", "", 1L);
     }
 
 
@@ -98,7 +98,7 @@ class UserRestControllerTest {
 
     @Test
     void signUp_invalidInput_returns400() throws Exception {
-        UserCreateDTO invalidUser = new UserCreateDTO("", "", "");
+        UserCreateDTO invalidUser = new UserCreateDTO("", "", "", 2L);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)

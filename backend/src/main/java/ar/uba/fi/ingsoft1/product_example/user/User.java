@@ -55,10 +55,11 @@ public class User implements UserDetails, UserCredentials {
     @Column
     private boolean locked = false;
 
-    public User(String username, String password, String role) {
+    public User(String username, String password, String role, Long id) {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.id = id;
     }
 
     public String getEmail() { return this.username; }
@@ -126,6 +127,10 @@ public class User implements UserDetails, UserCredentials {
     @Override
     public boolean isEnabled() {
         return verified;
+    }
+    
+    public Long getId() {
+        return id;
     }
 
     @Override

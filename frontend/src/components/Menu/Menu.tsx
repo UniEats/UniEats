@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDeleteProduct } from "@/services/ProductServices";
 import { useDeleteCombo } from "@/services/ComboServices";
+import { useCart } from "@/components/Cart/Cart";
+import { useProducts } from "@/components/Product/ProductContext";
 import Product from "../Product/Product";
 import "./Menu.css";
 
@@ -50,6 +52,44 @@ export const Menu = ({ menuSections }: MenuProps) => {
       switchingRef.current = false;
       setIsSwitching(false);
     }, 300);
+  };
+
+  const { addToCart } = useCart();
+  const { productsMap, setProducts, combosMap, setCombos } = useProducts();
+
+  useEffect(() => {
+    const allProducts = menuSections.flatMap(section => section.products);
+    setProducts(allProducts);
+    const allCombos = menuSections.flatMap(section =>
+      section.combos.map(c => ({
+        id: c.id,
+        name: c.name,
+        description: c.description,
+        price: c.price,
+        tags: c.tags || {},
+        products: [],            
+        menuSections: {},
+        image: c.image
+          ? new TextDecoder().decode(c.image)
+          : undefined,
+      }))
+    );
+    setCombos(allCombos);
+  }, [menuSections, setProducts, setCombos]);
+
+  const handleAddToCart = (id: number, type: "product" | "combo", quantity: number) => {
+    if (!productsMap[id] && type === "product") {
+      alert("Product not found");
+      return;
+    }
+
+    if (type === "combo" && !combosMap[id]) {
+      alert("Combo not found");
+      return;
+    }
+
+    addToCart(id, type, quantity);
+    alert(`Added ${quantity} of ${type} ${id} to cart`);
   };
 
   useEffect(() => {
@@ -122,7 +162,8 @@ return (
                       price={item.price}
                       tags={item.tags ? Object.values(item.tags) : []}
                       onDelete={() => handleDeleteItem(item.id, item.type)}
-                    />
+                      onAddToCart={(id, quantity) => handleAddToCart(id, item.type, quantity)}
+                  />
                   ))}
                 </div>
               </section>

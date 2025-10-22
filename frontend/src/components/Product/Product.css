@@ -162,3 +162,48 @@
     padding-top: 20px;
   }
 }
+
+.product-cta--cart {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.product-cta--cart:hover {
+  background-color: #388e3c;
+}
+
+.cart-controls {
+  margin-top: 0.8rem;
+  padding: 0.8rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.cart-controls input {
+  width: 60px;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.4rem;
+}
+
+.cart-total {
+  font-size: 0.9rem;
+}
+
+.product-cta--confirm {
+  background-color: #2e7d32;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
