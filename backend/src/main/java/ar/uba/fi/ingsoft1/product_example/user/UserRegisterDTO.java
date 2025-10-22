@@ -4,7 +4,6 @@ public record UserRegisterDTO(
         String nombre,
         String apellido,
         String email,
-        String foto,
         Integer edad,
         String genero,
         String domicilio,
