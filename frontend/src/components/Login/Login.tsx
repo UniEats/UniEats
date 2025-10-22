@@ -1,5 +1,6 @@
 import { useAppForm } from "@/config/use-app-form";
 import { LoginRequest, LoginRequestSchema } from "@/models/Login";
+import styles from "../../screens/LoginScreen.module.css";
 
 type Props = {
   onSubmit: (value: LoginRequest) => void;
@@ -8,25 +9,28 @@ type Props = {
 
 export function Login({ onSubmit, submitError }: Props) {
   const formData = useAppForm({
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-    validators: {
-      onChange: LoginRequestSchema,
-    },
+    defaultValues: { username: "", password: "" },
+    validators: { onChange: LoginRequestSchema },
     onSubmit: async ({ value }) => onSubmit(value),
   });
 
+  const { AppForm, FormContainer, AppField } = formData;
+
   return (
-    <>
-      <formData.AppForm>
-        <formData.FormContainer extraError={submitError}>
-          <formData.AppField name="username" children={(field) => <field.TextField label="Username" />} />
-          <formData.AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
-          <button type="submit">Log In</button>
-        </formData.FormContainer>
-      </formData.AppForm>
-    </>
+    <AppForm>
+      <FormContainer extraError={submitError}>
+        <AppField name="username" children={(field) => <field.TextField label="Username" />} />
+        <AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
+
+        <div style={{ marginTop: 8, marginBottom: 8 }}>
+          <a href="/forgot-password" className={styles.forgotButton}>
+            Forgot password?
+          </a>
+        </div>
+
+        <button type="submit">Log In</button>
+      </FormContainer>
+    </AppForm>
   );
 }
+

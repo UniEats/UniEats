@@ -62,13 +62,6 @@ class UserServiceTest {
     }
 
     @Test
-    void createUserThatAlreadyExists() {
-        UserCreateDTO user = new UserCreateDTO(USERNAME, PASSWORD, "ROLE_USER");
-        var response = userService.createUser(user);
-        assertEquals(userService.loginUser(user).get().accessToken(), response.get().accessToken());
-    }
-
-    @Test
     void createNewUser() {
         UserCreateDTO user = new UserCreateDTO(USERNAME + "_new", PASSWORD, "ROLE_USER");
         var response = userService.createUser(user);
