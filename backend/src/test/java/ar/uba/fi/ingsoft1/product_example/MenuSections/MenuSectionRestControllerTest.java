@@ -43,7 +43,7 @@ class MenuSectionRestControllerTest {
 
     @BeforeEach
     void setUp() {
-        menuSectionDTO = new MenuSectionDTO(1L, "Entradas", "-", List.of());
+        menuSectionDTO = new MenuSectionDTO(1L, "Entradas", "-", List.of(), List.of());
     }
 
     @Test
@@ -136,7 +136,7 @@ class MenuSectionRestControllerTest {
     void updateMenuSection_success() throws Exception {
         MenuSectionCreateDTO updateDTO = new MenuSectionCreateDTO("Platos principales", "-");
 
-        MenuSectionDTO updatedDTO = new MenuSectionDTO(1L, "Platos principales", "-", List.of());
+        MenuSectionDTO updatedDTO = new MenuSectionDTO(1L, "Platos principales", "-", List.of(), List.of());
 
         Mockito.when(menuSectionsService.updateMenuSection(eq(1L), any()))
                 .thenReturn(Optional.of(updatedDTO));

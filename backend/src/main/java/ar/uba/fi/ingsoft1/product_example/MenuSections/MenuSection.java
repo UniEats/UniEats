@@ -3,6 +3,7 @@ package ar.uba.fi.ingsoft1.product_example.MenuSections;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
+import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -47,4 +48,13 @@ public class MenuSection {
         inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private List<Product> products = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "menu_section_combo",
+            joinColumns = @JoinColumn(name = "menu_section_id"),
+            inverseJoinColumns = @JoinColumn(name = "combo_id")
+    )
+    private List<Combo> combos = new ArrayList<>();
+
 }

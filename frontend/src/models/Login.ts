@@ -5,9 +5,10 @@ export const SignupRequestSchema = z.object({
   apellido: z.string().min(1, "Surname can't be void"),
   email: z.string().min(1, "Email can't be void").email("Email must be valid"),
   foto: z
-      .instanceof(File)
-      .or(z.null())
-      .refine((file) => file !== null, "Image is required"),
+    .instanceof(File)
+    .or(z.null())
+    .refine((file) => file !== null, "Image is required")
+    .refine((file) => file && file.size <= 2 * 1024 * 1024, "Image must be less than 2MB."),
   edad: z.string().min(1, "Age can't be void"),
   genero: z.string().min(1, "Genre can't be void"),
   domicilio: z.string().min(1, "Residence can't be void"),

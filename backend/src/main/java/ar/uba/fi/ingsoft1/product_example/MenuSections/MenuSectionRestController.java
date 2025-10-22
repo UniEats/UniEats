@@ -61,6 +61,16 @@ class MenuSectionRestController {
             .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    @PostMapping("/{menuSectionId}/combos")
+    public ResponseEntity<MenuSectionDTO> addCombosToMenuSection(
+            @PathVariable Long menuSectionId,
+            @RequestBody MenuSectionAddCombosDTO combosId
+    ) {
+        return menuSectionsService.addCombosToMenuSection(menuSectionId, combosId.combosId())
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<MenuSectionDTO> updateMenuSection(
             @PathVariable long id,

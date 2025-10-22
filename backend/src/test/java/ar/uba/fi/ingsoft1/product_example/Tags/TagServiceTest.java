@@ -1,5 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.Tags;
 
+import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,9 @@ class TagServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private ComboRepository comboRepository;
 
     @InjectMocks
     private TagService tagService;

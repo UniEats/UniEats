@@ -2,6 +2,8 @@ package ar.uba.fi.ingsoft1.product_example.MenuSections;
 
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
+import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
+import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class MenuSectionService {
 
     private final MenuSectionRepository menuSectionRepository;
     private final ProductRepository productRepository;
+    private final ComboRepository comboRepository;
 
     public List<MenuSectionDTO> getAllMenuSections() {
         return menuSectionRepository.findAll()
@@ -76,4 +79,28 @@ public class MenuSectionService {
         return Optional.of(new MenuSectionDTO(menuSection));
     }
 
+    @Transactional
+    public Optional<MenuSectionDTO> addCombosToMenuSection(Long menuSectionId, List<Long> comboIds) {
+        Optional<MenuSection> menuSectionOpt = menuSectionRepository.findById(menuSectionId);
+        if (menuSectionOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        MenuSection menuSection = menuSectionOpt.get();
+
+        List<Combo> combosToAdd = comboRepository.findAllById(comboIds);
+
+        List<Combo> existingCombos = menuSection.getCombos();
+
+        for (Combo c : combosToAdd) {
+            if (!existingCombos.contains(c)) {
+                existingCombos.add(c);
+            }
+        }
+
+        menuSection.setCombos(existingCombos);
+        menuSectionRepository.save(menuSection);
+
+        return Optional.of(new MenuSectionDTO(menuSection));
+    }
 }   

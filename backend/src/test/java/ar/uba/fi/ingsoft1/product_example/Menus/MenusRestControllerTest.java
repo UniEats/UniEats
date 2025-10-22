@@ -47,8 +47,8 @@ class MenuRestControllerTest {
 
     @BeforeEach
     void setUp() {
-        section1 = new MenuSectionDTO(1L, "Starters", "Appetizers to begin the meal", List.of());
-        section2 = new MenuSectionDTO(2L, "Main Courses", "Hearty main dishes", List.of());
+        section1 = new MenuSectionDTO(1L, "Starters", "Appetizers to begin the meal", List.of(), List.of());
+        section2 = new MenuSectionDTO(2L, "Main Courses", "Hearty main dishes", List.of(), List.of());
     }
 
     @Test
