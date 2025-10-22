@@ -19,6 +19,7 @@ import java.util.Random;
 @Service
 @Transactional
 class UserService implements UserDetailsService {
+    public static final int MAX_ATTEMPTS = 5;
 
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -108,7 +109,6 @@ class UserService implements UserDetailsService {
 
     private void handleFailedLoginAttempt(User user) {
         user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
-        final int MAX_ATTEMPTS = 5;
 
         if (user.getFailedLoginAttempts() >= MAX_ATTEMPTS) {
             user.setLocked(true);
@@ -116,7 +116,7 @@ class UserService implements UserDetailsService {
             user.setVerificationCode(resetCode);
 
             try {
-                emailService.sendPasswordResetEmail(user.getUsername(), resetCode);
+                emailService.sendAccountLockedEmail(user.getUsername(), resetCode);
             } catch (Exception e) {
                 System.err.println("Failed to send password reset email to " + user.getUsername() + ": " + e.getMessage());
             }
