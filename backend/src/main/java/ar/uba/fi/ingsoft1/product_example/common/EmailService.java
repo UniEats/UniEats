@@ -27,4 +27,17 @@ public class EmailService {
                       "Si no solicitaste recuperar tu contraseña, ignora este mensaje.");
         mailSender.send(message);
     }
+
+    public void sendAccountLockedEmail(String to, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Tu cuenta ha sido bloqueada [Comedor FIUBA]");
+        message.setText("Detectamos el numero limite de intentos fallidos de inicio de sesión en tu cuenta.\n\n" +
+                "Por tu seguridad, hemos bloqueado temporalmente tu cuenta.\n\n" +
+                "Para desbloquearla, por favor reinicia tu contraseña usando el siguiente código de verificación:\n\n" +
+                "Código de verificación: " + code + "\n\n" +
+                "Puedes cambiarla en /reset-password \n\n" +
+                "Si no intentaste iniciar sesión, te recomendamos cambiar tu contraseña de todos modos para proteger tu cuenta.");
+        mailSender.send(message);
+    }
 }
