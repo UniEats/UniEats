@@ -78,7 +78,6 @@ export const Menu = ({ menuSections }: MenuProps) => {
   }, [menuSections, setProducts, setCombos]);
 
   const handleAddToCart = (id: number, type: "product" | "combo", quantity: number) => {
-    console.log("Quantity before alert:", quantity);
     if (!productsMap[id] && type === "product") {
       alert("Product not found");
       return;

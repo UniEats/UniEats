@@ -14,7 +14,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
   const userRole = useUserRole();
   const isAuthenticated = tokenState.state !== "LOGGED_OUT";
   const handleLogout = () => { setTokenState({ state: "LOGGED_OUT" }); };
-  const { validItems, clearCart, totalPrice, removeFromCart } = useCart();
+  const { validItems, clearCart, totalPrice, removeFromCart, updateQuantity } = useCart();
   const { productsMap, combosMap } = useProducts();
   const [showCart, setShowCart] = useState(false);
   const toggleCart = () => setShowCart(prev => !prev);
@@ -64,22 +64,26 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
               <button type="button" onClick={handleLogout} className={`${styles.siteButton} ${styles.siteButtonGhost}`}>
                 Log out
               </button>
-              <button type="button" onClick={toggleCart} className={`${styles.siteButton} ${styles.siteButtonCta}`} aria-label="Go to cart">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10
+              {userRole !== "ROLE_ADMIN" && (
+                <>
+                  <button type="button" onClick={toggleCart} className={`${styles.siteButton} ${styles.siteButtonCta}`} aria-label="Go to cart">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                    <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10
                            0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zm-9.83-3h11.31
                            c.75 0 1.41-.41 1.75-1.03L23 6H6.21l-.94-2H1v2h3l3.6
                            7.59-1.35 2.44C5.16 16.37 5 16.68 5 17a2 2 0
                            0 0 2 2h12v-2H7l1.1-2z"/>
-                </svg>
-                {validItems.length > 0 && <span className={styles.cartBadge}>{validItems.length}</span>}
-              </button>
+                    </svg>
+                    {validItems.length > 0 && <span className={styles.cartBadge}>{validItems.length}</span>}
+                  </button>
+                </> 
+              )}
             </>
           ) : (
             <>
@@ -116,9 +120,25 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
                         marginBottom: "0.5rem",
                         alignItems: "center",
                       }}>
-                      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {data.name} × {item.quantity}
-                      </span>
+                      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <span style={{ flexShrink: 0 }}>{data.name}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                          <input
+                            type="number"
+                            min={1}
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateQuantity(item.id, item.type, Math.max(parseInt(e.target.value, 10) || 1, 1))
+                            }
+                            style={{
+                              width: "3rem",
+                              textAlign: "center",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                            }}
+                          />
+                        </div>
+                      </div>
                       <span style={{ minWidth: "80px", textAlign: "right" }}>
                         ${subtotal.toFixed(2)}
                       </span>

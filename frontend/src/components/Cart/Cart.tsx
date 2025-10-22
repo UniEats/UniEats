@@ -12,6 +12,7 @@ type CartContextType = {
   items: CartItem[];
   setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
   addToCart: (id: number, type: "product" | "combo", quantity?: number) => void;
+  updateQuantity: (id: number, type: "product" | "combo", newQuantity: number) => void;
   removeFromCart: (id: number, type: "product" | "combo") => void;
   clearCart: () => void;
   validItems: CartItem[];
@@ -78,6 +79,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const updateQuantity = (id: number, type: "product" | "combo", newQuantity: number) => {
+    setCart((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id && item.type === type
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
+  };
+
   const removeFromCart = (id: number, type: "product" | "combo") => {
     setCart((prevItems) =>
       prevItems.filter((item) => !(item.id === id && item.type === type))
@@ -87,7 +98,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = () => setCart([]);
 
   return (
-    <CartContext.Provider value={{ items: cart, setCart, addToCart, removeFromCart, clearCart, validItems, totalPrice }}>
+    <CartContext.Provider value={{ items: cart, setCart, addToCart, updateQuantity, removeFromCart, clearCart, validItems, totalPrice }}>
       {children}
     </CartContext.Provider>
   );

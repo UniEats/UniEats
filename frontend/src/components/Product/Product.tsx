@@ -40,7 +40,6 @@ export default function Product({ id, image, title, description, price, tags, on
   };
 
   const handleConfirmAdd = () => {
-    console.log("Quantity before adding to cart:", quantity);
     if (onAddToCart) onAddToCart(id, quantity);
     setShowCartControls(false);
   };
