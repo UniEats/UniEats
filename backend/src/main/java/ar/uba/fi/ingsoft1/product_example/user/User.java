@@ -47,6 +47,12 @@ public class User implements UserDetails, UserCredentials {
     @Column
     private String verificationCode;
 
+    @Column
+    private int failedLoginAttempts = 0;
+
+    @Column
+    private boolean locked = false;
+
     public User(String username, String password, String role) {
         this.username = username;
         this.password = password;
@@ -100,7 +106,7 @@ public class User implements UserDetails, UserCredentials {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !locked;
     }
 
     @Override
@@ -112,7 +118,6 @@ public class User implements UserDetails, UserCredentials {
     public boolean isEnabled() {
         return verified;
     }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

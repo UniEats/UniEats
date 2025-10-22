@@ -1,23 +1,29 @@
 package ar.uba.fi.ingsoft1.product_example.user;
 
-import io.swagger.v3.oas.annotations.Operation;
-import ar.uba.fi.ingsoft1.product_example.common.EmailService;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-import java.util.UUID;
-import java.util.HashMap;
-import java.util.Map;
+import ar.uba.fi.ingsoft1.product_example.common.EmailService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
@@ -84,14 +90,6 @@ class UserRestController {
         response.put("message", "Código de verificación enviado a " + data.email());
         return ResponseEntity.ok(response);
     }
-
-    // --- Endpoint de testeo (solo GET, sin lógica real)
-    @GetMapping("/register")
-    @Operation(summary = "Test endpoint for user registration (no action performed)")
-    public ResponseEntity<String> testRegisterEndpoint() {
-        return ResponseEntity.ok("✅ Endpoint /users/register operativo");
-    }
-
 
     @PostMapping("/verify")
     @Operation(summary = "Verify a user's email using a verification code")

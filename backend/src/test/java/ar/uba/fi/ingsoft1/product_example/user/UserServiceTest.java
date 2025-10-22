@@ -1,18 +1,20 @@
 package ar.uba.fi.ingsoft1.product_example.user;
 
-import ar.uba.fi.ingsoft1.product_example.config.security.JwtService;
-import ar.uba.fi.ingsoft1.product_example.user.refresh_token.RefreshTokenService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import ar.uba.fi.ingsoft1.product_example.common.EmailService;
+import ar.uba.fi.ingsoft1.product_example.config.security.JwtService;
+import ar.uba.fi.ingsoft1.product_example.user.refresh_token.RefreshTokenService;
 
 class UserServiceTest {
 
@@ -40,7 +42,8 @@ class UserServiceTest {
                 new JwtService(key, 1L),
                 new BCryptPasswordEncoder(),
                 userRepository,
-                new RefreshTokenService(1L, 20, mock())
+                new RefreshTokenService(1L, 20, mock()),
+                mock(EmailService.class)
         );
     }
 
