@@ -55,21 +55,41 @@ export const Menu = ({ menuSections }: MenuProps) => {
   };
 
   const { addToCart } = useCart();
-  const { productsMap, setProducts } = useProducts();
+  const { productsMap, setProducts, combosMap, setCombos } = useProducts();
 
   useEffect(() => {
     const allProducts = menuSections.flatMap(section => section.products);
     setProducts(allProducts);
-  }, [menuSections, setProducts]);
+    const allCombos = menuSections.flatMap(section =>
+      section.combos.map(c => ({
+        id: c.id,
+        name: c.name,
+        description: c.description,
+        price: c.price,
+        tags: c.tags || {},
+        products: [],            
+        menuSections: {},
+        image: c.image
+          ? new TextDecoder().decode(c.image)
+          : undefined,
+      }))
+    );
+    setCombos(allCombos);
+  }, [menuSections, setProducts, setCombos]);
 
-  const handleAddToCart = (id: number, quantity: number) => {
-    const product = productsMap[id];
-    if (!product) {
+  const handleAddToCart = (id: number, type: "product" | "combo", quantity: number) => {
+    if (!productsMap[id] && type === "product") {
       alert("Product not found");
       return;
     }
-    addToCart(id, quantity);
-    alert(`Added ${quantity} of product ${id} to cart`);
+
+    if (type === "combo" && !combosMap[id]) {
+      alert("Combo not found");
+      return;
+    }
+
+    addToCart(id, type, quantity);
+    alert(`Added ${quantity} of ${type} ${id} to cart`);
   };
 
   useEffect(() => {
@@ -142,7 +162,7 @@ return (
                       price={item.price}
                       tags={item.tags ? Object.values(item.tags) : []}
                       onDelete={() => handleDeleteItem(item.id, item.type)}
-                      onAddToCart={handleAddToCart}
+                      onAddToCart={(quantity) => handleAddToCart(item.id, item.type, quantity)}
                   />
                   ))}
                 </div>

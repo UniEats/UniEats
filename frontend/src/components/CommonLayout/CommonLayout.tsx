@@ -14,8 +14,8 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
   const userRole = useUserRole();
   const isAuthenticated = tokenState.state !== "LOGGED_OUT";
   const handleLogout = () => { setTokenState({ state: "LOGGED_OUT" }); };
-  const { validItems, clearCart, totalPrice } = useCart();
-  const { productsMap } = useProducts();
+  const { validItems, clearCart, totalPrice, removeFromCart } = useCart();
+  const { productsMap, combosMap } = useProducts();
   const [showCart, setShowCart] = useState(false);
   const toggleCart = () => setShowCart(prev => !prev);
 
@@ -102,13 +102,32 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
             <>
               <ul>
                 {validItems.map(item => {
-                  const product = productsMap[item.id];
-                  if (!product) return null;
-                  const subtotal = product.price * item.quantity;
+                  const data =
+                    item.type === "product"
+                      ? productsMap[item.id]
+                      : combosMap[item.id];
+                  if (!data) return null;
+                  const subtotal = data.price * item.quantity;
                   return (
-                    <li key={item.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                      <span>{product.name} × {item.quantity}</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                    <li key={`${item.type}-${item.id}`}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "0.5rem",
+                        alignItems: "center",
+                      }}>
+                      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {data.name} × {item.quantity}
+                      </span>
+                      <span style={{ minWidth: "80px", textAlign: "right" }}>
+                        ${subtotal.toFixed(2)}
+                      </span>
+                      <button
+                        onClick={() => removeFromCart(item.id, item.type)}
+                        style={{ marginLeft: "1rem" }}
+                      >
+                        ✕
+                      </button>
                     </li>
                   );
                 })}

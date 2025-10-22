@@ -1,3 +1,4 @@
+import { Combo } from "@/models/Combo";
 import { createContext, useContext, useState, ReactNode } from "react";
 
 export type MenuItem = {
@@ -11,13 +12,17 @@ export type MenuItem = {
 
 type ProductsContextType = {
   productsMap: Record<number, MenuItem>;
+  combosMap: Record<number, Combo>;
   setProducts: (products: MenuItem[]) => void;
+  setCombos: (combos: Combo[]) => void;
+
 };
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
 
 export const ProductsProvider = ({ children }: { children: ReactNode }) => {
   const [productsMap, setProductsMap] = useState<Record<number, MenuItem>>({});
+  const [combosMap, setCombosMap] = useState<Record<number, Combo>>({});
   
   const setProducts = (products: MenuItem[]) => {
     const map: Record<number, MenuItem> = {};
@@ -25,8 +30,14 @@ export const ProductsProvider = ({ children }: { children: ReactNode }) => {
     setProductsMap(map);
   };
 
+  const setCombos = (combos: Combo[]) => {
+    const map: Record<number, Combo> = {};
+    combos.forEach((c) => (map[c.id] = c));
+    setCombosMap(map);
+  };
+
   return (
-    <ProductsContext.Provider value={{ productsMap, setProducts }}>
+    <ProductsContext.Provider value={{ productsMap, combosMap, setProducts, setCombos }}>
       {children}
     </ProductsContext.Provider>
   );

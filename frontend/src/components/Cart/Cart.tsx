@@ -4,14 +4,15 @@ import { useProducts } from "@/components/Product/ProductContext";
 
 type CartItem = {
   id: number;
+  type: "product" | "combo";
   quantity: number;
 };
 
 type CartContextType = {
   items: CartItem[];
   setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
-  addToCart: (id: number, quantity?: number) => void;
-  removeFromCart: (id: number) => void;
+  addToCart: (id: number, type: "product" | "combo", quantity?: number) => void;
+  removeFromCart: (id: number, type: "product" | "combo") => void;
   clearCart: () => void;
   validItems: CartItem[];
   totalPrice: number;
@@ -21,7 +22,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [tokenState] = useToken();
-  const { productsMap } = useProducts();
+  const { productsMap, combosMap } = useProducts();
   const userId = tokenState.state === "LOGGED_IN" ? tokenState.tokens.id : null;
   const storageKey = `cart_${userId}`;
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -39,8 +40,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [cart, storageKey]);
 
   const validItems = React.useMemo(() => {
-    return cart.filter(item => productsMap[item.id]);
-  }, [cart, productsMap]);
+    return cart.filter(
+      (item) =>
+        (item.type === "product" && productsMap[item.id]) ||
+        (item.type === "combo" && combosMap[item.id])
+    );
+  }, [cart, productsMap, combosMap]);
 
   useEffect(() => {
     if (!productsMap || Object.keys(productsMap).length === 0) return;
@@ -51,26 +56,32 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const totalPrice = React.useMemo(() => {
     return validItems.reduce((acc, item) => {
-      const product = productsMap[item.id];
-      if (!product) return acc;
-      return acc + product.price * item.quantity;
+      const price =
+        item.type === "product"
+          ? productsMap[item.id]?.price ?? 0
+          : combosMap[item.id]?.price ?? 0;
+      return acc + price * item.quantity;
     }, 0);
-  }, [validItems, productsMap]);
+  }, [validItems, productsMap, combosMap]);
 
-  const addToCart = (id: number, quantity: number = 1) => {
-    setCart(prevItems => {
-      const existing = prevItems.find(item => item.id === id);
+  const addToCart = (id: number, type: "product" | "combo", quantity: number = 1) => {
+    setCart((prevItems) => {
+      const existing = prevItems.find((item) => item.id === id && item.type === type);
       if (existing) {
-        return prevItems.map(item =>
-          item.id === id ? { ...item, quantity: item.quantity + quantity } : item
+        return prevItems.map((item) =>
+          item.id === id && item.type === type
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
         );
       }
-      return [...prevItems, { id, quantity }];
+      return [...prevItems, { id, type, quantity }];
     });
   };
 
-  const removeFromCart = (id: number) => {
-    setCart(prevItems => prevItems.filter(item => item.id !== id));
+  const removeFromCart = (id: number, type: "product" | "combo") => {
+    setCart((prevItems) =>
+      prevItems.filter((item) => !(item.id === id && item.type === type))
+    );
   };
 
   const clearCart = () => setCart([]);
