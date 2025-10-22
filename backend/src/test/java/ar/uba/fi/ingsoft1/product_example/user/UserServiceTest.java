@@ -8,8 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,11 +25,14 @@ class UserServiceTest {
         var passwordEncoder = new BCryptPasswordEncoder();
         var passwordHash = passwordEncoder.encode(PASSWORD);
 
+        var user = new User(USERNAME, passwordHash, "ROLE_USER");
+        user.setVerified(true);
+
         UserRepository userRepository = mock();
         when(userRepository.findByUsername(anyString()))
                 .thenReturn(Optional.empty());
         when(userRepository.findByUsername(USERNAME))
-                .thenReturn(Optional.of(new User(USERNAME, passwordHash, "ROLE_USER")));
+                .thenReturn(Optional.of(user));
 
         var key = "0".repeat(64);
         userService = new UserService(
@@ -56,6 +58,33 @@ class UserServiceTest {
     @Test
     void loginNonexistentUser() {
         var response = userService.loginUser(new UserLoginDTO(USERNAME + "_wrong", PASSWORD));
+        assertEquals(Optional.empty(), response);
+    }
+
+    @Test
+    void createNewUser() {
+        UserCreateDTO user = new UserCreateDTO(USERNAME + "_new", PASSWORD, "ROLE_USER");
+        var response = userService.createUser(user);
+        assertTrue(response.isPresent());
+    }
+
+    @Test
+    void loadUserThatExists() {
+        var userDetails = userService.loadUserByUsername(USERNAME);
+        assertEquals(USERNAME, userDetails.getUsername());
+    }
+
+    @Test
+    void loadUserThatDoesNotExist() {
+        assertThrows(
+                org.springframework.security.core.userdetails.UsernameNotFoundException.class,
+                () -> userService.loadUserByUsername(USERNAME + "_wrong")
+        );
+    }
+
+    @Test
+    void refreshWithInvalidToken() {
+        var response = userService.refresh(new RefreshDTO("invalid_token"));
         assertEquals(Optional.empty(), response);
     }
 }

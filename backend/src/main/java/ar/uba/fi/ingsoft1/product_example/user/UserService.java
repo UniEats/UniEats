@@ -59,7 +59,7 @@ class UserService implements UserDetailsService {
     Optional<TokenDTO> loginUser(UserCredentials data) {
         Optional<User> maybeUser = userRepository.findByUsername(data.username());
         return maybeUser
-                .filter(user -> passwordEncoder.matches(data.password(), user.getPassword()))
+                .filter(user -> passwordEncoder.matches(data.password(), user.getPassword()) && user.isEnabled())
                 .map(this::generateTokens);
     }
 

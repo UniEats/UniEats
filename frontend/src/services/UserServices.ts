@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
-import { AuthResponseSchema, LoginRequest, SignupRequest } from "@/models/Login";
+import { MessageResponseSchema, AuthResponseSchema, LoginRequest, SignupRequest, VerifyRequest } from "@/models/Login";
 import { UserCountSchema } from "@/models/User";
 import { useAccessTokenGetter, useHandleResponse, useToken } from "@/services/TokenContext";
 
@@ -42,12 +42,62 @@ export function useRefresh() {
 }
 
 export function useSignup() {
-  const [, setToken] = useToken();
+    return useMutation({
+        mutationFn: async (data: SignupRequest) => {
+            const formData = new FormData();
 
+            formData.append(
+                "user",
+                JSON.stringify({
+                    nombre: data.nombre,
+                    apellido: data.apellido,
+                    email: data.email,
+                    password: data.password,
+                    edad: data.edad,
+                    genero: data.genero,
+                    domicilio: data.domicilio
+                })
+            );
+
+            if (data.foto) {
+                formData.append("photo", data.foto);
+            }
+
+            const response = await fetch(BASE_API_URL + "/users/register", {
+                method: "POST",
+                body: formData,
+            });
+
+            const json = await response.json();
+
+            if (!response.ok) {
+                throw new Error(json.message || "Error inesperado durante el registro");
+            }
+
+            return MessageResponseSchema.parse(json);
+        },
+    });
+}
+
+export function useVerify() {
   return useMutation({
-    mutationFn: async (req: SignupRequest) => {
-      const tokens = await auth("POST", "/users", req);
-      setToken({ state: "LOGGED_IN", tokens });
+    mutationFn: async (data: VerifyRequest) => {
+      const response = await fetch(BASE_API_URL + "/users/verify", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.message || "Error verificando el código");
+      }
+
+      return MessageResponseSchema.parse(json);
     },
   });
 }
@@ -65,7 +115,7 @@ async function auth(method: "PUT" | "POST", endpoint: string, data: object) {
   if (response.ok) {
     return AuthResponseSchema.parse(await response.json());
   } else {
-    throw new Error(`Failed with status ${response.status}: ${await response.text()}`);
+    throw new Error(`Error en la autenticación`);
   }
 }
 

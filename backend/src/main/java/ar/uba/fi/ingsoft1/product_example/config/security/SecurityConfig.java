@@ -22,7 +22,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     public static final String[] PUBLIC_ENDPOINTS = { "/sessions" };
-    public static final String[] PUBLIC_POST_ENDPOINTS = { "/users" };
+    public static final String[] PUBLIC_POST_ENDPOINTS = {
+            "/users",
+            "/users/register",
+            "/users/verify",
+            "/users/password-reset/request",
+            "/users/password-reset/reset"
+    };
 
     private final JwtAuthFilter authFilter;
 
@@ -33,14 +39,14 @@ public class SecurityConfig {
 
     @Bean
     AuthenticationManager authenticationManager(
-        AuthenticationConfiguration config
+            AuthenticationConfiguration config
     ) throws Exception {
         return config.getAuthenticationManager();
     }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http)
-        throws Exception {
+            throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth ->
@@ -89,7 +95,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+                new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }

@@ -162,4 +162,39 @@ class ProductServiceTest {
 
         assertFalse(result);
     }
+
+    @Test
+    void testGetProductsAvailable_ReturnsList() {
+        // Arrange
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("Hamburguesa");
+        product.setDescription("Con queso y panceta");
+        product.setPrice(new BigDecimal("1500.00"));
+        product.setProductIngredients(List.of()); // No se testean acá los ingredientes
+        product.setTags(List.of());
+
+        when(productRepository.findProductsWithAllIngredientsInStock())
+                .thenReturn(List.of(product));
+
+        // Act
+        List<ProductDTO> result = productService.getProductsAvailable();
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("Hamburguesa", result.get(0).name());
+        assertEquals("Con queso y panceta", result.get(0).description());
+        assertEquals(new BigDecimal("1500.00"), result.get(0).price());
+    }
+
+    @Test
+    void testGetProductsAvailable_EmptyResult() {
+        when(productRepository.findProductsWithAllIngredientsInStock())
+                .thenReturn(List.of());
+
+        List<ProductDTO> result = productService.getProductsAvailable();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 }
