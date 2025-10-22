@@ -263,6 +263,19 @@
   font-size: 0.8rem;
 }
 
+.no-items-message {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #801818;
+  border-radius: 8px;
+  margin: 1rem 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
 @media (max-width: 1024px) {
   .menu-app {
     grid-template-columns: 1fr;

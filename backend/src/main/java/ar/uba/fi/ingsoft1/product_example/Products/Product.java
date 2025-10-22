@@ -4,6 +4,7 @@ import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
+import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -61,6 +62,9 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<ProductIngredient> productIngredients = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product")
+    private List<ComboProduct> comboProducts = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(

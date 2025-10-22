@@ -14,12 +14,14 @@ export const MenuSectionSchema = z.object({
   label: z.string(),
   description: z.string(),
   products: z.array(MenuItemSchema),
+  combos: z.array(MenuItemSchema),
 });
 
 // El backend devuelve un ARRAY de secciones directamente, no un objeto con "sections"
 export const MenuSchema = z.array(MenuSectionSchema);
 
 export type MenuItem = z.infer<typeof MenuItemSchema>;
+export type ComboItem = z.infer<typeof MenuItemSchema>;
 export type MenuSection = z.infer<typeof MenuSectionSchema>;
 export type Menu = z.infer<typeof MenuSchema>;
 
