@@ -78,6 +78,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
   }, [menuSections, setProducts, setCombos]);
 
   const handleAddToCart = (id: number, type: "product" | "combo", quantity: number) => {
+    console.log("Quantity before alert:", quantity);
     if (!productsMap[id] && type === "product") {
       alert("Product not found");
       return;
@@ -162,7 +163,7 @@ return (
                       price={item.price}
                       tags={item.tags ? Object.values(item.tags) : []}
                       onDelete={() => handleDeleteItem(item.id, item.type)}
-                      onAddToCart={(quantity) => handleAddToCart(item.id, item.type, quantity)}
+                      onAddToCart={(id, quantity) => handleAddToCart(id, item.type, quantity)}
                   />
                   ))}
                 </div>
