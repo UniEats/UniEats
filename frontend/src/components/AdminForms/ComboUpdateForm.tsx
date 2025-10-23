@@ -157,125 +157,35 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
           <formData.AppField name="description" children={(field) => <field.TextField label="New description" />} />
           <formData.AppField name="price" children={(field) => <field.TextField label="Price" />} />
 
-          <formData.Field
-              name="productIds"
-              children={(field) => (
-                <div className={styles.formFields}>
-                  <span className={styles.fieldLabel}>Products</span>
-                  {products.map((product) => {
-                    const selectedProduct = field.state.value.find((p: {id: string; quantity: number;}) => p.id === product.id.toString());
-                    const quantity = selectedProduct?.quantity ?? 1;
+          <formData.AppField 
+            name="productIds" 
+            children={(field) => 
+            <field.ItemQuantityField 
+              label="Products" 
+              items={products}
+              emptyMessage="Please add products first." 
+            />} 
+          /> 
 
-                    return (
-                      <div key={product.id} className={styles.optionRow}>
-                        <input
-                          type="checkbox"
-                          checked={!!selectedProduct}
-                          onChange={(e) => {
-                            let nextValue = [...field.state.value];
-                            if (e.target.checked) {
-                              nextValue.push({ id: product.id.toString(), quantity });
-                            } else {
-                              nextValue = nextValue.filter((p: {id: string; quantity: number;}) => p.id !== product.id.toString());
-                            }
-                            field.handleChange(nextValue);
-                          }}
-                        />
-                        <span>{product.name}</span>
-                        {selectedProduct && (
-                          <input
-                            type="number"
-                            min={1}
-                            value={quantity}
-                            onChange={(e) => {
-                              const nextValue = field.state.value.map((p: {id: string; quantity: number;}) =>
-                                p.id === product.id.toString() ? { ...p, quantity: parseInt(e.target.value, 10) || 1 } : p
-                              );
-                              field.handleChange(nextValue);
-                            }}
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
-                  <ErrorContainer errors={normalizeErrors(field.state.meta.errors)} />
-                </div>
-              )}
-          />
-
-          <formData.Field
+          <formData.AppField
             name="tagIds"
             children={(field) => (
-              <div className={styles.formFields}>
-                <span className={styles.fieldLabel}>Tags (optional)</span>
-                <div className={styles.optionsGrid}>
-                  {tags.length === 0 ? (
-                    <span>No tags available yet.</span>
-                  ) : (
-                    tags.map((tag) => {
-                      const optionValue = tag.id.toString();
-                      const isChecked = field.state.value.includes(optionValue);
-                      return (
-                        <label key={tag.id} className={styles.optionRow}>
-                          <input
-                            type="checkbox"
-                            value={optionValue}
-                            checked={isChecked}
-                            onChange={(event) => {
-                              const { checked, value } = event.target;
-                              const nextValue = checked
-                                ? [...field.state.value, value]
-                                : field.state.value.filter((item) => item !== value);
-                              field.handleChange(nextValue);
-                            }}
-                            onBlur={field.handleBlur}
-                          />
-                          <span>{tag.tag}</span>
-                        </label>
-                      );
-                    })
-                  )}
-                </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
-              </div>
+              <field.CheckboxField
+                label="Tags (optional)"
+                options={tags}
+                emptyMessage="No tags available yet."
+              />
             )}
           />
 
-          <formData.Field
+          <formData.AppField
             name="menuSectionIds"
             children={(field) => (
-              <div className={styles.formFields}>
-                <span className={styles.fieldLabel}>Menu Sections</span>
-                <div className={styles.optionsGrid}>
-                  {menuSections.length === 0 ? (
-                    <span>No menu sections available yet.</span>
-                  ) : (
-                    menuSections.map((section) => {
-                      const optionValue = section.id.toString();
-                      const isChecked = field.state.value.includes(optionValue);
-                      return (
-                        <label key={section.id} className={styles.optionRow}>
-                          <input
-                            type="checkbox"
-                            value={optionValue}
-                            checked={isChecked}
-                            onChange={(event) => {
-                              const { checked, value } = event.target;
-                              const nextValue = checked
-                                ? [...field.state.value, value]
-                                : field.state.value.filter((item) => item !== value);
-                              field.handleChange(nextValue);
-                            }}
-                            onBlur={field.handleBlur}
-                          />
-                          <span>{section.label}</span>
-                        </label>
-                      );
-                    })
-                  )}
-                </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
-              </div>
+              <field.CheckboxField
+                label="Menu Sections"
+                options={menuSections}
+                emptyMessage="No menu sections available yet."
+              />
             )}
           />
 
