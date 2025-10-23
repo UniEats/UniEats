@@ -192,12 +192,12 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
           <formData.AppField name="image" children={(field) => <field.FileField label="Image" />} />
 
           <div className={styles.formActions}>
-            <button type="button" className={styles.cancelButton} onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className={styles.submitButton}>
-              Update Combo
-            </button>
+            <formData.Button
+              label="Cancel"
+              type="button"
+              onClick={onClose}
+            />
+            <formData.Button label="Add Item" />
           </div>
         </formData.FormContainer>
       </formData.AppForm>

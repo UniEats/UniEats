@@ -49,18 +49,18 @@ export function useSignup() {
             formData.append(
                 "user",
                 JSON.stringify({
-                    nombre: data.nombre,
-                    apellido: data.apellido,
+                    nombre: data.name,
+                    apellido: data.last_name,
                     email: data.email,
                     password: data.password,
-                    edad: data.edad,
-                    genero: data.genero,
-                    domicilio: data.domicilio
+                    edad: data.age,
+                    genero: data.gender,
+                    domicilio: data.address
                 })
             );
 
-            if (data.foto) {
-                formData.append("photo", data.foto);
+            if (data.photo) {
+                formData.append("photo", data.photo);
             }
 
             const response = await fetch(BASE_API_URL + "/users/register", {
