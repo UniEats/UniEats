@@ -3,6 +3,8 @@ package ar.uba.fi.ingsoft1.product_example.Orders;
 import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetail;
 import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetailRepository;
 import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetailCreateDTO;
+import ar.uba.fi.ingsoft1.product_example.Products.Product;
+import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
 
@@ -38,9 +40,26 @@ class OrderService {
                 .toList();
     }
 
-    public List<OrderDTO> getOrdersWithAllMenuItemsInStock() {
-        return orderRepository.findOrdersWithAllMenuItemsInStock()
+    public boolean isProductInStock(Product p) {
+        return p.getProductIngredients()
                 .stream()
+                .allMatch(pi -> pi.getIngredient().getStock() > 0);
+    }
+
+    public boolean isComboInStock(Combo c) {
+        return c.getComboProducts()
+                .stream()
+                .allMatch(cp -> isProductInStock(cp.getProduct()));
+    }
+
+    public List<OrderDTO> getOrdersWithAllMenuItemsInStock() {
+        return orderRepository.findAll()
+                .stream()
+                .filter(order -> order.getDetails().stream()
+                        .allMatch(d -> (d.getProduct() == null || isProductInStock(d.getProduct())) &&
+                                (d.getCombo() == null || isComboInStock(d.getCombo()))
+                        )
+                )
                 .map(OrderDTO::new)
                 .toList();
     }
@@ -64,8 +83,16 @@ class OrderService {
 
         for (OrderDetailCreateDTO detailDto : dto.details()) {
             OrderDetail detail = new OrderDetail();
-            detail.setProductId(detailDto.productId());
-            detail.setComboId(detailDto.comboId());
+
+            if (detailDto.productId() != null) {
+                productRepository.findById(detailDto.productId())
+                        .ifPresent(detail::setProduct);
+            }
+            if (detailDto.comboId() != null) {
+                comboRepository.findById(detailDto.comboId())
+                        .ifPresent(detail::setCombo);
+            }
+
             detail.setQuantity(detailDto.quantity());
             detail.setPrice(detailDto.price());
             detail.setDiscount(detailDto.discount() != null ? detailDto.discount() : BigDecimal.ZERO);

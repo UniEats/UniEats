@@ -1,6 +1,8 @@
 package ar.uba.fi.ingsoft1.product_example.OrderDetails;
 
 import ar.uba.fi.ingsoft1.product_example.Orders.Order;
+import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
+import ar.uba.fi.ingsoft1.product_example.Products.Product;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
@@ -26,8 +28,13 @@ public class OrderDetail {
     @GeneratedValue
     private Long id;
 
-    private Long productId;
-    private Long comboId;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "combo_id")
+    private Combo combo;
 
     @NonNull
     private Integer quantity;
@@ -62,7 +69,7 @@ public class OrderDetail {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
 
@@ -70,14 +77,12 @@ public class OrderDetail {
         return new OrderDetailDTO(
                 this.getId(),
                 this.getOrder().getId(),
-                this.getProductId() != null ? this.getProductId() : null,
-                this.getComboId() != null ? this.getComboId() : null,
+                this.getProduct() != null ? this.getProduct().getId() : null,
+                this.getCombo() != null ? this.getCombo().getId() : null,
                 this.getQuantity(),
                 this.getPrice(),
                 this.getDiscount(),
                 this.getTotalPrice()
         );
     }
-
-
 }

@@ -16,8 +16,8 @@ public record OrderDetailDTO(
         this(
                 orderDetail.getId(),
                 orderDetail.getOrder().getId(),
-                orderDetail.getProductId(),
-                orderDetail.getComboId(),
+                orderDetail.getProduct() != null ? orderDetail.getProduct().getId() : null,
+                orderDetail.getCombo() != null ? orderDetail.getCombo().getId() : null,
                 orderDetail.getQuantity(),
                 orderDetail.getPrice(),
                 orderDetail.getDiscount(),

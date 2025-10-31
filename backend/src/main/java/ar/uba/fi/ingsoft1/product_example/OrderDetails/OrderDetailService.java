@@ -2,6 +2,9 @@ package ar.uba.fi.ingsoft1.product_example.OrderDetails;
 
 import ar.uba.fi.ingsoft1.product_example.Orders.Order;
 import ar.uba.fi.ingsoft1.product_example.Orders.OrderRepository;
+import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
+import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,8 @@ public class OrderDetailService {
 
     private final OrderDetailRepository orderDetailRepository;
     private final OrderRepository orderRepository;
+    private final ComboRepository comboRepository;
+    private final ProductRepository productRepository;
 
     public List<OrderDetailDTO> getDetailsByOrderId(Long orderId) {
         return orderDetailRepository.findByOrderId(orderId)
@@ -32,8 +37,17 @@ public class OrderDetailService {
 
         OrderDetail detail = new OrderDetail();
         detail.setOrder(order);
-        detail.setProductId(dto.productId());
-        detail.setComboId(dto.comboId());
+
+        if (dto.productId() != null) {
+            productRepository.findById(dto.productId())
+                    .ifPresent(detail::setProduct);
+        }
+
+        if (dto.comboId() != null) {
+            comboRepository.findById(dto.comboId())
+                    .ifPresent(detail::setCombo);
+        }
+
         detail.setQuantity(dto.quantity());
         detail.setPrice(dto.price());
         detail.setDiscount(dto.discount() != null ? dto.discount() : BigDecimal.ZERO);
