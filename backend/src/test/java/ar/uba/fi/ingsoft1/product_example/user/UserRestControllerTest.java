@@ -143,7 +143,7 @@ class UserRestControllerTest {
                         .file(photoPart)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Cose sent to: " + userRegisterDTO.email()));
+                .andExpect(jsonPath("$.message").value("Code sent to: " + userRegisterDTO.email()));
     }
 
     @Test
