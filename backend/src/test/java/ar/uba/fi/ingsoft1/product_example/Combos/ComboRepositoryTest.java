@@ -16,12 +16,16 @@ import ar.uba.fi.ingsoft1.product_example.Tags.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
 @DataJpaTest
+@TestPropertySource(properties = {
+        "spring.sql.init.mode=never"
+})
 class ComboRepositoryTest {
 
     @Autowired

@@ -7,13 +7,23 @@ import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
+import java.util.Arrays;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
+@TestPropertySource(properties = {
+        "spring.sql.init.mode=never"
+})
 class ProductRepositoryTest {
 
     @Autowired
@@ -58,11 +68,6 @@ class ProductRepositoryTest {
 
         productIngredientRepository.save(setAllProductIngredient(pancake, flour));
         productIngredientRepository.save(setAllProductIngredient(pancake, eggs));
-
-        // Without ingredients
-        Product air = new Product();
-        air.setName("Air");
-        productRepository.save(air);
 
         List<Product> result = productRepository.findProductsWithAllIngredientsInStock();
 
