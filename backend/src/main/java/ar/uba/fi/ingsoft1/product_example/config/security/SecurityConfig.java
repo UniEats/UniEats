@@ -47,6 +47,7 @@ public class SecurityConfig {
     };
 
     public static final String[] STAFF_ORDER_ENDPOINTS = {
+            
             "/orders/**",
             "/ingredients/{id}/stock/**"
     };
@@ -73,6 +74,10 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(PUBLIC_POST_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/menus").permitAll()
+
+                       
+                        .requestMatchers(HttpMethod.POST, "/orders").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/orders/*/confirm").authenticated()
 
                         // Order access rules
                         .requestMatchers(HttpMethod.GET, STAFF_ORDER_ENDPOINTS)

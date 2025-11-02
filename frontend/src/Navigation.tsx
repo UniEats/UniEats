@@ -3,7 +3,10 @@ import { Redirect, Route, Switch } from "wouter";
 import { LoginScreen } from "@/screens/LoginScreen";
 import { MainScreen } from "@/screens/MainScreen";
 import { SignupScreen } from "@/screens/SignupScreen";
-import { useToken } from "@/services/TokenContext";
+import { useToken, useUserRole } from "@/services/TokenContext";
+import { CartView } from "@/components/Cart/CartView";
+import { KitchenOrders } from "@/components/KitchenOrders/KitchenOrders";
+import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
 
 import { MenuScreen } from "./screens/MenuScreen";
 import { VerifyScreen } from "./screens/VerifyScreen";
@@ -12,6 +15,24 @@ import { ResetPasswordScreen } from "./screens/ResetPasswordScreen";
 
 export const Navigation = () => {
   const [tokenState] = useToken();
+  const userRole = useUserRole();
+
+  const KitchenRouteGuard = () => {
+    if (tokenState.state === "LOGGED_OUT") {
+      return <Redirect href="/login" />;
+    }
+    if (tokenState.state === "REFRESHING") {
+      return <div />; 
+    }
+    if (userRole === "ROLE_STAFF") {
+      return (
+        <CommonLayout>
+          <KitchenOrders />
+        </CommonLayout>
+      );
+    }
+    return <Redirect href="/" />;
+  };
 
   switch (tokenState.state) {
     case "LOGGED_IN":
@@ -21,8 +42,14 @@ export const Navigation = () => {
           <Route path="/menu">
             <MenuScreen />
           </Route>
+          <Route path="/cart">
+            <CartView />
+          </Route>
+          <Route path="/kitchen">
+            <KitchenRouteGuard />
+          </Route>
           <Route path="/">
-            <MainScreen />
+            {userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MainScreen />}
           </Route>
           <Route>
             <Redirect href="/" />
@@ -53,7 +80,6 @@ export const Navigation = () => {
         </Switch>
       );
     default:
-      // Make the compiler check this is unreachable
       return tokenState satisfies never;
   }
 };

@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/orders")
 @Validated
@@ -20,6 +21,11 @@ class OrderRestController {
     @GetMapping
     public List<OrderDTO> getAllOrders() {
         return orderService.geAlltOrders();
+    }
+
+    @GetMapping("/confirmed")
+    public List<OrderDTO> getConfirmedOrders() {
+        return orderService.getConfirmedOrders();
     }
 
     @GetMapping("/all-menu-items-in-stock")
@@ -77,6 +83,13 @@ class OrderRestController {
     @PostMapping("/{id}/cancel")
     public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id) {
         return orderService.cancelOrder(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<OrderDTO> confirmOrder(@PathVariable Long id) {
+        return orderService.confirmOrder(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }

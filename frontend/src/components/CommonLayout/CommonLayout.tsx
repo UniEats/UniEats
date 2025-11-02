@@ -157,9 +157,12 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
                   Total: ${totalPrice.toFixed(2)}
                 </p>
                 <div style={{ marginTop: "1rem", textAlign: "right" }}>
-                  <button onClick={clearCart} className={`${styles.siteButton} ${styles.siteButtonCta}`}>
-                    Clear cart
-                  </button>
+                    <Link href="/cart" className={`${styles.siteButton} ${styles.siteButtonCta}`}>
+                      Pay
+                    </Link>
+                    <button onClick={clearCart} className={`${styles.siteButton} ${styles.siteButtonGhost}`} style={{ marginLeft: '0.5rem' }}>
+                      Empty
+                    </button>
                 </div>
             </>
           )}
