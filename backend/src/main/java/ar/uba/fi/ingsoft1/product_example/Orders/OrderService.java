@@ -87,7 +87,7 @@ class OrderService {
         Order order = new Order();
         order.setUserId(userId);
         order.setCreationDate(LocalDateTime.now());
-    order.setState(entityManager.getReference(OrderStatus.class, STATUS_INITIATED));
+        order.setState(entityManager.getReference(OrderStatus.class, STATUS_INITIATED));
         order.setTotalPrice(BigDecimal.ZERO);
 
         order = orderRepository.save(order);
@@ -118,6 +118,7 @@ class OrderService {
         order = orderRepository.save(order);
         // Flush to ensure IDs are assigned to all details
         orderRepository.flush();
+        entityManager.refresh(order);
         return Optional.of(order.toDTO());
     }
 
