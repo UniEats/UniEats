@@ -83,3 +83,135 @@
     background-color: #6c757d;
     cursor: not-allowed;
 }
+
+/* Preparation overlay */
+.prepOverlay {
+    position: fixed;
+    top: 5vh;
+    left: 5vw;
+    right: 5vw;
+    bottom: 5vh;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.prepHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.prepBody {
+    flex: 1 1 auto;
+    min-height: 0; 
+    overflow: auto;
+    padding: 18px 22px;
+}
+
+.checklist {
+    max-height: 60vh;
+    overflow: auto;
+    padding-right: 8px; 
+}
+
+.prepFooter {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 12px 20px 16px;
+    border-top: 1px solid #eee;
+}
+
+.closeBtn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.primaryBtn {
+    background-color: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.primaryBtn[disabled], .primaryBtn[aria-disabled="true"] {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.secondaryBtn {
+    background: #f3f4f6;
+    color: #111827;
+    border: 1px solid #e5e7eb;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.section {
+    margin-bottom: 12px;
+}
+
+.subSection {
+    margin-left: 12px;
+    margin-bottom: 8px;
+}
+
+.checkboxList {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+}
+
+.checkboxItem {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.info {
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.emptyState {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    border: 1px dashed #e6edf3;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    color: #374151;
+    border-radius: 8px;
+}
+
+.emptyInner {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    max-width: 720px;
+}
+
+.emptyIcon {
+    font-size: 36px;
+    line-height: 1;
+}
+
+.emptySubtitle {
+    margin: 6px 0 0;
+    color: #6b7280;
+}

@@ -84,15 +84,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, STAFF_ORDER_ENDPOINTS)
                         .authenticated() // anyone logged in can view orders
                         .requestMatchers(HttpMethod.POST, STAFF_ORDER_ENDPOINTS)
-                        .hasAnyRole("STAFF", "ADMIN")
+                        .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
                         .requestMatchers(HttpMethod.PUT, STAFF_ORDER_ENDPOINTS)
-                        .hasAnyRole("STAFF", "ADMIN")
+                        .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
                         .requestMatchers(HttpMethod.PATCH, STAFF_ORDER_ENDPOINTS)
-                        .hasAnyRole("STAFF", "ADMIN")
+                        .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
                         .requestMatchers(HttpMethod.DELETE, STAFF_ORDER_ENDPOINTS)
-                        .hasAnyRole("STAFF", "ADMIN")
+                        .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
 
-                        // Admin-only sections
+                        // Read-only access for staff to view products/combos
+                        .requestMatchers(HttpMethod.GET, "/products/**", "/combos/**").hasAnyRole("STAFF", "ADMIN", "KITCHEN")
+
+                        // Admin-only sections (create/update/delete)
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN")
 
                         // Default deny

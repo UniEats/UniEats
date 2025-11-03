@@ -8,9 +8,7 @@ import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +27,11 @@ class OrderService {
     private final ProductRepository productRepository;
     private final ComboRepository comboRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
-        private static final Long STATUS_INITIATED = 1L;
-        private static final Long STATUS_CONFIRMED = 2L;
-        private static final Long STATUS_IN_PREPARATION = 3L;
-        private static final Long STATUS_FINISHED = 4L;
-        private static final Long STATUS_DELIVERED = 5L;
-        private static final Long STATUS_CANCELED = 6L;
+    private static final Long STATUS_CONFIRMED = 1L;
+    private static final Long STATUS_IN_PREPARATION = 2L;
+    private static final Long STATUS_READY = 3L;
+    private static final Long STATUS_COMPLETE = 4L;
+    private static final Long STATUS_CANCELED = 5L;
 
     public List<OrderDTO> geAlltOrders() {
         return orderRepository.findAll()
@@ -46,10 +40,11 @@ class OrderService {
                 .toList();
     }
 
+    // Return only orders in 'confirmed' status
     public List<OrderDTO> getConfirmedOrders() {
         return orderRepository.findAll()
                 .stream()
-                .filter(order -> STATUS_CONFIRMED.equals(order.getState().getId()))
+                .filter(o -> o.getState() != null && STATUS_CONFIRMED.equals(o.getState().getId()))
                 .map(OrderDTO::new)
                 .toList();
     }
@@ -87,10 +82,12 @@ class OrderService {
         Order order = new Order();
         order.setUserId(userId);
         order.setCreationDate(LocalDateTime.now());
-        order.setState(entityManager.getReference(OrderStatus.class, STATUS_INITIATED));
-        order.setTotalPrice(BigDecimal.ZERO);
 
-        order = orderRepository.save(order);
+        OrderStatus confirmedStatus = new OrderStatus(STATUS_CONFIRMED, "confirmed");
+        order.setState(confirmedStatus);
+
+    // Do not persist the order before adding details. Persist at the end so
+    // CascadeType.PERSIST on the details relationship saves the children.
 
         BigDecimal totalPrice = BigDecimal.ZERO;
 
@@ -114,65 +111,8 @@ class OrderService {
         }
 
         order.calculateTotal();
-        // Save order with details to ensure all IDs are assigned before converting to DTO
         order = orderRepository.save(order);
-        // Flush to ensure IDs are assigned to all details
-        orderRepository.flush();
-        entityManager.refresh(order);
         return Optional.of(order.toDTO());
-    }
-
-    @Transactional
-    public Optional<OrderDTO> confirmOrder(Long id) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        if (!STATUS_INITIATED.equals(order.getState().getId())) {
-            throw new IllegalStateException("Order must be in initiated state to confirm");
-        }
-        
-        // Validación de disponibilidad: todos los productos/combos del pedido deben existir y tener stock
-        try {
-            for (OrderDetail detail : order.getDetails()) {
-                if (detail.getProduct() != null) {
-                    Product product = detail.getProduct();
-                    // Verificar que el producto existe en BD (ya está cargado por la relación)
-                    if (product.getId() == null) {
-                        throw new IllegalStateException("Product in order detail does not exist");
-                    }
-                    // Verificar disponibilidad de ingredientes del producto solo si tiene ingredientes configurados
-                    if (product.getProductIngredients() != null && !product.getProductIngredients().isEmpty()) {
-                        if (!isProductInStock(product)) {
-                            throw new IllegalStateException("Product '" + product.getName() + "' is not available (out of stock)");
-                        }
-                    }
-                }
-                if (detail.getCombo() != null) {
-                    Combo combo = detail.getCombo();
-                    // Verificar que el combo existe en BD
-                    if (combo.getId() == null) {
-                        throw new IllegalStateException("Combo in order detail does not exist");
-                    }
-                    // Verificar disponibilidad de todos los productos del combo solo si tiene productos configurados
-                    if (combo.getComboProducts() != null && !combo.getComboProducts().isEmpty()) {
-                        if (!isComboInStock(combo)) {
-                            throw new IllegalStateException("Combo '" + combo.getName() + "' is not available (out of stock)");
-                        }
-                    }
-                }
-            }
-        } catch (IllegalStateException e) {
-            // Re-throw validation errors
-            throw e;
-        } catch (Exception e) {
-            // Log and wrap unexpected errors during validation
-            System.err.println("Error during order confirmation validation: " + e.getMessage());
-            e.printStackTrace();
-            // Allow confirmation to proceed if validation check fails (graceful degradation)
-            // In production, you might want to fail-fast instead
-        }
-        
-        order.setState(entityManager.getReference(OrderStatus.class, STATUS_CONFIRMED));
-        return Optional.of(orderRepository.save(order).toDTO());
     }
 
     @Transactional
@@ -196,7 +136,15 @@ class OrderService {
         if (!STATUS_CONFIRMED.equals(order.getState().getId())) {
             throw new IllegalStateException("Order must be confirmed to start preparation");
         }
-    order.setState(entityManager.getReference(OrderStatus.class, STATUS_IN_PREPARATION));
+        order.setState(new OrderStatus(STATUS_IN_PREPARATION, "in preparation"));
+        return Optional.of(orderRepository.save(order).toDTO());
+    }
+
+    @Transactional
+    public Optional<OrderDTO> confirmOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        order.setState(new OrderStatus(STATUS_CONFIRMED, "confirmed"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
 
@@ -207,7 +155,7 @@ class OrderService {
         if (!STATUS_IN_PREPARATION.equals(order.getState().getId())) {
             throw new IllegalStateException("Order must be in preparation to mark ready");
         }
-    order.setState(entityManager.getReference(OrderStatus.class, STATUS_FINISHED));
+        order.setState(new OrderStatus(STATUS_READY, "ready for pickup"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
 
@@ -215,10 +163,10 @@ class OrderService {
     public Optional<OrderDTO> pickup(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        if (!STATUS_FINISHED.equals(order.getState().getId())) {
-            throw new IllegalStateException("Order must be finished to be delivered");
+        if (!STATUS_READY.equals(order.getState().getId())) {
+            throw new IllegalStateException("Order must be ready for pickup");
         }
-    order.setState(entityManager.getReference(OrderStatus.class, STATUS_DELIVERED));
+        order.setState(new OrderStatus(STATUS_COMPLETE, "complete"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
 
@@ -226,12 +174,12 @@ class OrderService {
     public Optional<OrderDTO> cancelOrder(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-    if (STATUS_IN_PREPARATION.equals(order.getState().getId()) ||
-        STATUS_FINISHED.equals(order.getState().getId()) ||
-        STATUS_DELIVERED.equals(order.getState().getId())) {
+        if (STATUS_IN_PREPARATION.equals(order.getState().getId()) ||
+                STATUS_READY.equals(order.getState().getId()) ||
+                STATUS_COMPLETE.equals(order.getState().getId())) {
             throw new IllegalStateException("Order cannot be canceled once preparation has started");
         }
-    order.setState(entityManager.getReference(OrderStatus.class, STATUS_CANCELED));
+        order.setState(new OrderStatus(STATUS_CANCELED, "canceled"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
 
