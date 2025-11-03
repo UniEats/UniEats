@@ -1,7 +1,8 @@
 import React from 'react';
-import { useCart } from './Cart';
-import { useProducts } from '../Product/ProductContext';
+import { useCart, CartItem } from './Cart';
+import { useProducts, MenuItem } from '../Product/ProductContext';
 import { OrderService } from '../../services/OrderService';
+import { Combo } from '@/models/Combo';
 import styles from './CartView.module.css';
 
 export const CartView: React.FC = () => {
@@ -18,13 +19,18 @@ export const CartView: React.FC = () => {
 
     const handleCheckout = async () => {
         try {
-            const orderDetails = validItems.map((item: any) => ({
-                productId: item.type === 'product' ? item.id : null,
-                comboId: item.type === 'combo' ? item.id : null,
-                quantity: item.quantity,
-                price: item.type === 'product' ? productsMap[item.id].price : combosMap[item.id].price,
-                discount: 0
-            }));
+            const orderDetails = validItems.map((item: CartItem) => {
+                const product = item.type === 'product' ? (productsMap[item.id] as MenuItem | undefined) : undefined;
+                const combo = item.type === 'combo' ? (combosMap[item.id] as Combo | undefined) : undefined;
+                const price = product ? product.price : combo ? combo.price : 0;
+                return {
+                    productId: item.type === 'product' ? item.id : null,
+                    comboId: item.type === 'combo' ? item.id : null,
+                    quantity: item.quantity,
+                    price,
+                    discount: 0
+                };
+            });
 
                 const order = await OrderService.createOrder({ details: orderDetails });
                 // Confirmar la orden inmediatamente después de crearla (simular pago)
@@ -45,9 +51,9 @@ export const CartView: React.FC = () => {
         <div className={styles.cartContainer}>
             <h2>Your order</h2>
             <div className={styles.cartItems}>
-                {validItems.map((item: any) => {
-                    const product = item.type === 'product' ? productsMap[item.id] : null;
-                    const combo = item.type === 'combo' ? combosMap[item.id] : null;
+                {validItems.map((item: CartItem) => {
+                    const product = item.type === 'product' ? (productsMap[item.id] as MenuItem | undefined) : undefined;
+                    const combo = item.type === 'combo' ? (combosMap[item.id] as Combo | undefined) : undefined;
                     const name = product ? product.name : combo ? combo.name : '';
                     const price = product ? product.price : combo ? combo.price : 0;
 

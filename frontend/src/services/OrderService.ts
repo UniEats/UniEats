@@ -13,7 +13,7 @@ interface OrderCreateDTO {
 
 export class OrderService {
     private static getBaseUrl() {
-        const w = (window as any);
+        const w = (window as unknown) as { _env_?: Record<string, unknown> } | undefined;
         const env = w?._env_ ?? {};
         const base = env.VITE_BACKEND_URL ?? env.baseApiUrl ?? '/api';
         return String(base).replace(/\/$/, '');
@@ -32,7 +32,9 @@ export class OrderService {
                     } as const;
                 }
             }
-        } catch (e) {}
+        } catch {
+            // ignore JSON parse errors
+        }
         return { 'Content-Type': 'application/json' } as const;
     }
 
@@ -49,13 +51,15 @@ export class OrderService {
         });
         return response.data;
     }
-    static async getConfirmedOrders(): Promise<any[]> {
-        const response = await axios.get<any>(`${this.BASE_URL}/confirmed`, {
+    static async getConfirmedOrders(): Promise<Order[]> {
+        const response = await axios.get<Order[] | { content: Order[] }>(`${this.BASE_URL}/confirmed`, {
             headers: this.getAuthHeaders(),
         });
         const data = response.data;
-        if (Array.isArray(data)) return data;
-        if (data && Array.isArray((data as any).content)) return (data as any).content;
+        if (Array.isArray(data)) return data as Order[];
+        if (data && typeof data === 'object' && Array.isArray((data as { content?: unknown }).content)) {
+            return (data as { content: Order[] }).content;
+        }
         // Unexpected shape; return empty array to avoid runtime crash
         return [];
     }

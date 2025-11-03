@@ -51,8 +51,8 @@ export const KitchenOrders = () => {
             const confirmedOrders = await OrderService.getConfirmedOrders();
             const list = Array.isArray(confirmedOrders)
                 ? confirmedOrders
-                : (confirmedOrders && Array.isArray((confirmedOrders as any).content))
-                    ? (confirmedOrders as any).content
+                : (confirmedOrders && typeof confirmedOrders === 'object' && Array.isArray((confirmedOrders as { content?: unknown }).content))
+                    ? (confirmedOrders as { content: OrderDTO[] }).content
                     : [];
             setOrders(list as OrderDTO[]);
             if (!Array.isArray(confirmedOrders)) {
@@ -73,8 +73,8 @@ export const KitchenOrders = () => {
                 method: 'GET',
                 headers: { Accept: 'application/json', Authorization: `Bearer ${await getAccessToken()}` },
             });
-            const freshOrder1 = await handleResponse(orderResp1, (json) => json as OrderDTO);
-            if ((freshOrder1 as any).stateId === 1) {
+            const freshOrder1 = await handleResponse(orderResp1, (json) => json as OrderDTO) as OrderDTO;
+            if ((freshOrder1 as OrderDTO).stateId === 1) {
                 const startResp = await fetch(`${BASE_API_URL}/orders/${orderId}/start-preparation`, {
                     method: 'POST',
                     headers: { Authorization: `Bearer ${await getAccessToken()}` },
@@ -84,9 +84,9 @@ export const KitchenOrders = () => {
                     method: 'GET',
                     headers: { Accept: 'application/json', Authorization: `Bearer ${await getAccessToken()}` },
                 });
-                const freshOrder2 = await handleResponse(orderResp2, (json) => json as OrderDTO);
-                setActiveOrder(freshOrder2 as OrderDTO);
-                setCheckState(buildInitialChecklist(freshOrder2 as OrderDTO));
+                const freshOrder2 = await handleResponse(orderResp2, (json) => json as OrderDTO) as OrderDTO;
+                setActiveOrder(freshOrder2);
+                setCheckState(buildInitialChecklist(freshOrder2));
                 return;
             }
             setActiveOrder(freshOrder1 as OrderDTO);
@@ -110,23 +110,23 @@ export const KitchenOrders = () => {
         for (const d of order.details || []) {
             if (d.productId) {
                 const p = pMap[d.productId];
-                if (p && p.ingredients) {
-                    Object.keys(p.ingredients).forEach((ingId) => {
-                        const key = `p:${p.id}:i:${ingId}`;
-                        map[key] = false;
-                    });
-                }
+                const ings = getProductIngredients(p);
+                ings.forEach((ing) => {
+                    const ingId = String(ing.id ?? ing.name);
+                    const key = `p:${p?.id ?? d.productId}:i:${ingId}`;
+                    map[key] = false;
+                });
             } else if (d.comboId) {
                 const combo = cMap[d.comboId];
                 if (combo && combo.products) {
-                    combo.products.forEach((cp: { id: number; name: string; quantity: number }) => {
+                    combo.products.forEach((cp: { id: number; name?: string; quantity?: number }) => {
                         const product = pMap[cp.id];
-                        if (product && product.ingredients) {
-                            Object.keys(product.ingredients).forEach((ingId) => {
-                                const key = `c:${combo.id}:p:${product.id}:i:${ingId}`;
-                                map[key] = false;
-                            });
-                        }
+                        const ings = getProductIngredients(product);
+                        ings.forEach((ing) => {
+                            const ingId = String(ing.id ?? ing.name);
+                            const key = `c:${combo.id}:p:${product?.id ?? cp.id}:i:${ingId}`;
+                            map[key] = false;
+                        });
                     });
                 }
             }
@@ -134,17 +134,52 @@ export const KitchenOrders = () => {
         return map;
     };
 
-    const indexProductsById = () => {
-        const byId: Record<number, any> = {};
-        const list = (productsQuery.data || []) as any[];
+        type IngredientEntry = { id?: number | string; name: string; quantity?: number };
+        type ProductWithIngredientsLocal = { id?: number; name?: string; ingredients?: unknown };
+        type ComboProductEntry = { id: number; name?: string; quantity?: number };
+        type ComboLocal = { id: number; name?: string; products?: ComboProductEntry[] };
+
+        const getProductIngredients = (product?: ProductWithIngredientsLocal | null): IngredientEntry[] => {
+        if (!product) return [];
+        const ings: IngredientEntry[] = [];
+            const prodIngredients = (product as ProductWithIngredientsLocal).ingredients;
+        if (Array.isArray(prodIngredients)) {
+            for (const it of prodIngredients) {
+                if (!it) continue;
+                const rec = it as Record<string, unknown>;
+                const id = (typeof rec['id'] === 'number' || typeof rec['id'] === 'string') ? (rec['id'] as number | string) : undefined;
+                const name = typeof rec['name'] === 'string' ? (rec['name'] as string) : String(it);
+                const quantity = typeof rec['quantity'] === 'number' ? (rec['quantity'] as number) : undefined;
+                ings.push({ id, name, quantity });
+            }
+            return ings;
+        }
+        // or ingredients may be a map/object { id: name }
+            if (prodIngredients && typeof prodIngredients === 'object') {
+                Object.entries(prodIngredients).forEach(([k, v]) => {
+                    ings.push({ id: k, name: String(v) });
+                });
+            return ings;
+        }
+        return [];
+    };
+
+    const indexProductsById = (): Record<number, ProductWithIngredientsLocal> => {
+        const byId: Record<number, ProductWithIngredientsLocal> = {};
+        const list = (productsQuery.data || []) as unknown[];
         if (Array.isArray(list) && list.length > 0) {
-            list.forEach((p: any) => (byId[p.id] = p));
+            list.forEach((p) => {
+                const item = p as ProductWithIngredientsLocal;
+                if (item && typeof item.id === 'number') byId[item.id] = item;
+            });
         }
         try {
-            Object.values(productsMap || {}).forEach((p: any) => {
-                if (!byId[p.id]) byId[p.id] = p;
+            (Object.values(productsMap || {}) as ProductWithIngredientsLocal[]).forEach((p) => {
+                if (typeof p?.id === 'number' && !byId[p.id]) byId[p.id] = p;
             });
-        } catch (e) {}
+        } catch {
+            // ignore map merging errors
+        }
         if (Object.keys(byId).length === 0) {
             console.warn('KitchenOrders: no product data available from productsQuery or productsMap. Check permissions or token.');
         }
@@ -152,17 +187,22 @@ export const KitchenOrders = () => {
         return byId;
     };
 
-    const indexCombosById = () => {
-        const byId: Record<number, any> = {};
-        const list = (combosQuery.data || []) as any[];
+    const indexCombosById = (): Record<number, ComboLocal> => {
+        const byId: Record<number, ComboLocal> = {};
+        const list = (combosQuery.data || []) as unknown[];
         if (Array.isArray(list) && list.length > 0) {
-            list.forEach((c: any) => (byId[c.id] = c));
+            list.forEach((c) => {
+                const item = c as ComboLocal;
+                if (item && typeof item.id === 'number') byId[item.id] = item;
+            });
         }
         try {
-            Object.values(combosMap || {}).forEach((c: any) => {
-                if (!byId[c.id]) byId[c.id] = c;
+            (Object.values(combosMap || {}) as ComboLocal[]).forEach((c) => {
+                if (typeof c?.id === 'number' && !byId[c.id]) byId[c.id] = c;
             });
-        } catch (e) {}
+        } catch {
+            // ignore map merging errors
+        }
 
         if (Object.keys(byId).length === 0) {
             console.warn('KitchenOrders: no combo data available from combosQuery or combosMap.');
@@ -189,9 +229,9 @@ export const KitchenOrders = () => {
                 method: 'GET',
                 headers: { Accept: 'application/json', Authorization: `Bearer ${await getAccessToken()}` },
             });
-            const freshOrder = await handleResponse(orderResp, (json) => json as OrderDTO);
-            if ((freshOrder as any).stateId !== 2) {
-                if ((freshOrder as any).stateId === 1) {
+            const freshOrder = await handleResponse(orderResp, (json) => json as OrderDTO) as OrderDTO;
+            if ((freshOrder as OrderDTO).stateId !== 2) {
+                if ((freshOrder as OrderDTO).stateId === 1) {
                     const startResp = await fetch(`${BASE_API_URL}/orders/${freshOrder.id}/start-preparation`, {
                         method: 'POST',
                         headers: { Authorization: `Bearer ${await getAccessToken()}` },
@@ -237,7 +277,6 @@ export const KitchenOrders = () => {
             <div className={styles.ordersList}>
                 {orders.map((order: OrderDTO) => {
                     const when = order.createdAt ?? order.creationDate ?? '';
-                    const details = Array.isArray(order.details) ? order.details : [];
                     return (
                         <div key={order.id} className={styles.orderCard}>
                             <div className={styles.orderHeader}>
@@ -245,21 +284,6 @@ export const KitchenOrders = () => {
                                 <span className={styles.timestamp}>
                                     {when ? new Date(when).toLocaleString() : ''}
                                 </span>
-                            </div>
-                            <div className={styles.orderItems}>
-                                {details.map((item, index) => {
-                                    const name = item.productId
-                                        ? (productsMap[item.productId]?.name ?? `Producto #${item.productId}`)
-                                        : item.comboId
-                                            ? (combosMap[item.comboId]?.name ?? `Combo #${item.comboId}`)
-                                            : 'Ítem';
-                                    return (
-                                        <div key={index} className={styles.item}>
-                                            <span className={styles.quantity}>{item.quantity}x</span>
-                                            <span>{name}</span>
-                                        </div>
-                                    );
-                                })}
                             </div>
                             <button
                                 className={styles.startButton}
@@ -306,19 +330,20 @@ export const KitchenOrders = () => {
                                         return (
                                             <div key={`d-${d.id}`} className={styles.section}>
                                                 <h4>{d.quantity}× {p.name}</h4>
-                                                <ul className={styles.checkboxList}>
-                                                    {Object.entries(p.ingredients || {}).map(([ingId, ingName]) => {
-                                                        const key = `p:${p.id}:i:${ingId}`;
-                                                        return (
-                                                            <li key={key}>
-                                                                <label className={styles.checkboxItem}>
-                                                                    <input type="checkbox" checked={!!checkState[key]} onChange={() => toggleCheck(key)} />
-                                                                    <span>{String(ingName)}</span>
-                                                                </label>
-                                                            </li>
-                                                        );
-                                                    })}
-                                                </ul>
+                                                        <ul className={styles.checkboxList}>
+                                                            {getProductIngredients(p).map((ing) => {
+                                                                const ingId = String(ing.id ?? ing.name);
+                                                                const key = `p:${p.id}:i:${ingId}`;
+                                                                return (
+                                                                    <li key={key}>
+                                                                        <label className={styles.checkboxItem}>
+                                                                            <input type="checkbox" checked={!!checkState[key]} onChange={() => toggleCheck(key)} />
+                                                                            <span>{ing.name}</span>
+                                                                        </label>
+                                                                    </li>
+                                                                );
+                                                            })}
+                                                        </ul>
                                             </div>
                                         );
                                     }
@@ -327,21 +352,22 @@ export const KitchenOrders = () => {
                                         return (
                                             <div key={`d-${d.id}`} className={styles.section}>
                                                 <h4>{d.quantity}× {combo ? combo.name : `Combo #${d.comboId}`}</h4>
-                                                {(combo?.products || []).map((cp: any) => {
+                                                {(combo?.products || []).map((cp: ComboProductEntry) => {
                                                     const p = indexProductsById()[cp.id];
                                                     const totalQty = (cp.quantity || 1) * (d.quantity || 1);
                                                     return (
                                                         <div key={`c-${combo?.id}-p-${cp.id}`} className={styles.subSection}>
                                                             <h5>{totalQty}× {p ? p.name : `Producto #${cp.id}`}</h5>
-                                                            {p ? (
+                                                                {p ? (
                                                                 <ul className={styles.checkboxList}>
-                                                                    {Object.entries(p.ingredients || {}).map(([ingId, ingName]) => {
+                                                                    {getProductIngredients(p).map((ing) => {
+                                                                        const ingId = String(ing.id ?? ing.name);
                                                                         const key = `c:${combo?.id}:p:${p.id}:i:${ingId}`;
                                                                         return (
                                                                             <li key={key}>
                                                                                 <label className={styles.checkboxItem}>
                                                                                     <input type="checkbox" checked={!!checkState[key]} onChange={() => toggleCheck(key)} />
-                                                                                    <span>{String(ingName)}</span>
+                                                                                    <span>{ing.name}</span>
                                                                                 </label>
                                                                             </li>
                                                                         );
