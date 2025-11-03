@@ -87,9 +87,6 @@ class OrderService {
         OrderStatus confirmedStatus = new OrderStatus(STATUS_CONFIRMED, "confirmed");
         order.setState(confirmedStatus);
 
-    // Do not persist the order before adding details. Persist at the end so
-    // CascadeType.PERSIST on the details relationship saves the children.
-
         BigDecimal totalPrice = BigDecimal.ZERO;
 
         for (OrderDetailCreateDTO detailDto : dto.details()) {
@@ -172,7 +169,6 @@ class OrderService {
             }
         }
 
-        order.setState(entityManager.getReference(OrderStatus.class, STATUS_IN_PREPARATION));
         order.setState(new OrderStatus(STATUS_IN_PREPARATION, "in preparation"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
@@ -219,7 +215,6 @@ class OrderService {
         order.setState(new OrderStatus(STATUS_CANCELED, "canceled"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
-
 
     public boolean deleteOrder(long id) {
         if (!orderRepository.existsById(id)){
