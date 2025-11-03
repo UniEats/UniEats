@@ -35,4 +35,7 @@ public class ProductIngredient {
     @JoinColumn(name = "ID_ing")
     private Ingredient ingredient;
 
+    @Column(nullable = false)
+    private Integer quantity;
+
 }

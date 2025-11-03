@@ -115,6 +115,12 @@
     transform 0.2s ease;
 }
 
+.product-cta.unavailable {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
 .product-cta:hover {
   background: #bf0c2b;
   transform: translateY(-1px);

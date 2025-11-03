@@ -7,6 +7,7 @@ import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
+import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ class OrderService {
     private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
     private final ComboRepository comboRepository;
+    private final IngredientRepository ingredientRepository;
 
     private static final Long STATUS_CONFIRMED = 1L;
     private static final Long STATUS_IN_PREPARATION = 2L;
@@ -40,7 +42,6 @@ class OrderService {
                 .toList();
     }
 
-    // Return only orders in 'confirmed' status
     public List<OrderDTO> getConfirmedOrders() {
         return orderRepository.findAll()
                 .stream()
@@ -129,13 +130,49 @@ class OrderService {
         return Optional.of(savedOrder.toDTO());
     }
 
+    private void discountIngredientsForProduct(Product product, int quantityOrdered) {
+        if (product.getProductIngredients() == null) return;
+
+        product.getProductIngredients().forEach(pi -> {
+            var ingredient = pi.getIngredient();
+            int required = pi.getQuantity() * quantityOrdered;
+
+            int newStock = ingredient.getStock() - required;
+            if (newStock < 0) {
+                throw new IllegalStateException(
+                        "Not enough stock for ingredient: " + ingredient.getName()
+                );
+            }
+
+            ingredient.setStock(newStock);
+            ingredientRepository.save(ingredient);
+        });
+    }
+
     @Transactional
     public Optional<OrderDTO> startPreparation(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
         if (!STATUS_CONFIRMED.equals(order.getState().getId())) {
             throw new IllegalStateException("Order must be confirmed to start preparation");
         }
+
+        for (OrderDetail detail : order.getDetails()) {
+            if (detail.getProduct() != null) {
+                Product product = detail.getProduct();
+                discountIngredientsForProduct(product, detail.getQuantity());
+            } else if (detail.getCombo() != null) {
+                Combo combo = detail.getCombo();
+                for (var comboProduct : combo.getComboProducts()) {
+                    Product product = comboProduct.getProduct();
+                    int comboQuantity = comboProduct.getQuantity() * detail.getQuantity();
+                    discountIngredientsForProduct(product, comboQuantity);
+                }
+            }
+        }
+
+        order.setState(entityManager.getReference(OrderStatus.class, STATUS_IN_PREPARATION));
         order.setState(new OrderStatus(STATUS_IN_PREPARATION, "in preparation"));
         return Optional.of(orderRepository.save(order).toDTO());
     }

@@ -11,6 +11,7 @@ import { MenuSection, MenuItem, ComboItem } from "@/models/Menu";
 type DisplayItem = (MenuItem | ComboItem) & {
   type: 'product' | 'combo';
   tags?: Record<number, string> | undefined;
+  available?: boolean;
 };
 
 type MenuProps = {
@@ -72,6 +73,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
         image: c.image
           ? new TextDecoder().decode(c.image)
           : undefined,
+        available: c.available,
       }))
     );
     setCombos(allCombos);
@@ -111,8 +113,8 @@ export const Menu = ({ menuSections }: MenuProps) => {
   const displayItems: DisplayItem[] = useMemo(() => {
     if (!activeSection) return [];
 
-    const products: DisplayItem[] = activeSection.products.map(p => ({ ...p, type: 'product' }));
-    const combos: DisplayItem[] = activeSection.combos.map(c => ({ ...c, type: 'combo' }));
+    const products: DisplayItem[] = activeSection.products.map(p => ({ ...p, type: 'product', available: p.available }));
+    const combos: DisplayItem[] = activeSection.combos.map(c => ({ ...c, type: 'combo', available: c.available }));
 
     return [...products, ...combos];
   }, [activeSection]);
@@ -163,6 +165,7 @@ return (
                       tags={item.tags ? Object.values(item.tags) : []}
                       onDelete={() => handleDeleteItem(item.id, item.type)}
                       onAddToCart={(id, quantity) => handleAddToCart(id, item.type, quantity)}
+                      available={item.available}
                   />
                   ))}
                 </div>

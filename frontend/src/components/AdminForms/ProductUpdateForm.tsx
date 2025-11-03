@@ -128,8 +128,10 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
                       formData.setFieldValue("name", matchedProduct?.name ?? "");
                       formData.setFieldValue("description", matchedProduct?.description ?? "");
                       formData.setFieldValue("price", matchedProduct?.price?.toString() ?? "");
-
-                      formData.setFieldValue("ingredientIds", Object.keys(matchedProduct?.ingredients || {}));
+                      formData.setFieldValue(
+                        "ingredientIds",
+                        (matchedProduct?.ingredients || []).map(i => ({ id: String(i.id), quantity: i.quantity }))
+                      );
                       formData.setFieldValue("tagIds", Object.keys(matchedProduct?.tags || {}));
                       formData.setFieldValue("menuSectionIds", Object.keys(matchedProduct?.menuSections || {}));
                    
@@ -163,33 +165,42 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
             children={(field) => (
               <div className={styles.formFields}>
                 <span className={styles.fieldLabel}>Ingredients</span>
-                <div className={styles.optionsGrid}>
                   {ingredients.map((ingredient) => {
-                    const optionValue = ingredient.id.toString();
-                    const isChecked = field.state.value.includes(optionValue);
+                    const selectedIngredient = field.state.value.find((i: {id: string; quantity: number;}) => i.id === ingredient.id.toString());
+                    const quantity = selectedIngredient?.quantity ?? 1;
+
                     return (
-                      <label key={ingredient.id} className={styles.optionRow}>
+                      <div key={ingredient.id} className={styles.optionRow}>
                         <input
                           type="checkbox"
-                          value={optionValue}
-                          checked={isChecked}
-                          onChange={(event) => {
-                            const { checked, value } = event.target;
-                            const nextValue = checked
-                              ? [...field.state.value, value]
-                              : field.state.value.filter((item) => item !== value);
+                          checked={!!selectedIngredient}
+                          onChange={(e) => {
+                            let nextValue = [...field.state.value];
+                            if (e.target.checked) {
+                              nextValue.push({ id: ingredient.id.toString(), quantity });
+                            } else {
+                              nextValue = nextValue.filter((i: {id: string; quantity: number;}) => i.id !== ingredient.id.toString());
+                            }
                             field.handleChange(nextValue);
                           }}
-                          onBlur={field.handleBlur}
                         />
-                        <span>
-                          {ingredient.name}
-                          {ingredient.description ? ` – ${ingredient.description}` : ""}
-                        </span>
-                      </label>
+                        <span>{ingredient.name}</span>
+                        {selectedIngredient && (
+                          <input
+                            type="number"
+                            min={1}
+                            value={quantity}
+                            onChange={(e) => {
+                              const nextValue = field.state.value.map((i: {id: string; quantity: number;}) =>
+                                i.id === ingredient.id.toString() ? { ...i, quantity: parseInt(e.target.value, 10) || 1 } : i
+                              );
+                              field.handleChange(nextValue);
+                            }}
+                          />
+                        )}
+                      </div>
                     );
                   })}
-                </div>
                 <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
               </div>
             )}

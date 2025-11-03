@@ -11,9 +11,10 @@ interface ProductProps {
   tags: string[];
   onDelete: (id: number) => void;
   onAddToCart?: (id: number, quantity: number) => void;
+  available?: boolean;
 }
 
-export default function Product({ id, image, title, description, price, tags, onDelete, onAddToCart }: ProductProps) {
+export default function Product({ id, image, title, description, price, tags, onDelete, onAddToCart, available }: ProductProps) {
   const imageUrl = useMemo(() => {
     if (!image) return undefined;
 
@@ -71,13 +72,23 @@ export default function Product({ id, image, title, description, price, tags, on
         </div>
         <div className="product-actions">
           {userRole !== "ROLE_ADMIN" ? (
-            <button
-              className="product-cta"
-              type="button"
-              onClick={handleAddClick}
-            >
-              {showCartControls ? "Cancel" : "Add to cart"}
-            </button>
+            available ? (
+              <button
+                className="product-cta"
+                type="button"
+                onClick={handleAddClick}
+              >
+                {showCartControls ? "Cancel" : "Add to cart"}
+              </button>
+            ) : (
+              <button
+                className="product-cta unavailable"
+                type="button"
+                disabled
+              >
+                Not available
+              </button>
+            )
           ) : (
             <>
               {onDelete && (

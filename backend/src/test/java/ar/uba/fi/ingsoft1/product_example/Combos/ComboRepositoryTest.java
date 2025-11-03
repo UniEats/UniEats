@@ -46,7 +46,7 @@ class ComboRepositoryTest {
     @Autowired
     private TagRepository tagRepository;
 
-    ProductIngredient setAllProductIngredient(Product product, Ingredient ingredient) {
+    ProductIngredient setAllProductIngredient(Product product, Ingredient ingredient, int quantity) {
         ProductIngredient pi = new ProductIngredient();
         ProductIngredientId piId = new ProductIngredientId();
         piId.setProductId(product.getId());
@@ -54,6 +54,7 @@ class ComboRepositoryTest {
         pi.setId(piId);
         pi.setProduct(product);
         pi.setIngredient(ingredient);
+        pi.setQuantity(quantity);
         return pi;
     }
 
@@ -78,14 +79,14 @@ class ComboRepositoryTest {
         Product cake = new Product();
         cake.setName("Cake");
         productRepository.save(cake);
-        productIngredientRepository.save(setAllProductIngredient(cake, flour));
-        productIngredientRepository.save(setAllProductIngredient(cake, sugar));
+        productIngredientRepository.save(setAllProductIngredient(cake, flour, 1));
+        productIngredientRepository.save(setAllProductIngredient(cake, sugar, 1));
 
         Product pancake = new Product();
         pancake.setName("Pancake");
         productRepository.save(pancake);
-        productIngredientRepository.save(setAllProductIngredient(pancake, flour));
-        productIngredientRepository.save(setAllProductIngredient(pancake, eggs));
+        productIngredientRepository.save(setAllProductIngredient(pancake, flour, 1));
+        productIngredientRepository.save(setAllProductIngredient(pancake, eggs, 1));
 
         Combo combo1 = new Combo();
         combo1.setName("Combo 1");

@@ -8,6 +8,7 @@ export type MenuItem = {
   price: number;
   tags?: Record<number, string>;
   image?: Uint8Array;
+  available?: boolean;
 };
 
 type ProductsContextType = {

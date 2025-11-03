@@ -26,10 +26,14 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Entity
 @Table(name = "product")
@@ -77,6 +81,28 @@ public class Product {
     @ManyToMany(mappedBy = "products")
     private List<MenuSection> menuSections = new ArrayList<>();
 
+
+    public boolean isAvailable() {
+        if (productIngredients == null || productIngredients.isEmpty()) {
+            return false;
+        }
+
+        for (ProductIngredient pi : productIngredients) {
+            Ingredient ingredient = pi.getIngredient();
+            if (ingredient == null) {
+                return false;
+            }
+
+            int stockDisponible = ingredient.getStock();
+
+            if (stockDisponible < 1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public ProductDTO toDTO() {
         Map<Long, String> tags_ = tags != null
                 ? tags.stream()
@@ -85,14 +111,18 @@ public class Product {
                         Tag::getTag
                     ))
                 : Map.of();
-        Map<Long, String> ingredients = productIngredients != null
-            ? productIngredients.stream()
-                .map(ProductIngredient::getIngredient)
-                .collect(Collectors.toMap(
-                    Ingredient::getId,  
-                    Ingredient::getName 
-                ))
-            : Map.of();
+
+        List<Map<String, Object>> ingredients = productIngredients != null
+                ? productIngredients.stream()
+                .map(pi -> {
+                    Map<String, Object> ingredientMap = new HashMap<>();
+                    ingredientMap.put("id", pi.getIngredient().getId());
+                    ingredientMap.put("name", pi.getIngredient().getName());
+                    ingredientMap.put("quantity", pi.getQuantity());
+                    return ingredientMap;
+                })
+                .collect(Collectors.toList())
+                : Collections.emptyList();
         
         Map<Long, String> menuSections_ = menuSections != null
                 ? menuSections.stream()
@@ -110,7 +140,8 @@ public class Product {
             tags_,
             ingredients,
             menuSections_,
-            this.getImage()
+            this.getImage(),
+            this.isAvailable()
         );
     }  
 

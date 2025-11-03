@@ -20,7 +20,8 @@ public record ComboDTO(
         Map<Long, String> tags,
         List<Map<String, Object>> products,
         Map<Long, String> menuSections,
-        byte[] image
+        byte[] image,
+        Boolean available
 ) {
     public ComboDTO(Combo combo) {
         this(
@@ -53,7 +54,8 @@ public record ComboDTO(
                                 MenuSection::getLabel
                         ))
                         : Map.of(),
-                combo.getImage()
+                combo.getImage(),
+                combo.isAvailable()
          );
     }
 }
