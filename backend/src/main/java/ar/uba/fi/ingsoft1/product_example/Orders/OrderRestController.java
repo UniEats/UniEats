@@ -54,11 +54,13 @@ class OrderRestController {
     }
 
     @PatchMapping("/{id}")
-    public Optional<OrderDTO> updateOrder(
+    public ResponseEntity<OrderDTO> updateOrder(
             @PathVariable Long id,
             @RequestBody OrderUpdateDTO dto
     ) {
-        return orderService.updateOrder(id, dto);
+        return orderService.updateOrder(id, dto)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}/start-preparation")

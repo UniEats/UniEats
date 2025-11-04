@@ -7,6 +7,10 @@ import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
 import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
+import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
+import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
+import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProductId;
+import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -51,6 +55,19 @@ class OrderServiceTest {
         order.setState(new OrderStatus(1L, "confirmed"));
         return order;
     }
+
+    private ProductIngredient createProductIngredient(Product p, Ingredient i, int qty) {
+        var id = new ProductIngredientId(p.getId(), i.getId());
+        ProductIngredient pi = new ProductIngredient(id, p, i, qty);
+        return pi;
+    }
+
+    private ComboProduct createComboProduct(Combo c, Product p, int qty) {
+        var id = new ComboProductId(c.getId(), p.getId());
+        ComboProduct cp = new ComboProduct(id, c, p, qty);
+        return cp;
+    }
+
 
     @Test
     void testGetOrderById_Found() {
@@ -237,5 +254,150 @@ class OrderServiceTest {
         boolean deleted = orderService.deleteOrder(1L);
 
         assertFalse(deleted);
+    }
+
+        @Test
+    void testGetAllOrders_ReturnsResults() {
+        Order order = createValidOrder();
+        when(orderRepository.findAll()).thenReturn(List.of(order));
+
+        List<OrderDTO> result = orderService.geAlltOrders();
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).id());
+    }
+
+    @Test
+    void testGetConfirmedOrders_FiltersCorrectly() {
+        Order confirmed = createValidOrder();
+        Order other = createValidOrder();
+        other.setState(new OrderStatus(2L, "in preparation"));
+
+        when(orderRepository.findAll()).thenReturn(List.of(confirmed, other));
+
+        List<OrderDTO> result = orderService.getConfirmedOrders();
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).id());
+    }
+
+    @Test
+    void testIsProductInStock_True() {
+        Ingredient ingredient = new Ingredient();
+        ingredient.setStock(5);
+
+        ProductIngredient pi = createProductIngredient(productWithIngredients(), ingredient, 1);
+        Product p = pi.getProduct();
+        p.setProductIngredients(List.of(pi));
+
+        assertTrue(orderService.isProductInStock(p));
+    }
+
+    @Test
+    void testIsProductInStock_False() {
+        Ingredient ingredient = new Ingredient();
+        ingredient.setStock(0);
+
+        ProductIngredient pi = createProductIngredient(productWithIngredients(), ingredient, 1);
+        Product p = pi.getProduct();
+        p.setProductIngredients(List.of(pi));
+
+        assertFalse(orderService.isProductInStock(p));
+    }
+
+    private Product productWithIngredients() {
+        return new Product("P1", "desc", BigDecimal.TEN);
+    }
+
+    @Test
+    void testIsComboInStock() {
+        Product p = new Product("P1", "d", BigDecimal.TEN);
+        Ingredient i = new Ingredient();
+        i.setStock(10);
+
+        ProductIngredient pi = createProductIngredient(p, i, 1);
+        p.setProductIngredients(List.of(pi));
+
+        Combo combo = new Combo("C1", "desc", BigDecimal.ONE);
+        combo.setComboProducts(List.of(createComboProduct(combo, p, 1)));
+
+        assertTrue(orderService.isComboInStock(combo));
+    }
+
+    @Test
+    void testIsComboInStock_False() {
+        Product p = new Product("P1", "d", BigDecimal.TEN);
+        Ingredient i = new Ingredient();
+        i.setStock(0);
+
+        ProductIngredient pi = createProductIngredient(p, i, 1);
+        p.setProductIngredients(List.of(pi));
+
+        Combo combo = new Combo("C1", "desc", BigDecimal.ONE);
+        combo.setComboProducts(List.of(createComboProduct(combo, p, 1)));
+
+        assertFalse(orderService.isComboInStock(combo));
+    }
+
+    @Test
+    void testStartPreparation_NotConfirmed_Throws() {
+        Order order = createValidOrder();
+        order.setState(new OrderStatus(3L, "ready"));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        assertThrows(IllegalStateException.class, () -> orderService.startPreparation(1L));
+    }
+
+    @Test
+    void testMarkReady_InvalidState_Throws() {
+        Order order = createValidOrder(); 
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        assertThrows(IllegalStateException.class, () -> orderService.markReady(1L));
+    }
+
+    @Test
+    void testPickup_InvalidState_Throws() {
+        Order order = createValidOrder(); 
+        
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        assertThrows(IllegalStateException.class, () -> orderService.pickup(1L));
+    }
+
+    @Test
+    void testCancelOrder_ForbiddenState_Throws() {
+        Order order = createValidOrder();
+        order.setState(new OrderStatus(3L,"ready"));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        assertThrows(IllegalStateException.class, () -> orderService.cancelOrder(1L));
+    }
+
+    @Test
+    void testDiscountIngredients_ReducesStock() {
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(100L);
+        ingredient.setName("Tomate");
+        ingredient.setStock(10);
+
+        Product p = new Product("P1", "desc", BigDecimal.ONE);
+        p.setId(1L);
+        ProductIngredient pi = createProductIngredient(p, ingredient, 2);
+        p.setProductIngredients(List.of(pi));
+
+        Order order = createValidOrder();
+        OrderDetail detail = new OrderDetail(2, BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ONE);
+        detail.setId(5L);
+        detail.setProduct(p);
+        detail.setOrder(order);
+        order.setDetails(List.of(detail));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(order)).thenReturn(order);
+        when(ingredientRepository.save(any())).thenReturn(ingredient);
+
+        orderService.startPreparation(1L);
+
+        assertEquals(6, ingredient.getStock());
     }
 }

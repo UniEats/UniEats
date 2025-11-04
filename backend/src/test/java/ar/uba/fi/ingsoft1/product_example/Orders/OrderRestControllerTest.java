@@ -159,4 +159,146 @@ class OrderRestControllerTest {
         mockMvc.perform(delete("/orders/999"))
                 .andExpect(status().isNotFound());
     }
+
+        @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void getConfirmedOrders_returnsList() throws Exception {
+        Mockito.when(orderService.getConfirmedOrders())
+                .thenReturn(List.of(orderDTO));
+
+        mockMvc.perform(get("/orders/confirmed"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(1)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void getOrdersWithAllMenuItemsInStock_returnsList() throws Exception {
+        Mockito.when(orderService.getOrdersWithAllMenuItemsInStock())
+                .thenReturn(List.of(orderDTO));
+
+        mockMvc.perform(get("/orders/all-menu-items-in-stock"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(1)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void updateOrder_notFound() throws Exception {
+        OrderUpdateDTO dto = new OrderUpdateDTO(new BigDecimal("600.00"));
+        String json = objectMapper.writeValueAsString(dto);
+
+        Mockito.when(orderService.updateOrder(eq(999L), any()))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(patch("/orders/999")
+                        .content(json)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void startPreparation_success() throws Exception {
+        Mockito.when(orderService.startPreparation(1L))
+                .thenReturn(Optional.of(orderDTO));
+
+        mockMvc.perform(post("/orders/1/start-preparation"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void startPreparation_notFound() throws Exception {
+        Mockito.when(orderService.startPreparation(999L))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/orders/999/start-preparation"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void markReady_success() throws Exception {
+        Mockito.when(orderService.markReady(1L))
+                .thenReturn(Optional.of(orderDTO));
+
+        mockMvc.perform(post("/orders/1/mark-ready"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void markReady_notFound() throws Exception {
+        Mockito.when(orderService.markReady(999L))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/orders/999/mark-ready"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void pickup_success() throws Exception {
+        Mockito.when(orderService.pickup(1L))
+                .thenReturn(Optional.of(orderDTO));
+
+        mockMvc.perform(post("/orders/1/pickup"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void pickup_notFound() throws Exception {
+        Mockito.when(orderService.pickup(999L))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/orders/999/pickup"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void cancelOrder_success() throws Exception {
+        Mockito.when(orderService.cancelOrder(1L))
+                .thenReturn(Optional.of(orderDTO));
+
+        mockMvc.perform(post("/orders/1/cancel"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void cancelOrder_notFound() throws Exception {
+        Mockito.when(orderService.cancelOrder(999L))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/orders/999/cancel"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void confirmOrder_success() throws Exception {
+        Mockito.when(orderService.confirmOrder(1L))
+                .thenReturn(Optional.of(orderDTO));
+
+        mockMvc.perform(post("/orders/1/confirm"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void confirmOrder_notFound() throws Exception {
+        Mockito.when(orderService.confirmOrder(999L))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/orders/999/confirm"))
+                .andExpect(status().isNotFound());
+    }
 }
