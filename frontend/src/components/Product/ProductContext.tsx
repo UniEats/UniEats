@@ -6,6 +6,7 @@ export type MenuItem = {
   name: string;
   description: string;
   price: number;
+  stock: number;
   tags?: Record<number, string>;
   image?: Uint8Array;
   available?: boolean;
@@ -24,12 +25,12 @@ const ProductsContext = createContext<ProductsContextType | undefined>(undefined
 export const ProductsProvider = ({ children }: { children: ReactNode }) => {
   const [productsMap, setProductsMap] = useState<Record<number, MenuItem>>({});
   const [combosMap, setCombosMap] = useState<Record<number, Combo>>({});
-  
+
   const setProducts = (products: MenuItem[]) => {
-    const map: Record<number, MenuItem> = {};
-    products.forEach((p) => (map[p.id] = p));
-    setProductsMap(map);
-  };
+      const map: Record<number, MenuItem> = {};
+      products.forEach((p) => (map[p.id] = { ...p, stock: p.stock ?? 0 })); // 👈 default
+      setProductsMap(map);
+    };
 
   const setCombos = (combos: Combo[]) => {
     const map: Record<number, Combo> = {};

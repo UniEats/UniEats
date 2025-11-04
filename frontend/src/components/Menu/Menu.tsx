@@ -59,8 +59,13 @@ export const Menu = ({ menuSections }: MenuProps) => {
   const { productsMap, setProducts, combosMap, setCombos } = useProducts();
 
   useEffect(() => {
-    const allProducts = menuSections.flatMap(section => section.products);
-    setProducts(allProducts);
+      const allProducts = menuSections.flatMap(section =>
+          section.products.map(p => ({
+              ...p,
+              stock: 0
+          }))
+      );
+      setProducts(allProducts);
     const allCombos = menuSections.flatMap(section =>
       section.combos.map(c => ({
         id: c.id,

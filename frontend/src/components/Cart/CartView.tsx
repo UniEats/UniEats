@@ -17,11 +17,45 @@ export const CartView: React.FC = () => {
         }
     };
 
+    const checkStock = (): string[] => {
+        const outOfStock: string[] = [];
+
+        validItems.forEach(item => {
+            if (item.type === "product") {
+                const product = productsMap[item.id];
+                if (product && product.stock < item.quantity) {
+                    outOfStock.push(product.name);
+                }
+            } else if (item.type === "combo") {
+                const combo = combosMap[item.id];
+                if (combo) {
+                    const missing = combo.products.some((p: { id: number; name: string; quantity: number }) => {
+                        const product = productsMap[p.id];
+                        return product && product.stock < p.quantity * item.quantity;
+                    });
+                    if (missing) {
+                        outOfStock.push(combo.name);
+                    }
+                }
+            }
+        });
+
+        return outOfStock;
+    };
+
+
+
     const handleCheckout = async () => {
         try {
+            const outOfStock = checkStock();
+            if (outOfStock.length > 0) {
+                alert(`There is not stock enough for: ${outOfStock.join(", ")}`);
+                return;
+            }
+
             const orderDetails = validItems.map((item: CartItem) => {
-                const product = item.type === 'product' ? (productsMap[item.id] as MenuItem | undefined) : undefined;
-                const combo = item.type === 'combo' ? (combosMap[item.id] as Combo | undefined) : undefined;
+                const product = item.type === 'product' ? productsMap[item.id] : undefined;
+                const combo = item.type === 'combo' ? combosMap[item.id] : undefined;
                 const price = product ? product.price : combo ? combo.price : 0;
                 return {
                     productId: item.type === 'product' ? item.id : null,
@@ -32,14 +66,14 @@ export const CartView: React.FC = () => {
                 };
             });
 
-                const order = await OrderService.createOrder({ details: orderDetails });
-                // Confirmar la orden inmediatamente después de crearla (simular pago)
-                await OrderService.confirmOrder(order.id);
+            const order = await OrderService.createOrder({ details: orderDetails });
+            await OrderService.confirmOrder(order.id);
+
             clearCart();
             alert('¡Pedido confirmado! El personal de cocina comenzará a prepararlo pronto.');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error al procesar el pedido:', error);
-            alert('Hubo un error al procesar tu pedido. Por favor intenta nuevamente.');
+            alert(error?.response?.data?.message || 'Hubo un error al procesar tu pedido. Por favor intenta nuevamente.');
         }
     };
 
