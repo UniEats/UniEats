@@ -34,6 +34,7 @@ class OrderService {
     private static final Long STATUS_READY = 3L;
     private static final Long STATUS_COMPLETE = 4L;
     private static final Long STATUS_CANCELED = 5L;
+    private static final Long STATUS_INITIATED =6L;
 
     public List<OrderDTO> geAlltOrders() {
         return orderRepository.findAll()
@@ -84,7 +85,7 @@ class OrderService {
         order.setUserId(userId);
         order.setCreationDate(LocalDateTime.now());
 
-        OrderStatus confirmedStatus = new OrderStatus(STATUS_CONFIRMED, "confirmed");
+        OrderStatus confirmedStatus = new OrderStatus(STATUS_INITIATED, "initiated");
         order.setState(confirmedStatus);
 
         BigDecimal totalPrice = BigDecimal.ZERO;
