@@ -4,6 +4,7 @@ import { useProducts, MenuItem } from '../Product/ProductContext';
 import { OrderService } from '../../services/OrderService';
 import { Combo } from '@/models/Combo';
 import styles from './CartView.module.css';
+import type { ComboProduct } from "@/models/Combo";
 
 export const CartView: React.FC = () => {
     const { validItems, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
@@ -29,7 +30,7 @@ export const CartView: React.FC = () => {
             } else if (item.type === "combo") {
                 const combo = combosMap[item.id];
                 if (combo) {
-                    const missing = combo.products.some((p: { id: number; name: string; quantity: number }) => {
+                    const missing = combo.products.some((p: ComboProduct) => {
                         const product = productsMap[p.id];
                         return product && product.stock < p.quantity * item.quantity;
                     });
@@ -70,10 +71,11 @@ export const CartView: React.FC = () => {
             await OrderService.confirmOrder(order.id);
 
             clearCart();
-            alert('¡Pedido confirmado! El personal de cocina comenzará a prepararlo pronto.');
-        } catch (error: any) {
-            console.error('Error al procesar el pedido:', error);
-            alert(error?.response?.data?.message || 'Hubo un error al procesar tu pedido. Por favor intenta nuevamente.');
+            alert('Order Confirmed! The kitchen staff will start preparing it soon.');
+        } catch (error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            console.error("Error processing order:", err);
+            alert(err.response?.data?.message || "Error processing order. Please retry later.");
         }
     };
 
