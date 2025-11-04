@@ -178,6 +178,27 @@ class OrderService {
     public Optional<OrderDTO> confirmOrder(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        for (OrderDetail detail : order.getDetails()) {
+
+            if (detail.getProduct() != null) {
+                Product product = detail.getProduct();
+
+                if (!isProductInStock(product)) {
+                    throw new IllegalStateException(
+                            "There is not enough stock for the product: " + product.getName()
+                    );
+                }
+            }
+
+            if (detail.getCombo() != null) {
+                if (!isComboInStock(detail.getCombo())) {
+                    throw new IllegalStateException(
+                            "There is not enough stock for the combo: " + detail.getCombo().getName()
+                    );
+                }
+            }
+        }
         order.setState(new OrderStatus(STATUS_CONFIRMED, "confirmed"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
