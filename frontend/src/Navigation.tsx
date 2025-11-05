@@ -1,17 +1,17 @@
 import { Redirect, Route, Switch } from "wouter";
 
+import { CartView } from "@/components/Cart/CartView";
+import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
+import { KitchenOrders } from "@/components/KitchenOrders/KitchenOrders";
 import { LoginScreen } from "@/screens/LoginScreen";
 import { MainScreen } from "@/screens/MainScreen";
 import { SignupScreen } from "@/screens/SignupScreen";
 import { useToken, useUserRole } from "@/services/TokenContext";
-import { CartView } from "@/components/Cart/CartView";
-import { KitchenOrders } from "@/components/KitchenOrders/KitchenOrders";
-import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
 
-import { MenuScreen } from "./screens/MenuScreen";
-import { VerifyScreen } from "./screens/VerifyScreen";
 import { ForgotPasswordScreen } from "./screens/ForgotPasswordScreen";
+import { MenuScreen } from "./screens/MenuScreen";
 import { ResetPasswordScreen } from "./screens/ResetPasswordScreen";
+import { VerifyScreen } from "./screens/VerifyScreen";
 
 export const Navigation = () => {
   const [tokenState] = useToken();
@@ -22,7 +22,7 @@ export const Navigation = () => {
       return <Redirect href="/login" />;
     }
     if (tokenState.state === "REFRESHING") {
-      return <div />; 
+      return <div />;
     }
     if (userRole === "ROLE_STAFF") {
       return (
@@ -39,18 +39,12 @@ export const Navigation = () => {
     case "REFRESHING":
       return (
         <Switch>
-          <Route path="/menu">
-            {userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MenuScreen />}
-          </Route>
-          <Route path="/cart">
-            {userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <CartView />}
-          </Route>
+          <Route path="/menu">{userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MenuScreen />}</Route>
+          <Route path="/cart">{userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <CartView />}</Route>
           <Route path="/kitchen">
             <KitchenRouteGuard />
           </Route>
-          <Route path="/">
-            {userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MainScreen />}
-          </Route>
+          <Route path="/">{userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MainScreen />}</Route>
           <Route>
             <Redirect href="/" />
           </Route>
@@ -75,7 +69,7 @@ export const Navigation = () => {
             <VerifyScreen />
           </Route>
           <Route>
-            <Redirect href="/signup" />
+            <Redirect href="/login" />
           </Route>
         </Switch>
       );
