@@ -30,16 +30,16 @@ export function Signup({ onSubmit, submitError }: Props) {
     return (
         <formData.AppForm>
             <formData.FormContainer extraError={submitError}>
-                <formData.AppField name="nombre" children={(field) => <field.TextField label="Nombre" />} />
-                <formData.AppField name="apellido" children={(field) => <field.TextField label="Apellido" />} />
+                <formData.AppField name="nombre" children={(field) => <field.TextField label="Name" />} />
+                <formData.AppField name="apellido" children={(field) => <field.TextField label="Surname" />} />
                 <formData.AppField name="email" children={(field) => <field.TextField label="Email" />} />
-                <formData.AppField name="password" children={(field) => <field.PasswordField label="Contraseña" />} />
-                <formData.AppField name="foto" children={(field) => <field.FileField label="Foto" />} />
-                <formData.AppField name="edad" children={(field) => <field.TextField label="Edad" />} />
-                <formData.AppField name="genero" children={(field) => <field.TextField label="Género" />} />
-                <formData.AppField name="domicilio" children={(field) => <field.TextField label="Domicilio" />} />
+                <formData.AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
+                <formData.AppField name="foto" children={(field) => <field.FileField label="Photo" />} />
+                <formData.AppField name="edad" children={(field) => <field.TextField label="Age" />} />
+                <formData.AppField name="genero" children={(field) => <field.TextField label="Genre" />} />
+                <formData.AppField name="domicilio" children={(field) => <field.TextField label="Residence" />} />
 
-                <button type="submit">Registrarse</button>
+                <button type="submit">Register</button>
             </formData.FormContainer>
         </formData.AppForm>
     );

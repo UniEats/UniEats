@@ -150,7 +150,10 @@ export function useCreateProduct() {
         name: values.name,
         description: values.description,
         price: Number(values.price),
-        ingredientIds: values.ingredientIds.map((id) => Number.parseInt(id, 10)),
+        ingredientIds: values.ingredientIds.map((i) => ({
+          ingredientId: Number(i.id),
+          quantity: i.quantity
+        })),
         tagIds: values.tagIds.map((id) => Number.parseInt(id, 10)),
         menuSectionIds: values.menuSectionIds.map((id) => Number.parseInt(id, 10)),
         image: values.image,
@@ -196,7 +199,10 @@ export function useUpdateProduct() {
       }
 
       if (values.ingredientIds.length > 0) {
-        payload.ingredientIds = values.ingredientIds.map((id) => Number.parseInt(id, 10));
+        payload.ingredientIds = values.ingredientIds.map((i) => ({
+            ingredientId: Number.parseInt(i.id, 10),
+            quantity: i.quantity
+        }));
       }
 
       if (values.tagIds.length > 0) {

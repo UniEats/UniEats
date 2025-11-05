@@ -2,11 +2,11 @@ import { useId, useState } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
-import { ComboUpdateFormSchema, ComboFormValues } from "@/models/Combo";
+import { ComboFormValues, ComboUpdateFormSchema } from "@/models/Combo";
 import { useComboList, useUpdateCombo } from "@/services/ComboServices";
+import { useMenuSectionList } from "@/services/MenuSectionServices";
 import { useProductList } from "@/services/ProductServices";
 import { useTagList } from "@/services/TagServices";
-import { useMenuSectionList } from "@/services/MenuSectionServices";
 
 import styles from "./AdminForms.module.css";
 
@@ -73,11 +73,15 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
     const tagError = tagsQuery.error;
     const menuError = menuSectionsQuery.error;
     const errorMessage =
-      comboError instanceof Error ? comboError.message :
-      productError instanceof Error ? productError.message :
-      tagError instanceof Error ? tagError.message :
-      menuError instanceof Error ? menuError.message :
-      "Failed to load data.";
+      comboError instanceof Error
+        ? comboError.message
+        : productError instanceof Error
+          ? productError.message
+          : tagError instanceof Error
+            ? tagError.message
+            : menuError instanceof Error
+              ? menuError.message
+              : "Failed to load data.";
     return (
       <section className={styles.formSection} aria-live="assertive">
         <p>{errorMessage}</p>
@@ -129,7 +133,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                       formData.setFieldValue("price", matchedCombo?.price?.toString() ?? "");
                       formData.setFieldValue(
                         "productIds",
-                        (matchedCombo?.products || []).map(p => ({ id: String(p.id), quantity: p.quantity }))
+                        (matchedCombo?.products || []).map((p) => ({ id: String(p.id), quantity: p.quantity })),
                       );
                       formData.setFieldValue("tagIds", Object.keys(matchedCombo?.tags || {}));
                       formData.setFieldValue("menuSectionIds", Object.keys(matchedCombo?.menuSections || {}));
@@ -158,12 +162,15 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
           <formData.AppField name="price" children={(field) => <field.TextField label="Price" />} />
 
           <formData.Field
-              name="productIds"
-              children={(field) => (
-                <div className={styles.formFields}>
-                  <span className={styles.fieldLabel}>Products</span>
+            name="productIds"
+            children={(field) => (
+              <div className={styles.formFields}>
+                <span className={styles.fieldLabel}>Products</span>
+                <div className={styles.optionsGrid}>
                   {products.map((product) => {
-                    const selectedProduct = field.state.value.find((p: {id: string; quantity: number;}) => p.id === product.id.toString());
+                    const selectedProduct = field.state.value.find(
+                      (p: { id: string; quantity: number }) => p.id === product.id.toString(),
+                    );
                     const quantity = selectedProduct?.quantity ?? 1;
 
                     return (
@@ -176,7 +183,9 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                             if (e.target.checked) {
                               nextValue.push({ id: product.id.toString(), quantity });
                             } else {
-                              nextValue = nextValue.filter((p: {id: string; quantity: number;}) => p.id !== product.id.toString());
+                              nextValue = nextValue.filter(
+                                (p: { id: string; quantity: number }) => p.id !== product.id.toString(),
+                              );
                             }
                             field.handleChange(nextValue);
                           }}
@@ -188,8 +197,10 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                             min={1}
                             value={quantity}
                             onChange={(e) => {
-                              const nextValue = field.state.value.map((p: {id: string; quantity: number;}) =>
-                                p.id === product.id.toString() ? { ...p, quantity: parseInt(e.target.value, 10) || 1 } : p
+                              const nextValue = field.state.value.map((p: { id: string; quantity: number }) =>
+                                p.id === product.id.toString()
+                                  ? { ...p, quantity: parseInt(e.target.value, 10) || 1 }
+                                  : p,
                               );
                               field.handleChange(nextValue);
                             }}
@@ -198,9 +209,11 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                       </div>
                     );
                   })}
-                  <ErrorContainer errors={normalizeErrors(field.state.meta.errors)} />
                 </div>
-              )}
+
+                <ErrorContainer errors={normalizeErrors(field.state.meta.errors)} />
+              </div>
+            )}
           />
 
           <formData.Field
@@ -236,7 +249,9 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                     })
                   )}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
@@ -274,7 +289,9 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                     })
                   )}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />

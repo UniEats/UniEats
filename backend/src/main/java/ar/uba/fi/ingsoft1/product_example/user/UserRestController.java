@@ -87,7 +87,7 @@ class UserRestController {
 
         if (userRepository.findByUsername(data.email()).isPresent()) {
             Map<String, String> response = new HashMap<>();
-            response.put("message", "El email ya está registrado");
+            response.put("message", "The email is already registered");
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -119,7 +119,7 @@ class UserRestController {
         Map<String, String> response = new HashMap<>();
         response.put(
             "message",
-            "Código de verificación enviado a " + data.email()
+            "Code sent to: " + data.email()
         );
         return ResponseEntity.ok(response);
     }
@@ -131,7 +131,7 @@ class UserRestController {
             request.email()
         );
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("Usuario no encontrado");
+            return ResponseEntity.badRequest().body("User not found");
         }
 
         Map<String, String> response = new HashMap<>();
@@ -140,10 +140,10 @@ class UserRestController {
             user.setVerified(true);
             user.setVerificationCode(null);
             userRepository.save(user);
-            response.put("message", "Correo verificado con éxito");
+            response.put("message", "Email verified succesfully");
             return ResponseEntity.ok(response);
         } else {
-            response.put("message", "Código incorrecto");
+            response.put("message", "Wrong code");
             return ResponseEntity.badRequest().body(response);
         }
     }

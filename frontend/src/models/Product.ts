@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const IngredientsMapSchema = z.record(z.string(), z.string()); 
+export const IngredientsMapSchema = z.array(
+  z.object({
+    id: z.number(),
+    name: z.string(),
+    quantity: z.number(),
+  })
+);
 export const TagsMapSchema = z.record(z.string(), z.string()); 
 export const MenuSectionsMapSchema = z.record(z.string(), z.string()); 
 
@@ -38,7 +44,12 @@ export const ProductFormSchema = z.object({
       },
       "Price cannot have more than two decimal places"
     ),
-  ingredientIds: z.array(z.string()).min(1, "Select at least one ingredient"),
+  ingredientIds: z.array(
+    z.object({
+      id: z.string(),
+      quantity: z.number().min(1, "Quantity must be at least 1"),
+    })
+  ).min(1, "Select at least one ingredient"),
   tagIds: z.array(z.string()),
   menuSectionIds: z.array(z.string()),
   image: z
@@ -66,7 +77,12 @@ export const ProductUpdateFormSchema = z
         },
         "Price cannot have more than two decimal places"
       ),
-    ingredientIds: z.array(z.string()).min(1, "Select at least one ingredient"),
+    ingredientIds: z.array(
+      z.object({
+        id: z.string(),
+        quantity: z.number().min(1, "Quantity must be at least 1"),
+      })
+    ).min(1, "Select at least one ingredient"),
     tagIds: z.array(z.string()),
     menuSectionIds: z.array(z.string()),
     image: z
@@ -95,7 +111,7 @@ export type ProductCreateRequest = {
   name: string;
   description: string;
   price: number;
-  ingredientIds: number[];
+  ingredientIds: { ingredientId: number; quantity: number }[];
   tagIds: number[];
   menuSectionIds: number[];
   image: File;
@@ -105,7 +121,7 @@ export type ProductUpdateRequest = {
   name?: string;
   description?: string;
   price?: number;
-  ingredientIds?: number[];
+  ingredientIds?: { ingredientId: number; quantity: number }[];
   tagIds?: number[];
   menuSectionIds?: number[];
   image?: File;

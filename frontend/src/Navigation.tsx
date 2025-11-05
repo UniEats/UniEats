@@ -1,29 +1,50 @@
 import { Redirect, Route, Switch } from "wouter";
 
+import { CartView } from "@/components/Cart/CartView";
+import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
+import { KitchenOrders } from "@/components/KitchenOrders/KitchenOrders";
 import { LoginScreen } from "@/screens/LoginScreen";
 import { MainScreen } from "@/screens/MainScreen";
 import { SignupScreen } from "@/screens/SignupScreen";
-import { useToken } from "@/services/TokenContext";
+import { useToken, useUserRole } from "@/services/TokenContext";
 
-import { MenuScreen } from "./screens/MenuScreen";
-import { VerifyScreen } from "./screens/VerifyScreen";
 import { ForgotPasswordScreen } from "./screens/ForgotPasswordScreen";
+import { MenuScreen } from "./screens/MenuScreen";
 import { ResetPasswordScreen } from "./screens/ResetPasswordScreen";
+import { VerifyScreen } from "./screens/VerifyScreen";
 
 export const Navigation = () => {
   const [tokenState] = useToken();
+  const userRole = useUserRole();
+
+  const KitchenRouteGuard = () => {
+    if (tokenState.state === "LOGGED_OUT") {
+      return <Redirect href="/login" />;
+    }
+    if (tokenState.state === "REFRESHING") {
+      return <div />;
+    }
+    if (userRole === "ROLE_STAFF") {
+      return (
+        <CommonLayout>
+          <KitchenOrders />
+        </CommonLayout>
+      );
+    }
+    return <Redirect href="/" />;
+  };
 
   switch (tokenState.state) {
     case "LOGGED_IN":
     case "REFRESHING":
       return (
         <Switch>
-          <Route path="/menu">
-            <MenuScreen />
+          <Route path="/menu">{userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MenuScreen />}</Route>
+          <Route path="/cart">{userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <CartView />}</Route>
+          <Route path="/kitchen">
+            <KitchenRouteGuard />
           </Route>
-          <Route path="/">
-            <MainScreen />
-          </Route>
+          <Route path="/">{userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MainScreen />}</Route>
           <Route>
             <Redirect href="/" />
           </Route>
@@ -48,12 +69,11 @@ export const Navigation = () => {
             <VerifyScreen />
           </Route>
           <Route>
-            <Redirect href="/signup" />
+            <Redirect href="/login" />
           </Route>
         </Switch>
       );
     default:
-      // Make the compiler check this is unreachable
       return tokenState satisfies never;
   }
 };

@@ -1,25 +1,33 @@
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
 
+import { ComboForm } from "@/components/AdminForms/ComboForm";
+import { ComboUpdateForm } from "@/components/AdminForms/ComboUpdateForm";
 import { IngredientForm } from "@/components/AdminForms/IngredientForm";
 import { MenuSectionForm } from "@/components/AdminForms/MenuSectionForm";
 import { ProductForm } from "@/components/AdminForms/ProductForm";
 import { ProductUpdateForm } from "@/components/AdminForms/ProductUpdateForm";
 import { TagForm } from "@/components/AdminForms/TagForm";
-import { ComboForm } from "@/components/AdminForms/ComboForm";
-import { ComboUpdateForm } from "@/components/AdminForms/ComboUpdateForm";
 import { Modal } from "@/components/Modal/Modal";
+import { useComboList, useDeleteCombo } from "@/services/ComboServices";
 import { useIngredientList } from "@/services/IngredientServices";
 import { useMenuSectionList } from "@/services/MenuSectionServices";
 import { useDeleteProduct, useProductList } from "@/services/ProductServices";
 import { useTagList } from "@/services/TagServices";
-import { useDeleteCombo, useComboList } from "@/services/ComboServices"
 import { useToken } from "@/services/TokenContext";
 import { useUserCount } from "@/services/UserServices";
 
 import styles from "./AdminDashboard.module.css";
 
-type ModalType = "ingredient" | "tag" | "product-create" | "product-update" | "menu-section" | "combo-create" | "combo-update" | null;
+type ModalType =
+  | "ingredient"
+  | "tag"
+  | "product-create"
+  | "product-update"
+  | "menu-section"
+  | "combo-create"
+  | "combo-update"
+  | null;
 
 type SectionId = (typeof SIDEBAR_ITEMS)[number]["id"];
 
@@ -38,7 +46,7 @@ const SIDEBAR_ITEMS = [
   { id: "ingredients", label: "Ingredients", icon: "🥕" },
   { id: "tags", label: "Tags", icon: "🏷️" },
   { id: "users", label: "Users", icon: "👥" },
-  { id: "combos", label: "Combos", icon: "🍔🍟🥤"}
+  { id: "combos", label: "Combos", icon: "🍔🍟🥤" },
 ] as const;
 
 const LOW_STOCK_THRESHOLD = 10;
@@ -47,6 +55,7 @@ export const AdminDashboard = () => {
   const [, setTokenState] = useToken();
   const [activeSection, setActiveSection] = useState<SectionId>("dashboard");
   const [openModal, setOpenModal] = useState<ModalType>(null);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
 
   const { data: products, isPending: productsPending } = useProductList();
   const { data: ingredients, isPending: ingredientsPending } = useIngredientList();
@@ -57,7 +66,10 @@ export const AdminDashboard = () => {
   const deleteProductMutation = useDeleteProduct();
   const deleteComboMutation = useDeleteCombo();
 
-  const closeModal = () => setOpenModal(null);
+  const closeModal = () => {
+    setOpenModal(null);
+    setSelectedProductId(null);
+  };
   const handleLogout = () => setTokenState({ state: "LOGGED_OUT" });
 
   const productList = useMemo(() => products ?? [], [products]);
@@ -277,6 +289,16 @@ export const AdminDashboard = () => {
                 <td>{Object.keys(product.tags).length > 0 ? Object.values(product.tags).join(", ") : "—"}</td>
                 <td>
                   <button
+                    className={styles.secondaryButton}
+                    style={{ marginRight: "0.5rem" }}
+                    onClick={() => {
+                      setSelectedProductId(product.id);
+                      setOpenModal("product-update");
+                    }}
+                  >
+                    Update
+                  </button>
+                  <button
                     className={styles.dangerButton}
                     onClick={() => handleDeleteProduct(product.id)}
                     disabled={deleteProductMutation.isPending}
@@ -421,72 +443,70 @@ export const AdminDashboard = () => {
   );
 
   const renderCombos = () => (
-      <section className={styles.section}>
-        <header className={styles.sectionHeader}>
-          <div>
-            <p className={styles.sectionEyebrow}>Catalog</p>
-            <h2 className={styles.sectionTitle}>Combos</h2>
-            <p className={styles.sectionSubtitle}>Manage combo meals and special offers.</p>
-          </div>
-          <div className={styles.sectionActions}>
-            <button className={styles.primaryButton} onClick={() => setOpenModal("combo-create")}>
-              Add combo
-            </button>
-            <button className={styles.secondaryButton} onClick={() => setOpenModal("combo-update")}>
-              Update combo
-            </button>
-          </div>
-        </header>
+    <section className={styles.section}>
+      <header className={styles.sectionHeader}>
+        <div>
+          <p className={styles.sectionEyebrow}>Catalog</p>
+          <h2 className={styles.sectionTitle}>Combos</h2>
+          <p className={styles.sectionSubtitle}>Manage combo meals and special offers.</p>
+        </div>
+        <div className={styles.sectionActions}>
+          <button className={styles.primaryButton} onClick={() => setOpenModal("combo-create")}>
+            Add combo
+          </button>
+          <button className={styles.secondaryButton} onClick={() => setOpenModal("combo-update")}>
+            Update combo
+          </button>
+        </div>
+      </header>
 
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Description</th>
-                <th scope="col">Price</th>
-                <th scope="col">Tags</th>
-                <th scope="col">Products</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {comboList.length > 0 ? (
-                comboList.map((combo) => (
-                  <tr key={combo.id}>
-                    <td>{combo.name}</td>
-                    <td className={styles.descriptionCell}>{combo.description}</td>
-                    <td>{formatCurrency(combo.price)}</td>
-                    <td>{Object.keys(combo.tags).length > 0 ? Object.values(combo.tags).join(", ") : "—"}</td>
-                    <td>
-                      {combo.products.length > 0
-                        ? combo.products
-                            .map((product) => `${product.quantity} x ${product.name}`)
-                            .join(", ")
-                        : "—"}
-                    </td>
-                    <td>
-                      <button
-                        className={styles.dangerButton}
-                        onClick={() => handleDeleteCombo(combo.id)}
-                        disabled={deleteComboMutation.isPending}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className={styles.emptyCell}>
-                    No combos loaded. Add your first combo to get started.
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Description</th>
+              <th scope="col">Price</th>
+              <th scope="col">Tags</th>
+              <th scope="col">Products</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comboList.length > 0 ? (
+              comboList.map((combo) => (
+                <tr key={combo.id}>
+                  <td>{combo.name}</td>
+                  <td className={styles.descriptionCell}>{combo.description}</td>
+                  <td>{formatCurrency(combo.price)}</td>
+                  <td>{Object.keys(combo.tags).length > 0 ? Object.values(combo.tags).join(", ") : "—"}</td>
+                  <td>
+                    {combo.products.length > 0
+                      ? combo.products.map((product) => `${product.quantity} x ${product.name}`).join(", ")
+                      : "—"}
+                  </td>
+                  <td>
+                    <button
+                      className={styles.dangerButton}
+                      onClick={() => handleDeleteCombo(combo.id)}
+                      disabled={deleteComboMutation.isPending}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className={styles.emptyCell}>
+                  No combos loaded. Add your first combo to get started.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 
   const renderActiveSection = () => {
@@ -578,7 +598,7 @@ export const AdminDashboard = () => {
       )}
       {openModal === "product-update" && (
         <Modal onClose={closeModal}>
-          <ProductUpdateForm onClose={closeModal} />
+          <ProductUpdateForm onClose={closeModal} productIdToUpdate={selectedProductId} />
         </Modal>
       )}
       {openModal === "menu-section" && (
@@ -587,9 +607,9 @@ export const AdminDashboard = () => {
         </Modal>
       )}
       {openModal === "combo-create" && (
-          <Modal onClose={closeModal}>
-            <ComboForm onClose={closeModal} />
-          </Modal>
+        <Modal onClose={closeModal}>
+          <ComboForm onClose={closeModal} />
+        </Modal>
       )}
       {openModal === "combo-update" && (
         <Modal onClose={closeModal}>

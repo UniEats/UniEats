@@ -12,9 +12,11 @@ export function useLogin() {
     mutationFn: async (req: LoginRequest) => {
       const tokens = await auth("POST", "/sessions", req);
       setToken({ state: "LOGGED_IN", tokens });
+      return tokens; 
     },
   });
 }
+
 
 export function useRefresh() {
   const [tokenState, setToken] = useToken();

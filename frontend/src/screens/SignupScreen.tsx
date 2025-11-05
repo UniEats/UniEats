@@ -26,7 +26,7 @@ export const SignupScreen = () => {
                     <Signup onSubmit={mutate} submitError={error} />
                     {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
                     <a href="/login" className={styles.loginLink}>
-                        ¿Ya tenés cuenta? Iniciá sesión
+                        Already signed up? Sign in here
                     </a>
                 </div>
             </div>

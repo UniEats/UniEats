@@ -1,11 +1,12 @@
 import { useState } from "react";
+
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
 import { ComboFormSchema, ComboFormValues } from "@/models/Combo";
 import { useCreateCombo } from "@/services/ComboServices";
+import { useMenuSectionList } from "@/services/MenuSectionServices";
 import { useProductList } from "@/services/ProductServices";
 import { useTagList } from "@/services/TagServices";
-import { useMenuSectionList } from "@/services/MenuSectionServices";
 
 import styles from "./AdminForms.module.css";
 
@@ -33,7 +34,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
   const createCombo = useCreateCombo();
   const productsQuery = useProductList();
   const tagsQuery = useTagList();
-  const menuSectionsQuery = useMenuSectionList()
+  const menuSectionsQuery = useMenuSectionList();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const formData = useAppForm({
@@ -50,7 +51,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
     ? createCombo.error instanceof Error
       ? createCombo.error
       : new Error(String(createCombo.error))
-      : null;
+    : null;
 
   if (productsQuery.isLoading || tagsQuery.isLoading || menuSectionsQuery.isLoading) {
     return (
@@ -65,13 +66,13 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
     const tagError = tagsQuery.error;
     const menuError = menuSectionsQuery.error;
     const errorMessage =
-       productError instanceof Error
-          ? productError.message
-          : tagError instanceof Error
+      productError instanceof Error
+        ? productError.message
+        : tagError instanceof Error
           ? tagError.message
           : menuError instanceof Error
-          ? menuError.message
-          : "Failed to load required data.";
+            ? menuError.message
+            : "Failed to load required data.";
     return (
       <section className={styles.formSection} aria-live="assertive">
         <p>{errorMessage}</p>
@@ -100,42 +101,51 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
             children={(field) => (
               <div className={styles.formFields}>
                 <span className={styles.fieldLabel}>Products</span>
-                {products.map((product) => {
-                  const selectedProduct = field.state.value.find((p: {id: string; quantity: number;}) => p.id === product.id.toString());
-                  const quantity = selectedProduct?.quantity ?? 1;
+                <div className={styles.optionsGrid}>
+                  {products.map((product) => {
+                    const selectedProduct = field.state.value.find(
+                      (p: { id: string; quantity: number }) => p.id === product.id.toString(),
+                    );
+                    const quantity = selectedProduct?.quantity ?? 1;
 
-                  return (
-                    <div key={product.id} className={styles.optionRow}>
-                      <input
-                        type="checkbox"
-                        checked={!!selectedProduct}
-                        onChange={(e) => {
-                          let nextValue = [...field.state.value];
-                          if (e.target.checked) {
-                            nextValue.push({ id: product.id.toString(), quantity });
-                          } else {
-                            nextValue = nextValue.filter((p: {id: string; quantity: number;}) => p.id !== product.id.toString());
-                          }
-                          field.handleChange(nextValue);
-                        }}
-                      />
-                      <span>{product.name}</span>
-                      {selectedProduct && (
+                    return (
+                      <div key={product.id} className={styles.optionRow}>
                         <input
-                          type="number"
-                          min={1}
-                          value={quantity}
+                          type="checkbox"
+                          checked={!!selectedProduct}
                           onChange={(e) => {
-                            const nextValue = field.state.value.map((p: {id: string; quantity: number;}) =>
-                              p.id === product.id.toString() ? { ...p, quantity: parseInt(e.target.value, 10) || 1 } : p
-                            );
+                            let nextValue = [...field.state.value];
+                            if (e.target.checked) {
+                              nextValue.push({ id: product.id.toString(), quantity });
+                            } else {
+                              nextValue = nextValue.filter(
+                                (p: { id: string; quantity: number }) => p.id !== product.id.toString(),
+                              );
+                            }
                             field.handleChange(nextValue);
                           }}
                         />
-                      )}
-                    </div>
-                  );
-                })}
+                        <span>{product.name}</span>
+                        {selectedProduct && (
+                          <input
+                            type="number"
+                            min={1}
+                            value={quantity}
+                            onChange={(e) => {
+                              const nextValue = field.state.value.map((p: { id: string; quantity: number }) =>
+                                p.id === product.id.toString()
+                                  ? { ...p, quantity: parseInt(e.target.value, 10) || 1 }
+                                  : p,
+                              );
+                              field.handleChange(nextValue);
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
                 <ErrorContainer errors={normalizeErrors(field.state.meta.errors)} />
               </div>
             )}
@@ -174,7 +184,9 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
                     })
                   )}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
@@ -212,11 +224,13 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
                     })
                   )}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
-          
+
           <formData.AppField name="image" children={(field) => <field.FileField label="Image" />} />
 
           <div className={styles.formActions}>

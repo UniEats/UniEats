@@ -1,5 +1,4 @@
-import { Combo } from "@/models/Combo";
-import { createContext, useContext, useState, ReactNode } from "react";
+import { ReactNode, createContext, useContext, useState } from "react";
 
 export type MenuItem = {
   id: number;
@@ -8,31 +7,31 @@ export type MenuItem = {
   price: number;
   tags?: Record<number, string>;
   image?: Uint8Array;
+  available: boolean;
 };
 
 type ProductsContextType = {
   productsMap: Record<number, MenuItem>;
-  combosMap: Record<number, Combo>;
+  combosMap: Record<number, MenuItem>;
   setProducts: (products: MenuItem[]) => void;
-  setCombos: (combos: Combo[]) => void;
-
+  setCombos: (combos: MenuItem[]) => void;
 };
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
 
 export const ProductsProvider = ({ children }: { children: ReactNode }) => {
   const [productsMap, setProductsMap] = useState<Record<number, MenuItem>>({});
-  const [combosMap, setCombosMap] = useState<Record<number, Combo>>({});
-  
+  const [combosMap, setCombosMap] = useState<Record<number, MenuItem>>({});
+
   const setProducts = (products: MenuItem[]) => {
     const map: Record<number, MenuItem> = {};
-    products.forEach((p) => (map[p.id] = p));
+    products.forEach((p) => (map[p.id] = { ...p, available: p.available ?? false }));
     setProductsMap(map);
   };
 
-  const setCombos = (combos: Combo[]) => {
-    const map: Record<number, Combo> = {};
-    combos.forEach((c) => (map[c.id] = c));
+  const setCombos = (combos: MenuItem[]) => {
+    const map: Record<number, MenuItem> = {};
+    combos.forEach((c) => (map[c.id] = { ...c, available: c.available ?? false }));
     setCombosMap(map);
   };
 
