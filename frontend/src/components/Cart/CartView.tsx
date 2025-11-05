@@ -60,7 +60,7 @@ export const CartView: React.FC = () => {
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
       console.error("Error processing order:", err);
-      alert(err.response?.data?.message || "Error processing order. Please retry later.");
+      alert(err.response?.data?.message || "Insufficient Stock or Invalid State");
     }
   };
 
