@@ -40,10 +40,10 @@ export const Navigation = () => {
       return (
         <Switch>
           <Route path="/menu">
-            <MenuScreen />
+            {userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MenuScreen />}
           </Route>
           <Route path="/cart">
-            <CartView />
+            {userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <CartView />}
           </Route>
           <Route path="/kitchen">
             <KitchenRouteGuard />

@@ -34,7 +34,6 @@ class OrderService {
     private static final Long STATUS_READY = 3L;
     private static final Long STATUS_COMPLETE = 4L;
     private static final Long STATUS_CANCELED = 5L;
-    private static final Long STATUS_INITIATED =6L;
 
     public List<OrderDTO> geAlltOrders() {
         return orderRepository.findAll()
@@ -85,7 +84,7 @@ class OrderService {
         order.setUserId(userId);
         order.setCreationDate(LocalDateTime.now());
 
-        OrderStatus confirmedStatus = new OrderStatus(STATUS_INITIATED, "initiated");
+        OrderStatus confirmedStatus = new OrderStatus(STATUS_CONFIRMED, "confirmed");
         order.setState(confirmedStatus);
 
         BigDecimal totalPrice = BigDecimal.ZERO;
@@ -178,27 +177,6 @@ class OrderService {
     public Optional<OrderDTO> confirmOrder(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-
-        for (OrderDetail detail : order.getDetails()) {
-
-            if (detail.getProduct() != null) {
-                Product product = detail.getProduct();
-
-                if (!isProductInStock(product)) {
-                    throw new IllegalStateException(
-                            "There is not enough stock for the product: " + product.getName()
-                    );
-                }
-            }
-
-            if (detail.getCombo() != null) {
-                if (!isComboInStock(detail.getCombo())) {
-                    throw new IllegalStateException(
-                            "There is not enough stock for the combo: " + detail.getCombo().getName()
-                    );
-                }
-            }
-        }
         order.setState(new OrderStatus(STATUS_CONFIRMED, "confirmed"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
