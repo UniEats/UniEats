@@ -3,6 +3,8 @@ import React from "react";
 import { OrderService } from "../../services/OrderService";
 import { MenuItem, useProducts } from "../Product/ProductContext";
 import { CartItem, useCart } from "./Cart";
+import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
+
 import styles from "./CartView.module.css";
 
 export const CartView: React.FC = () => {
@@ -64,57 +66,65 @@ export const CartView: React.FC = () => {
     }
   };
 
-  if (validItems.length === 0) {
-    return <div className={styles.emptyCart}>Your cart is empty</div>;
-  }
+    if (validItems.length === 0) {
+      return (
+        <CommonLayout>
+            <div className={styles.emptyCart}>
+              <p>Your cart is empty</p>
+            </div>
+        </CommonLayout>
+      );
+    }
 
   return (
-    <div className={styles.cartContainer}>
-      <h2>Your order</h2>
-      <div className={styles.cartItems}>
-        {validItems.map((item: CartItem) => {
-          const product = item.type === "product" ? (productsMap[item.id] as MenuItem | undefined) : undefined;
-          const combo = item.type === "combo" ? (combosMap[item.id] as MenuItem | undefined) : undefined;
-          const name = product ? product.name : combo ? combo.name : "";
-          const price = product ? product.price : combo ? combo.price : 0;
+    <CommonLayout>
+        <div className={styles.cartContainer}>
+          <h2>Your order</h2>
+          <div className={styles.cartItems}>
+            {validItems.map((item: CartItem) => {
+              const product = item.type === "product" ? (productsMap[item.id] as MenuItem | undefined) : undefined;
+              const combo = item.type === "combo" ? (combosMap[item.id] as MenuItem | undefined) : undefined;
+              const name = product ? product.name : combo ? combo.name : "";
+              const price = product ? product.price : combo ? combo.price : 0;
 
-          return (
-            <div key={`${item.type}-${item.id}`} className={styles.cartItem}>
-              <div className={styles.itemInfo}>
-                <span className={styles.itemName}>{name}</span>
-                <span className={styles.itemPrice}>${price * item.quantity}</span>
-              </div>
-              <div className={styles.itemControls}>
-                <button
-                  onClick={() => handleQuantityChange(item.id, item.type, item.quantity - 1)}
-                  className={styles.quantityButton}
-                >
-                  -
-                </button>
-                <span className={styles.quantity}>{item.quantity}</span>
-                <button
-                  onClick={() => handleQuantityChange(item.id, item.type, item.quantity + 1)}
-                  className={styles.quantityButton}
-                >
-                  +
-                </button>
-                <button onClick={() => removeFromCart(item.id, item.type)} className={styles.removeButton}>
-                  Eliminar
-                </button>
-              </div>
+              return (
+                <div key={`${item.type}-${item.id}`} className={styles.cartItem}>
+                  <div className={styles.itemInfo}>
+                    <span className={styles.itemName}>{name}</span>
+                    <span className={styles.itemPrice}>${price * item.quantity}</span>
+                  </div>
+                  <div className={styles.itemControls}>
+                    <button
+                      onClick={() => handleQuantityChange(item.id, item.type, item.quantity - 1)}
+                      className={styles.quantityButton}
+                    >
+                      -
+                    </button>
+                    <span className={styles.quantity}>{item.quantity}</span>
+                    <button
+                      onClick={() => handleQuantityChange(item.id, item.type, item.quantity + 1)}
+                      className={styles.quantityButton}
+                    >
+                      +
+                    </button>
+                    <button onClick={() => removeFromCart(item.id, item.type)} className={styles.removeButton}>
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className={styles.cartFooter}>
+            <div className={styles.total}>
+              <span>Total:</span>
+              <span>${totalPrice}</span>
             </div>
-          );
-        })}
-      </div>
-      <div className={styles.cartFooter}>
-        <div className={styles.total}>
-          <span>Total:</span>
-          <span>${totalPrice}</span>
+            <button onClick={handleCheckout} className={styles.checkoutButton}>
+              Confirm and Pay
+            </button>
+          </div>
         </div>
-        <button onClick={handleCheckout} className={styles.checkoutButton}>
-          Confirm and Pay
-        </button>
-      </div>
-    </div>
+    </CommonLayout>
   );
 };

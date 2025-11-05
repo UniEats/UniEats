@@ -102,6 +102,21 @@
   padding-top: 24px;
 }
 
+.product-cta.unavailable {
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: none;
+  background: #808080;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: not-allowed;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+  opacity: 0.8;
+}
+
 .product-cta {
   padding: 10px 22px;
   border-radius: 999px;
