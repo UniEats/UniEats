@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useToken } from "@/services/TokenContext";
 import { useProducts } from "@/components/Product/ProductContext";
 
-type CartItem = {
+export type CartItem = {
   id: number;
   type: "product" | "combo";
   quantity: number;
@@ -41,35 +41,34 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [cart, storageKey]);
 
   const validItems = React.useMemo(() => {
-    return cart.filter(
-      (item) =>
-        (item.type === "product" && productsMap[item.id]) ||
-        (item.type === "combo" && combosMap[item.id])
+    return cart.filter((item: CartItem) =>
+      (item.type === "product" && Boolean(productsMap[item.id])) ||
+      (item.type === "combo" && Boolean(combosMap[item.id]))
     );
   }, [cart, productsMap, combosMap]);
 
   useEffect(() => {
     if (!productsMap || Object.keys(productsMap).length === 0) return;
     if (validItems.length !== cart.length) {
-      setCart(validItems);
+      setCart(validItems as CartItem[]);
     }
   }, [validItems, cart, productsMap, setCart]);
 
   const totalPrice = React.useMemo(() => {
-    return validItems.reduce((acc, item) => {
+    return validItems.reduce((acc: number, item: CartItem) => {
       const price =
         item.type === "product"
-          ? productsMap[item.id]?.price ?? 0
-          : combosMap[item.id]?.price ?? 0;
+          ? (productsMap[item.id]?.price as number) ?? 0
+          : (combosMap[item.id]?.price as number) ?? 0;
       return acc + price * item.quantity;
     }, 0);
   }, [validItems, productsMap, combosMap]);
 
   const addToCart = (id: number, type: "product" | "combo", quantity: number = 1) => {
-    setCart((prevItems) => {
-      const existing = prevItems.find((item) => item.id === id && item.type === type);
+    setCart((prevItems: CartItem[]) => {
+      const existing = prevItems.find((item: CartItem) => item.id === id && item.type === type);
       if (existing) {
-        return prevItems.map((item) =>
+        return prevItems.map((item: CartItem) =>
           item.id === id && item.type === type
             ? { ...item, quantity: item.quantity + quantity }
             : item
@@ -80,8 +79,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateQuantity = (id: number, type: "product" | "combo", newQuantity: number) => {
-    setCart((prevItems) =>
-      prevItems.map((item) =>
+    setCart((prevItems: CartItem[]) =>
+      prevItems.map((item: CartItem) =>
         item.id === id && item.type === type
           ? { ...item, quantity: newQuantity }
           : item
@@ -90,8 +89,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeFromCart = (id: number, type: "product" | "combo") => {
-    setCart((prevItems) =>
-      prevItems.filter((item) => !(item.id === id && item.type === type))
+    setCart((prevItems: CartItem[]) =>
+      prevItems.filter((item: CartItem) => !(item.id === id && item.type === type))
     );
   };
 

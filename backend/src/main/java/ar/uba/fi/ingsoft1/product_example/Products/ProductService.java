@@ -86,14 +86,15 @@ class ProductService {
         }
 
         List<ProductIngredient> productIngredients = dto.ingredientIds().stream()
-            .map(ingredientId -> {
-                Ingredient ingredient = ingredientRepository.findById(ingredientId)
-                    .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientId));
+            .map(iq -> {
+                Ingredient ingredient = ingredientRepository.findById(iq.ingredientId())
+                    .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + iq.ingredientId()));
 
                 ProductIngredient pi = new ProductIngredient();
                 pi.setId(new ProductIngredientId());
                 pi.setProduct(product);
                 pi.setIngredient(ingredient);
+                pi.setQuantity(iq.quantity());
 
                 return pi;
             })
@@ -154,14 +155,15 @@ class ProductService {
         
         product.getProductIngredients().clear();
         List<ProductIngredient> productIngredients = dto.ingredientIds().stream()
-            .map(ingredientId -> {
-                Ingredient ingredient = ingredientRepository.findById(ingredientId)
-                    .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientId));
+            .map(iq -> {
+                Ingredient ingredient = ingredientRepository.findById(iq.ingredientId())
+                    .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + iq.ingredientId()));
 
                 ProductIngredient pi = new ProductIngredient();
-                pi.setId(new ProductIngredientId(product.getId(), ingredient.getId()));
+                pi.setId(new ProductIngredientId(product.getId(), iq.ingredientId()));
                 pi.setProduct(product);
                 pi.setIngredient(ingredient);
+                pi.setQuantity(iq.quantity());
 
                 return pi;
             })

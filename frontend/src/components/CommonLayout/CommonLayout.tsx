@@ -12,7 +12,8 @@ import styles from "./CommonLayout.module.css";
 export const CommonLayout = ({ children }: React.PropsWithChildren) => {
   const [tokenState, setTokenState] = useToken();
   const userRole = useUserRole();
-  const isAuthenticated = tokenState.state !== "LOGGED_OUT";
+  // consider the user authenticated only when tokens are fully loaded
+  const isAuthenticated = tokenState.state === "LOGGED_IN";
   const handleLogout = () => { setTokenState({ state: "LOGGED_OUT" }); };
   const { validItems, clearCart, totalPrice, removeFromCart, updateQuantity } = useCart();
   const { productsMap, combosMap } = useProducts();
@@ -34,9 +35,11 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
                   Main Page
                 </Link>
               </> )}
-              <Link href="/menu" className={styles.siteNavLink}>
-                Menu
-              </Link>
+              {userRole !== "ROLE_STAFF" && (
+                <Link href="/menu" className={styles.siteNavLink}>
+                  Menu
+                </Link>
+              )}
             </>
           ) : (
             <>
@@ -64,7 +67,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
               <button type="button" onClick={handleLogout} className={`${styles.siteButton} ${styles.siteButtonGhost}`}>
                 Log out
               </button>
-              {userRole !== "ROLE_ADMIN" && (
+              {userRole !== "ROLE_ADMIN" && userRole !== "ROLE_STAFF" && (
                 <>
                   <button type="button" onClick={toggleCart} className={`${styles.siteButton} ${styles.siteButtonCta}`} aria-label="Go to cart">
                     <svg
@@ -157,9 +160,12 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
                   Total: ${totalPrice.toFixed(2)}
                 </p>
                 <div style={{ marginTop: "1rem", textAlign: "right" }}>
-                  <button onClick={clearCart} className={`${styles.siteButton} ${styles.siteButtonCta}`}>
-                    Clear cart
-                  </button>
+                    <Link href="/cart" className={`${styles.siteButton} ${styles.siteButtonCta}`}>
+                      Pay
+                    </Link>
+                    <button onClick={clearCart} className={`${styles.siteButton} ${styles.siteButtonGhost}`} style={{ marginLeft: '0.5rem' }}>
+                      Empty
+                    </button>
                 </div>
             </>
           )}

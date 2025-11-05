@@ -44,7 +44,7 @@ class ProductRestControllerTest {
 
     @BeforeEach
     void setUp() {
-        productDTO = new ProductDTO(1L, "Pizza", "Delicious pizza", new BigDecimal("500.00"), Map.of(), Map.of(), Map.of(), new byte[5 * 1024]);
+        productDTO = new ProductDTO(1L, "Pizza", "Delicious pizza", new BigDecimal("500.00"), Map.of(), List.of(), Map.of(), new byte[5 * 1024], true);
     }
 
     @Test
@@ -93,8 +93,8 @@ class ProductRestControllerTest {
             "Pizza",
             "Delicious pizza",
             new BigDecimal("500.00"),
-            List.of(1L),
-            List.of(2L),
+            List.of(),
+            List.of(1L, 2L),
             List.of(3L)
         );
 
@@ -124,8 +124,8 @@ class ProductRestControllerTest {
                 "Pizza",
                 "Delicious pizza",
                 new BigDecimal("500.00"),
-                List.of(1L),
-                List.of(2L),
+                List.of(),
+                List.of(1L, 2L),
                 List.of(3L)
         );
 
@@ -153,8 +153,8 @@ class ProductRestControllerTest {
                 "Pizza Updated",
                 "Updated Description",
                 new BigDecimal("550.00"),
-                List.of(1L),
-                List.of(2L),
+                List.of(),
+                List.of(1L, 2L),
                 List.of(3L)
         );
 
@@ -170,7 +170,7 @@ class ProductRestControllerTest {
 
         ProductDTO updatedDTO = new ProductDTO(
                 1L, "Pizza Updated", "Updated Description", new BigDecimal("550.00"),
-                Map.of(), Map.of(), Map.of(), new byte[5 * 1024]
+                Map.of(), List.of(), Map.of(), new byte[5 * 1024], true
         );
 
         Mockito.when(productService.updateProduct(Mockito.eq(1L), any(), any()))

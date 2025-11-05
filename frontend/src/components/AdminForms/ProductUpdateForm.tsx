@@ -1,14 +1,14 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
 import { ProductUpdateFormSchema, ProductUpdateFormValues } from "@/models/Product";
+import { useIngredientList } from "@/services/IngredientServices";
+import { useMenuSectionList } from "@/services/MenuSectionServices";
 import { useProductList, useUpdateProduct } from "@/services/ProductServices";
+import { useTagList } from "@/services/TagServices";
 
 import styles from "./AdminForms.module.css";
-import { useMenuSectionList } from "@/services/MenuSectionServices";
-import { useTagList } from "@/services/TagServices";
-import { useIngredientList } from "@/services/IngredientServices";
 
 type FieldError = { message: string };
 
@@ -30,9 +30,10 @@ const PRODUCT_UPDATE_DEFAULT_VALUES: ProductUpdateFormValues = {
 
 type ProductUpdateFormProps = {
   onClose: () => void;
+  productIdToUpdate?: number | null;
 };
 
-export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
+export const ProductUpdateForm = ({ onClose, productIdToUpdate }: ProductUpdateFormProps) => {
   const updateProduct = useUpdateProduct();
   const productsQuery = useProductList();
   const ingredientsQuery = useIngredientList();
@@ -40,6 +41,11 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
   const menuSectionsQuery = useMenuSectionList();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const productSelectId = useId();
+
+  const products = productsQuery.data ?? [];
+  const ingredients = ingredientsQuery.data ?? [];
+  const tags = tagsQuery.data ?? [];
+  const menuSections = menuSectionsQuery.data ?? [];
 
   const formData = useAppForm({
     defaultValues: PRODUCT_UPDATE_DEFAULT_VALUES,
@@ -52,6 +58,28 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
       setSuccessMessage(`Product "${updatedProduct.name}" updated successfully.`);
     },
   });
+
+  useEffect(() => {
+    // Wait for the prop and for the products to be loaded
+    if (productIdToUpdate && products.length > 0) {
+      const matchedProduct = products.find((p) => p.id === productIdToUpdate);
+
+      // If we found the product, set all the form fields
+      if (matchedProduct) {
+        formData.setFieldValue("productId", matchedProduct.id.toString());
+        formData.setFieldValue("name", matchedProduct.name ?? "");
+        formData.setFieldValue("description", matchedProduct.description ?? "");
+        formData.setFieldValue("price", matchedProduct.price?.toString() ?? "");
+        formData.setFieldValue(
+          "ingredientIds",
+          (matchedProduct.ingredients || []).map((i) => ({ id: String(i.id), quantity: i.quantity })),
+        );
+        formData.setFieldValue("tagIds", Object.keys(matchedProduct.tags || {}));
+        formData.setFieldValue("menuSectionIds", Object.keys(matchedProduct.menuSections || {}));
+        // We don't set the image, as it's a file upload
+      }
+    }
+  }, [productIdToUpdate, products, formData]); // Dependencies
 
   const submissionError = updateProduct.error
     ? updateProduct.error instanceof Error
@@ -73,22 +101,21 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
     const tagError = tagsQuery.error;
     const menuError = menuSectionsQuery.error;
     const errorMessage =
-      productError instanceof Error ? productError.message :
-      ingredientError instanceof Error ? ingredientError.message :
-      tagError instanceof Error ? tagError.message :
-      menuError instanceof Error ? menuError.message :
-      "Failed to load data";
+      productError instanceof Error
+        ? productError.message
+        : ingredientError instanceof Error
+          ? ingredientError.message
+          : tagError instanceof Error
+            ? tagError.message
+            : menuError instanceof Error
+              ? menuError.message
+              : "Failed to load data";
     return (
       <section className={styles.formSection} aria-live="assertive">
         <p>{errorMessage}</p>
       </section>
     );
   }
-
-  const products = productsQuery.data ?? [];
-  const ingredients = ingredientsQuery.data ?? [];
-  const tags = tagsQuery.data ?? [];
-  const menuSections = menuSectionsQuery.data ?? [];
 
   if (products.length === 0) {
     return (
@@ -122,20 +149,20 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
                       const value = event.target.value;
                       field.handleChange(value);
 
-                      const matchedProduct =
-                        products.find((product) => product.id.toString() === value) ?? null;
+                      const matchedProduct = products.find((product) => product.id.toString() === value) ?? null;
 
                       formData.setFieldValue("name", matchedProduct?.name ?? "");
                       formData.setFieldValue("description", matchedProduct?.description ?? "");
                       formData.setFieldValue("price", matchedProduct?.price?.toString() ?? "");
-
-                      formData.setFieldValue("ingredientIds", Object.keys(matchedProduct?.ingredients || {}));
+                      formData.setFieldValue(
+                        "ingredientIds",
+                        (matchedProduct?.ingredients || []).map((i) => ({ id: String(i.id), quantity: i.quantity })),
+                      );
                       formData.setFieldValue("tagIds", Object.keys(matchedProduct?.tags || {}));
                       formData.setFieldValue("menuSectionIds", Object.keys(matchedProduct?.menuSections || {}));
-                   
+
                       setSuccessMessage(null);
                     }}
-
                     onBlur={field.handleBlur}
                   >
                     <option value="">Select a product</option>
@@ -153,44 +180,62 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
             }}
           />
           <formData.AppField name="name" children={(field) => <field.TextField label="New name" />} />
-          <formData.AppField
-            name="description"
-            children={(field) => <field.TextField label="New description" />}
-          />
+          <formData.AppField name="description" children={(field) => <field.TextField label="New description" />} />
           <formData.AppField name="price" children={(field) => <field.TextField label="Price" />} />
           <formData.Field
             name="ingredientIds"
             children={(field) => (
               <div className={styles.formFields}>
                 <span className={styles.fieldLabel}>Ingredients</span>
+
                 <div className={styles.optionsGrid}>
                   {ingredients.map((ingredient) => {
-                    const optionValue = ingredient.id.toString();
-                    const isChecked = field.state.value.includes(optionValue);
+                    const selectedIngredient = field.state.value.find(
+                      (i: { id: string; quantity: number }) => i.id === ingredient.id.toString(),
+                    );
+                    const quantity = selectedIngredient?.quantity ?? 1;
+
                     return (
-                      <label key={ingredient.id} className={styles.optionRow}>
+                      <div key={ingredient.id} className={styles.optionRow}>
                         <input
                           type="checkbox"
-                          value={optionValue}
-                          checked={isChecked}
-                          onChange={(event) => {
-                            const { checked, value } = event.target;
-                            const nextValue = checked
-                              ? [...field.state.value, value]
-                              : field.state.value.filter((item) => item !== value);
+                          checked={!!selectedIngredient}
+                          onChange={(e) => {
+                            let nextValue = [...field.state.value];
+                            if (e.target.checked) {
+                              nextValue.push({ id: ingredient.id.toString(), quantity });
+                            } else {
+                              nextValue = nextValue.filter(
+                                (i: { id: string; quantity: number }) => i.id !== ingredient.id.toString(),
+                              );
+                            }
                             field.handleChange(nextValue);
                           }}
-                          onBlur={field.handleBlur}
                         />
-                        <span>
-                          {ingredient.name}
-                          {ingredient.description ? ` – ${ingredient.description}` : ""}
-                        </span>
-                      </label>
+                        <span>{ingredient.name}</span>
+                        {selectedIngredient && (
+                          <input
+                            type="number"
+                            min={1}
+                            value={quantity}
+                            onChange={(e) => {
+                              const nextValue = field.state.value.map((i: { id: string; quantity: number }) =>
+                                i.id === ingredient.id.toString()
+                                  ? { ...i, quantity: parseInt(e.target.value, 10) || 1 }
+                                  : i,
+                              );
+                              field.handleChange(nextValue);
+                            }}
+                          />
+                        )}
+                      </div>
                     );
                   })}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
@@ -227,7 +272,9 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
                     })
                   )}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
@@ -264,7 +311,9 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
                     })
                   )}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
@@ -282,22 +331,24 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
                   accept="image/*"
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    const file = event.currentTarget.files ? event.currentTarget.files[0] ?? null : null;
+                    const file = event.currentTarget.files ? (event.currentTarget.files[0] ?? null) : null;
                     field.handleChange(file);
                   }}
                 />
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
-        <div className={styles.formActions}>
-          <button type="button" className={styles.cancelButton} onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className={styles.submitButton}>
-            Update Item
-          </button>
-        </div>
+          <div className={styles.formActions}>
+            <button type="button" className={styles.cancelButton} onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className={styles.submitButton}>
+              Update Item
+            </button>
+          </div>
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}

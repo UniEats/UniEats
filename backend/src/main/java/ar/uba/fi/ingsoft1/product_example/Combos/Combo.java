@@ -77,6 +77,23 @@ public class Combo {
     )
     private List<Tag> tags = new ArrayList<>();
 
+    public boolean isAvailable() {
+        if (comboProducts == null || comboProducts.isEmpty()) {
+            return false;
+        }
+
+        for (ComboProduct cp : comboProducts) {
+            Product product = cp.getProduct();
+
+            if (product == null || !product.isAvailable()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
     public ComboDTO toDTO() {
         Map<Long, String> tags_ = tags != null
                 ? tags.stream()
@@ -114,7 +131,8 @@ public class Combo {
                 tags_,
                 productList,
                 menuSections_,
-                this.getImage()
+                this.getImage(),
+                this.isAvailable()
         );
     }
 }

@@ -94,7 +94,16 @@ const getInitialTokenState = (): TokenContextData => {
 export function useUserRole() {
   const [tokenState] = useToken();
   if (tokenState.state === "LOGGED_IN") {
-    return tokenState.tokens.role;
+    return normalizeRole(tokenState.tokens.role);
   }
+  return null;
+}
+
+export function normalizeRole(role: string | null | undefined): "ROLE_ADMIN" | "ROLE_STAFF" | "ROLE_USER" | null {
+  if (!role) return null;
+  const r = role.trim().toUpperCase();
+  if (r.includes("ADMIN")) return "ROLE_ADMIN";
+  if (r.includes("STAFF") || r.includes("KITCHEN")) return "ROLE_STAFF";
+  if (r.includes("USER")) return "ROLE_USER";
   return null;
 }

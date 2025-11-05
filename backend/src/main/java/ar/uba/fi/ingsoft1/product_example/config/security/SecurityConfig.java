@@ -21,13 +21,36 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity(debug = false)
 public class SecurityConfig {
 
-    public static final String[] PUBLIC_ENDPOINTS = { "/sessions" };
+    public static final String[] PUBLIC_ENDPOINTS = {
+            "/sessions",
+            "/error",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
+    };
+
     public static final String[] PUBLIC_POST_ENDPOINTS = {
             "/users",
             "/users/register",
             "/users/verify",
             "/users/password-reset/request",
-            "/users/password-reset/reset"
+            "/users/password-reset/reset",
+            "/orders"
+    };
+
+    public static final String[] ADMIN_ENDPOINTS = {
+            "/order-details/**",
+            "/products/**",
+            "/menu-sections/**",
+            "/combos/**",
+            "/tags/**",
+            "/ingredients/**",
+            "/users/count"
+    };
+
+    public static final String[] STAFF_ORDER_ENDPOINTS = {
+            
+            "/orders/**",
+            "/ingredients/{id}/stock/**"
     };
 
     private final JwtAuthFilter authFilter;
@@ -38,55 +61,50 @@ public class SecurityConfig {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config
-    ) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
         return config.getAuthenticationManager();
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth ->
-                        auth
-                                .requestMatchers(
-                                        "/error",
-                                        "/swagger-ui/**",
-                                        "/v3/api-docs/**"
-                                )
-                                .permitAll()
-                                .requestMatchers(PUBLIC_ENDPOINTS)
-                                .permitAll()
-                                .requestMatchers(PUBLIC_POST_ENDPOINTS)
-                                .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/menus")
-                                .permitAll()
-                                .requestMatchers("/products/**")
-                                .hasRole("ADMIN")
-                                .requestMatchers("/menu-sections/**")
-                                .hasRole("ADMIN")
-                                .requestMatchers("/combos/**")
-                                .hasRole("ADMIN")
-                                .requestMatchers("/tags/**")
-                                .hasRole("ADMIN")
-                                .requestMatchers("/ingredients/**")
-                                .hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/users/count")
-                                .hasRole("ADMIN")
-                                .anyRequest()
-                                .denyAll()
+                .authorizeHttpRequests(auth -> auth
+                        // Public routes
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(PUBLIC_POST_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/menus").permitAll()
+
+                       
+                        .requestMatchers(HttpMethod.POST, "/orders").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/orders/*/confirm").authenticated()
+
+                        // Order access rules
+                        .requestMatchers(HttpMethod.GET, STAFF_ORDER_ENDPOINTS)
+                        .authenticated() // anyone logged in can view orders
+                        .requestMatchers(HttpMethod.POST, STAFF_ORDER_ENDPOINTS)
+                        .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
+                        .requestMatchers(HttpMethod.PUT, STAFF_ORDER_ENDPOINTS)
+                        .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
+                        .requestMatchers(HttpMethod.PATCH, STAFF_ORDER_ENDPOINTS)
+                        .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
+                        .requestMatchers(HttpMethod.DELETE, STAFF_ORDER_ENDPOINTS)
+                        .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
+
+                        // Read-only access for staff to view products/combos
+                        .requestMatchers(HttpMethod.GET, "/products/**", "/combos/**").hasAnyRole("STAFF", "ADMIN", "KITCHEN")
+
+                        // Admin-only sections (create/update/delete)
+                        .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN")
+
+                        // Default deny
+                        .anyRequest().denyAll()
                 )
                 .sessionManagement(sessionManager ->
-                        sessionManager.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
+                        sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(
-                        authFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                )
+                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -96,8 +114,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }

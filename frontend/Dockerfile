@@ -3,6 +3,7 @@ FROM node:22 AS build
 WORKDIR /app
 COPY ./package.json ./package-lock.json ./
 RUN npm ci --omit=dev
+RUN npm install axios @types/axios
 COPY . .
 RUN npm run build
 

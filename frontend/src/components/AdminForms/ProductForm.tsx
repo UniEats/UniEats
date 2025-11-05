@@ -3,10 +3,10 @@ import { useState } from "react";
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
 import { ProductFormSchema, ProductFormValues } from "@/models/Product";
-import { useCreateProduct } from "@/services/ProductServices";
 import { useIngredientList } from "@/services/IngredientServices";
-import { useTagList } from "@/services/TagServices";
 import { useMenuSectionList } from "@/services/MenuSectionServices";
+import { useCreateProduct } from "@/services/ProductServices";
+import { useTagList } from "@/services/TagServices";
 
 import styles from "./AdminForms.module.css";
 
@@ -35,7 +35,7 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
   const createProduct = useCreateProduct();
   const ingredientsQuery = useIngredientList();
   const tagsQuery = useTagList();
-  const menuSectionsQuery = useMenuSectionList()
+  const menuSectionsQuery = useMenuSectionList();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const formData = useAppForm({
@@ -69,13 +69,13 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
     const tagError = tagsQuery.error;
     const menuError = menuSectionsQuery.error;
     const errorMessage =
-        ingredientError instanceof Error
-          ? ingredientError.message
-          : tagError instanceof Error
+      ingredientError instanceof Error
+        ? ingredientError.message
+        : tagError instanceof Error
           ? tagError.message
           : menuError instanceof Error
-          ? menuError.message
-          : "Failed to load required data.";
+            ? menuError.message
+            : "Failed to load required data.";
     return (
       <section className={styles.formSection} aria-live="assertive">
         <p>{errorMessage}</p>
@@ -103,34 +103,55 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
             children={(field) => (
               <div className={styles.formFields}>
                 <span className={styles.fieldLabel}>Ingredients</span>
+
                 <div className={styles.optionsGrid}>
                   {ingredients.map((ingredient) => {
-                    const optionValue = ingredient.id.toString();
-                    const isChecked = field.state.value.includes(optionValue);
+                    const selectedIngredient = field.state.value.find(
+                      (i: { id: string; quantity: number }) => i.id === ingredient.id.toString(),
+                    );
+                    const quantity = selectedIngredient?.quantity ?? 1;
+
                     return (
-                      <label key={ingredient.id} className={styles.optionRow}>
+                      <div key={ingredient.id} className={styles.optionRow}>
                         <input
                           type="checkbox"
-                          value={optionValue}
-                          checked={isChecked}
-                          onChange={(event) => {
-                            const { checked, value } = event.target;
-                            const nextValue = checked
-                              ? [...field.state.value, value]
-                              : field.state.value.filter((item) => item !== value);
+                          checked={!!selectedIngredient}
+                          onChange={(e) => {
+                            let nextValue = [...field.state.value];
+                            if (e.target.checked) {
+                              nextValue.push({ id: ingredient.id.toString(), quantity });
+                            } else {
+                              nextValue = nextValue.filter(
+                                (i: { id: string; quantity: number }) => i.id !== ingredient.id.toString(),
+                              );
+                            }
                             field.handleChange(nextValue);
                           }}
-                          onBlur={field.handleBlur}
                         />
-                        <span>
-                          {ingredient.name}
-                          {ingredient.description ? ` – ${ingredient.description}` : ""}
-                        </span>
-                      </label>
+                        <span>{ingredient.name}</span>
+                        {selectedIngredient && (
+                          <input
+                            type="number"
+                            min={1}
+                            value={quantity}
+                            onChange={(e) => {
+                              const nextValue = field.state.value.map((i: { id: string; quantity: number }) =>
+                                i.id === ingredient.id.toString()
+                                  ? { ...i, quantity: parseInt(e.target.value, 10) || 1 }
+                                  : i,
+                              );
+                              field.handleChange(nextValue);
+                            }}
+                          />
+                        )}
+                      </div>
                     );
                   })}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
@@ -167,7 +188,9 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
                     })
                   )}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
@@ -204,7 +227,9 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
                     })
                   )}
                 </div>
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
@@ -222,22 +247,24 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
                   accept="image/*"
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    const file = event.currentTarget.files ? event.currentTarget.files[0] ?? null : null;
+                    const file = event.currentTarget.files ? (event.currentTarget.files[0] ?? null) : null;
                     field.handleChange(file);
                   }}
                 />
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
-        <div className={styles.formActions}>
-          <button type="button" className={styles.cancelButton} onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className={styles.submitButton}>
-            Add Item
-          </button>
-        </div>
+          <div className={styles.formActions}>
+            <button type="button" className={styles.cancelButton} onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className={styles.submitButton}>
+              Add Item
+            </button>
+          </div>
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}
