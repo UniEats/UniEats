@@ -27,12 +27,15 @@ public class ProductIngredient {
 
     @ManyToOne
     @MapsId("productId")
-    @JoinColumn(name = "ID_prod")
+    @JoinColumn(name = "id_prod")
     private Product product;
 
     @ManyToOne
     @MapsId("ingredientId")
-    @JoinColumn(name = "ID_ing")
+    @JoinColumn(name = "id_ing")
     private Ingredient ingredient;
+
+    @Column(nullable = false)
+    private Integer quantity;
 
 }

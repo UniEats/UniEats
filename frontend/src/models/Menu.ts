@@ -6,7 +6,8 @@ export const MenuItemSchema = z.object({
   description: z.string(),
   price: z.number(),
   tags: z.record(z.string(), z.string()).optional(),
-  image: z.string().transform((base64) => Uint8Array.from(atob(base64), c => c.charCodeAt(0))),
+  image: z.string().transform((base64) => Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))),
+  available: z.boolean(),
 });
 
 export const MenuSectionSchema = z.object({
@@ -31,7 +32,7 @@ export const MenuCreateRequestItemSchema = z.object({
   description: z.string().min(1, "Description must not be empty"),
   price: z.string().min(1, "Price must not be empty"),
   tags: z.array(z.string()).optional(),
-  image: z.instanceof(Uint8Array)
+  image: z.instanceof(Uint8Array),
 });
 
 export const MenuCreateRequestSectionSchema = z.object({

@@ -77,11 +77,12 @@
 
 .menu-grid {
   display: grid;
-  gap: clamp(8px, 2vw, 16px);
-  grid-template-columns: repeat(auto-fit, minmax(clamp(220px, 25vw, 280px), 1fr));
+  gap: clamp(16px, 2vw, 24px);
+  grid-template-columns: repeat(auto-fit, minmax(clamp(220px, 30vw, 320px), 1fr));
   max-width: min(1400px, 100%);
   margin: 0 auto;
   padding: 0 8px;
+  justify-content: flex-start;
 }
 
 .menu-next {
@@ -274,7 +275,6 @@
   width: 100%;
   box-sizing: border-box;
 }
-
 
 @media (max-width: 1024px) {
   .menu-app {

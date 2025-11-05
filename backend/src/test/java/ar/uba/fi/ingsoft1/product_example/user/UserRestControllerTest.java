@@ -60,8 +60,8 @@ class UserRestControllerTest {
 
     @BeforeEach
     void setUp() {
-        userCreateDTO = new UserCreateDTO("john.doe@example.com", "password123", "ADMIN");
-        tokenDTO = new TokenDTO("mocked-jwt-token", "", "");
+        userCreateDTO = new UserCreateDTO("john.doe@example.com", "password123", "ADMIN", 1L);
+        tokenDTO = new TokenDTO("mocked-jwt-token", "", "", 1L);
     }
 
 
@@ -98,7 +98,7 @@ class UserRestControllerTest {
 
     @Test
     void signUp_invalidInput_returns400() throws Exception {
-        UserCreateDTO invalidUser = new UserCreateDTO("", "", "");
+        UserCreateDTO invalidUser = new UserCreateDTO("", "", "", 2L);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ class UserRestControllerTest {
                         .file(photoPart)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Código de verificación enviado a " + userRegisterDTO.email()));
+                .andExpect(jsonPath("$.message").value("Code sent to: " + userRegisterDTO.email()));
     }
 
     @Test
@@ -180,7 +180,7 @@ class UserRestControllerTest {
                         .file(photoPart)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("El email ya está registrado"));
+                .andExpect(jsonPath("$.message").value("The email is already registered"));
     }
 
     @Test
@@ -199,7 +199,7 @@ class UserRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Correo verificado con éxito"));
+                .andExpect(jsonPath("$.message").value("Email verified succesfully"));
     }
 
     @Test
@@ -218,7 +218,7 @@ class UserRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Código incorrecto"));
+                .andExpect(jsonPath("$.message").value("Wrong code"));
     }
 
     @Test
@@ -232,6 +232,6 @@ class UserRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Usuario no encontrado"));
+                .andExpect(content().string("User not found"));
     }
 }

@@ -27,24 +27,24 @@ class UserServiceTest {
         var passwordEncoder = new BCryptPasswordEncoder();
         var passwordHash = passwordEncoder.encode(PASSWORD);
 
-        var user = new User(USERNAME, passwordHash, "ROLE_USER");
+        var user = new User(USERNAME, passwordHash, "ROLE_USER", 1L);
         user.setVerified(true);
+        user.setFailedLoginAttempts(0);
 
+        // Mock del repositorio de usuarios
         UserRepository userRepository = mock();
-        when(userRepository.findByUsername(anyString())).thenReturn(
-            Optional.empty()
-        );
-        when(userRepository.findByUsername(USERNAME)).thenReturn(
-            Optional.of(user)
-        );
+        when(userRepository.findByUsername(anyString()))
+                .thenReturn(Optional.empty());
+        when(userRepository.findByUsername(USERNAME))
+                .thenReturn(Optional.of(user));
 
         var key = "0".repeat(64);
         userService = new UserService(
-            new JwtService(key, 1L),
-            new BCryptPasswordEncoder(),
-            userRepository,
-            new RefreshTokenService(1L, 20, mock()),
-            mock(EmailService.class)
+                new JwtService(key, 1L),
+                passwordEncoder,
+                userRepository,
+                new RefreshTokenService(1L, 20, mock()),
+                mock(EmailService.class)
         );
     }
 
@@ -77,7 +77,7 @@ class UserServiceTest {
         UserCreateDTO user = new UserCreateDTO(
             USERNAME + "_new",
             PASSWORD,
-            "ROLE_USER"
+            "ROLE_USER", 1L
         );
         var response = userService.createUser(user);
         assertTrue(response.isPresent());

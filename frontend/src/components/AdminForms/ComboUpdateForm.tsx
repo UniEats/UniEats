@@ -2,11 +2,11 @@ import { useId, useState } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
-import { ComboUpdateFormSchema, ComboFormValues } from "@/models/Combo";
+import { ComboFormValues, ComboUpdateFormSchema } from "@/models/Combo";
 import { useComboList, useUpdateCombo } from "@/services/ComboServices";
+import { useMenuSectionList } from "@/services/MenuSectionServices";
 import { useProductList } from "@/services/ProductServices";
 import { useTagList } from "@/services/TagServices";
-import { useMenuSectionList } from "@/services/MenuSectionServices";
 
 import styles from "./AdminForms.module.css";
 
@@ -73,11 +73,15 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
     const tagError = tagsQuery.error;
     const menuError = menuSectionsQuery.error;
     const errorMessage =
-      comboError instanceof Error ? comboError.message :
-      productError instanceof Error ? productError.message :
-      tagError instanceof Error ? tagError.message :
-      menuError instanceof Error ? menuError.message :
-      "Failed to load data.";
+      comboError instanceof Error
+        ? comboError.message
+        : productError instanceof Error
+          ? productError.message
+          : tagError instanceof Error
+            ? tagError.message
+            : menuError instanceof Error
+              ? menuError.message
+              : "Failed to load data.";
     return (
       <section className={styles.formSection} aria-live="assertive">
         <p>{errorMessage}</p>
@@ -129,7 +133,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                       formData.setFieldValue("price", matchedCombo?.price?.toString() ?? "");
                       formData.setFieldValue(
                         "productIds",
-                        (matchedCombo?.products || []).map(p => ({ id: String(p.id), quantity: p.quantity }))
+                        (matchedCombo?.products || []).map((p) => ({ id: String(p.id), quantity: p.quantity })),
                       );
                       formData.setFieldValue("tagIds", Object.keys(matchedCombo?.tags || {}));
                       formData.setFieldValue("menuSectionIds", Object.keys(matchedCombo?.menuSections || {}));

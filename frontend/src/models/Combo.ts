@@ -7,6 +7,7 @@ export const ProductsMapSchema = z.array(
     quantity: z.number(),
   })
 );
+export type ComboProduct = z.infer<typeof ProductsMapSchema>[number];
 export const TagsMapSchema = z.record(z.string(), z.string());
 export const MenuSectionsMapSchema = z.record(z.string(), z.string());
 

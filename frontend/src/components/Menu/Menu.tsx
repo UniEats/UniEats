@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useDeleteProduct } from "@/services/ProductServices";
+
+import { useCart } from "@/components/Cart/Cart";
+import { useProducts } from "@/components/Product/ProductContext";
+import { ComboItem, MenuItem, MenuSection } from "@/models/Menu";
 import { useDeleteCombo } from "@/services/ComboServices";
+import { useDeleteProduct } from "@/services/ProductServices";
+
 import Product from "../Product/Product";
 import "./Menu.css";
 
-import { MenuSection, MenuItem, ComboItem } from "@/models/Menu";
-
 type DisplayItem = (MenuItem | ComboItem) & {
-  type: 'product' | 'combo';
+  type: "product" | "combo";
   tags?: Record<number, string> | undefined;
+  available?: boolean;
 };
 
 type MenuProps = {
@@ -17,7 +21,7 @@ type MenuProps = {
 
 export const Menu = ({ menuSections }: MenuProps) => {
   const [activeCategoryId, setActiveCategoryId] = useState<MenuSection["id"] | null>(
-    menuSections.length > 0 ? menuSections[0].id : null
+    menuSections.length > 0 ? menuSections[0].id : null,
   );
 
   const [isSwitching, setIsSwitching] = useState(false);
@@ -26,9 +30,9 @@ export const Menu = ({ menuSections }: MenuProps) => {
   const deleteProduct = useDeleteProduct();
   const deleteCombo = useDeleteCombo();
 
-  const handleDeleteItem = async (id: number, type: 'product' | 'combo') => {
+  const handleDeleteItem = async (id: number, type: "product" | "combo") => {
     try {
-      if (type === 'product') {
+      if (type === "product") {
         await deleteProduct.mutateAsync(id);
       } else {
         await deleteCombo.mutateAsync(id);
@@ -52,6 +56,31 @@ export const Menu = ({ menuSections }: MenuProps) => {
     }, 300);
   };
 
+  const { addToCart } = useCart();
+  const { productsMap, setProducts, combosMap, setCombos } = useProducts();
+
+  useEffect(() => {
+    const allProducts = menuSections.flatMap((section) => section.products);
+    setProducts(allProducts);
+    const allCombos = menuSections.flatMap((section) => section.combos);
+    setCombos(allCombos);
+  }, [menuSections, setProducts, setCombos]);
+
+  const handleAddToCart = (id: number, type: "product" | "combo", quantity: number) => {
+    if (!productsMap[id] && type === "product") {
+      alert("Product not found");
+      return;
+    }
+
+    if (type === "combo" && !combosMap[id]) {
+      alert("Combo not found");
+      return;
+    }
+
+    addToCart(id, type, quantity);
+    alert(`Added ${quantity} of ${type} ${id} to cart`);
+  };
+
   useEffect(() => {
     if (!menuSections || menuSections.length === 0) {
       setActiveCategoryId(null);
@@ -71,13 +100,17 @@ export const Menu = ({ menuSections }: MenuProps) => {
   const displayItems: DisplayItem[] = useMemo(() => {
     if (!activeSection) return [];
 
-    const products: DisplayItem[] = activeSection.products.map(p => ({ ...p, type: 'product' }));
-    const combos: DisplayItem[] = activeSection.combos.map(c => ({ ...c, type: 'combo' }));
+    const products: DisplayItem[] = activeSection.products.map((p) => ({
+      ...p,
+      type: "product",
+      available: p.available,
+    }));
+    const combos: DisplayItem[] = activeSection.combos.map((c) => ({ ...c, type: "combo", available: c.available }));
 
     return [...products, ...combos];
   }, [activeSection]);
 
-return (
+  return (
     <div className="menu-page">
       <nav className="menu-categories" aria-label="Menu sections">
         <ul role="tablist">
@@ -114,7 +147,7 @@ return (
                 <div className="menu-grid">
                   {displayItems.map((item) => (
                     <Product
-                      key={item.id}
+                      key={`${item.type}-${item.id}`}
                       id={item.id}
                       image={item.image}
                       title={item.name}
@@ -122,6 +155,8 @@ return (
                       price={item.price}
                       tags={item.tags ? Object.values(item.tags) : []}
                       onDelete={() => handleDeleteItem(item.id, item.type)}
+                      onAddToCart={(id, quantity) => handleAddToCart(id, item.type, quantity)}
+                      available={item.available}
                     />
                   ))}
                 </div>

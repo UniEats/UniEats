@@ -1,6 +1,7 @@
 package ar.uba.fi.ingsoft1.product_example.Products;
 
 import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
+import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
 import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 import ar.uba.fi.ingsoft1.product_example.Tags.TagRepository;
 import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
@@ -74,7 +75,7 @@ class ProductServiceTest {
 
     @Test
     void testCreateProduct_Success() throws Exception {
-        ProductCreateDTO dto = new ProductCreateDTO("Product 1", "Description", new BigDecimal("100.0"), List.of(1L), List.of(1L), List.of());
+        ProductCreateDTO dto = new ProductCreateDTO("Product 1", "Description", new BigDecimal("100.0"), List.of(new IngredientQuantity(1L, 2)), List.of(1L), List.of());
         MockMultipartFile image = new MockMultipartFile("image", "image.png", "image/png", new byte[1]);
 
         Tag tag = new Tag();
@@ -98,7 +99,7 @@ class ProductServiceTest {
     @Test
     void testCreateProduct_ImageTooLarge() throws Exception {
         ProductCreateDTO dto = new ProductCreateDTO(
-            "Product 1", "Description", new BigDecimal("100.0"), List.of(1L), List.of(1L), List.of(1L)
+            "Product 1", "Description", new BigDecimal("100.0"), List.of(new IngredientQuantity(1L, 2)), List.of(1L), List.of(1L)
         );
 
         MockMultipartFile image = new MockMultipartFile("image", "image.png", "image/png", new byte[3 * 1024 * 1024]);
@@ -123,23 +124,40 @@ class ProductServiceTest {
         Product existingProduct = new Product("Product 1", "Description", new BigDecimal("100.0"));
         existingProduct.setId(1L);
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
-        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
         ProductUpdateDTO updateDTO = new ProductUpdateDTO(
             "Updated Product",
             "Updated Description",
             new BigDecimal("150.0"),
-            List.of(),
-            List.of(), 
-            List.of()
+            List.of(new IngredientQuantity(1L, 1)),
+            List.of(1L),
+            List.of(1L)
         );
+        MockMultipartFile image = new MockMultipartFile("image", "updatedCombo.png", "image/png", new byte[1]);
 
-        Optional<ProductDTO> result = productService.updateProduct(1L, updateDTO, any());
+        when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
+
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(1L);
+        when(ingredientRepository.findById(1L)).thenReturn(Optional.of(ingredient));
+
+        Tag tag = new Tag();
+        tag.setId(1L);
+        when(tagRepository.findById(1L)).thenReturn(Optional.of(tag));
+
+        MenuSection section = new MenuSection();
+        section.setId(1L);
+        when(menuSectionRepository.findById(1L)).thenReturn(Optional.of(section));
+
+        Product updatedProduct = new Product("Updated Product", "Updated Description", new BigDecimal("350.0"));
+        updatedProduct.setId(1L);
+        when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
+
+        Optional<ProductDTO> result = productService.updateProduct(1L, updateDTO, image);
 
         assertTrue(result.isPresent());
         assertEquals("Updated Product", result.get().name());
         assertEquals("Updated Description", result.get().description());
+        assertEquals(new BigDecimal("350.0"), result.get().price());
     }
 
     @Test

@@ -47,7 +47,7 @@ class SessionRestControllerTest {
     void setUp() {
         userLoginDTO = new UserLoginDTO("john.doe@example.com", "password123");
         refreshDTO = new RefreshDTO("valid-refresh-token");
-        tokenDTO = new TokenDTO("mocked-jwt-token", "", "");
+        tokenDTO = new TokenDTO("mocked-jwt-token", "", "", 1L);
     }
 
     @Test

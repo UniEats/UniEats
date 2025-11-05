@@ -44,7 +44,7 @@ class ComboRestControllerTest {
 
     @BeforeEach
     void setUp() {
-        comboDTO = new ComboDTO(1L, "Combo Pizza", "Delicious combo with pizza", new BigDecimal("700.00"), Map.of(), List.of(), Map.of(), new byte[5 * 1024]);
+        comboDTO = new ComboDTO(1L, "Combo Pizza", "Delicious combo with pizza", new BigDecimal("700.00"), Map.of(), List.of(), Map.of(), new byte[5 * 1024], true);
     }
 
     @Test
@@ -172,7 +172,7 @@ class ComboRestControllerTest {
 
         ComboDTO updatedDTO = new ComboDTO(
                 1L, "Combo Pizza Updated", "Updated Description", new BigDecimal("750.00"),
-                Map.of(), List.of(), Map.of(), new byte[5 * 1024]
+                Map.of(), List.of(), Map.of(), new byte[5 * 1024], true
         );
 
         Mockito.when(comboService.updateCombo(Mockito.eq(1L), any(), any()))

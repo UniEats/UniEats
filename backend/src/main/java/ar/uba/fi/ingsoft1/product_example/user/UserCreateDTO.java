@@ -7,9 +7,10 @@ import java.util.function.Function;
 public record UserCreateDTO(
         @NotBlank String username,
         @NotBlank String password,
-        @NotBlank String role
+        @NotBlank String role,
+        Long id
 ) implements UserCredentials {
     public User asUser(Function<String, String> encryptPassword) {
-        return new User(username, encryptPassword.apply(password), role);
+        return new User(username, encryptPassword.apply(password), role, id);
     }
 }
