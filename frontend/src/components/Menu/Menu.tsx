@@ -147,7 +147,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
                 <div className="menu-grid">
                   {displayItems.map((item) => (
                     <Product
-                      key={item.id}
+                      key={`${item.type}-${item.id}`}
                       id={item.id}
                       image={item.image}
                       title={item.name}
