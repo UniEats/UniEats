@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
@@ -30,9 +30,10 @@ const PRODUCT_UPDATE_DEFAULT_VALUES: ProductUpdateFormValues = {
 
 type ProductUpdateFormProps = {
   onClose: () => void;
+  productIdToUpdate?: number | null;
 };
 
-export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
+export const ProductUpdateForm = ({ onClose, productIdToUpdate }: ProductUpdateFormProps) => {
   const updateProduct = useUpdateProduct();
   const productsQuery = useProductList();
   const ingredientsQuery = useIngredientList();
@@ -40,6 +41,11 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
   const menuSectionsQuery = useMenuSectionList();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const productSelectId = useId();
+
+  const products = productsQuery.data ?? [];
+  const ingredients = ingredientsQuery.data ?? [];
+  const tags = tagsQuery.data ?? [];
+  const menuSections = menuSectionsQuery.data ?? [];
 
   const formData = useAppForm({
     defaultValues: PRODUCT_UPDATE_DEFAULT_VALUES,
@@ -52,6 +58,28 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
       setSuccessMessage(`Product "${updatedProduct.name}" updated successfully.`);
     },
   });
+
+  useEffect(() => {
+    // Wait for the prop and for the products to be loaded
+    if (productIdToUpdate && products.length > 0) {
+      const matchedProduct = products.find((p) => p.id === productIdToUpdate);
+
+      // If we found the product, set all the form fields
+      if (matchedProduct) {
+        formData.setFieldValue("productId", matchedProduct.id.toString());
+        formData.setFieldValue("name", matchedProduct.name ?? "");
+        formData.setFieldValue("description", matchedProduct.description ?? "");
+        formData.setFieldValue("price", matchedProduct.price?.toString() ?? "");
+        formData.setFieldValue(
+          "ingredientIds",
+          (matchedProduct.ingredients || []).map((i) => ({ id: String(i.id), quantity: i.quantity })),
+        );
+        formData.setFieldValue("tagIds", Object.keys(matchedProduct.tags || {}));
+        formData.setFieldValue("menuSectionIds", Object.keys(matchedProduct.menuSections || {}));
+        // We don't set the image, as it's a file upload
+      }
+    }
+  }, [productIdToUpdate, products, formData]); // Dependencies
 
   const submissionError = updateProduct.error
     ? updateProduct.error instanceof Error
@@ -88,11 +116,6 @@ export const ProductUpdateForm = ({ onClose }: ProductUpdateFormProps) => {
       </section>
     );
   }
-
-  const products = productsQuery.data ?? [];
-  const ingredients = ingredientsQuery.data ?? [];
-  const tags = tagsQuery.data ?? [];
-  const menuSections = menuSectionsQuery.data ?? [];
 
   if (products.length === 0) {
     return (
