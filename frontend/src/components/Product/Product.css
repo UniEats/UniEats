@@ -12,7 +12,8 @@
     transform 0.25s ease,
     box-shadow 0.25s ease;
   height: 100%;
-  width: 260px;
+  width: 100%;
+  max-width: 320px;
   position: relative;
   z-index: 0;
   overflow: hidden;
@@ -115,12 +116,6 @@
     transform 0.2s ease;
 }
 
-.product-cta.unavailable {
-  background-color: #ccc;
-  color: #666;
-  cursor: not-allowed;
-}
-
 .product-cta:hover {
   background: #bf0c2b;
   transform: translateY(-1px);
@@ -210,6 +205,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
