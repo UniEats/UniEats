@@ -1,6 +1,4 @@
 import { useState } from "react";
-
-import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
 import { ComboFormSchema, ComboFormValues } from "@/models/Combo";
 import { useCreateCombo } from "@/services/ComboServices";
@@ -9,12 +7,6 @@ import { useProductList } from "@/services/ProductServices";
 import { useTagList } from "@/services/TagServices";
 
 import styles from "./AdminForms.module.css";
-
-type FieldError = { message: string };
-const normalizeErrors = (errors: Array<{ message?: string } | undefined>): FieldError[] =>
-  errors
-    .map((error) => (error && error.message ? { message: error.message } : null))
-    .filter((error): error is FieldError => error !== null);
 
 const COMBO_DEFAULT_VALUES: ComboFormValues = {
   name: "",
@@ -96,150 +88,47 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
           <formData.AppField name="description" children={(field) => <field.TextField label="Description" />} />
           <formData.AppField name="price" children={(field) => <field.TextField label="Price" />} />
 
-          <formData.Field
-            name="productIds"
-            children={(field) => (
-              <div className={styles.formFields}>
-                <span className={styles.fieldLabel}>Products</span>
-                <div className={styles.optionsGrid}>
-                  {products.map((product) => {
-                    const selectedProduct = field.state.value.find(
-                      (p: { id: string; quantity: number }) => p.id === product.id.toString(),
-                    );
-                    const quantity = selectedProduct?.quantity ?? 1;
-
-                    return (
-                      <div key={product.id} className={styles.optionRow}>
-                        <input
-                          type="checkbox"
-                          checked={!!selectedProduct}
-                          onChange={(e) => {
-                            let nextValue = [...field.state.value];
-                            if (e.target.checked) {
-                              nextValue.push({ id: product.id.toString(), quantity });
-                            } else {
-                              nextValue = nextValue.filter(
-                                (p: { id: string; quantity: number }) => p.id !== product.id.toString(),
-                              );
-                            }
-                            field.handleChange(nextValue);
-                          }}
-                        />
-                        <span>{product.name}</span>
-                        {selectedProduct && (
-                          <input
-                            type="number"
-                            min={1}
-                            value={quantity}
-                            onChange={(e) => {
-                              const nextValue = field.state.value.map((p: { id: string; quantity: number }) =>
-                                p.id === product.id.toString()
-                                  ? { ...p, quantity: parseInt(e.target.value, 10) || 1 }
-                                  : p,
-                              );
-                              field.handleChange(nextValue);
-                            }}
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <ErrorContainer errors={normalizeErrors(field.state.meta.errors)} />
-              </div>
-            )}
+          <formData.AppField 
+            name="productIds" 
+            children={(field) => 
+            <field.ItemQuantityField 
+              label="Products" 
+              items={products}
+              emptyMessage="Please add products first." 
+            />} 
           />
 
-          <formData.Field
+          <formData.AppField
             name="tagIds"
             children={(field) => (
-              <div className={styles.formFields}>
-                <span className={styles.fieldLabel}>Tags (optional)</span>
-                <div className={styles.optionsGrid}>
-                  {tags.length === 0 ? (
-                    <span>No tags available yet.</span>
-                  ) : (
-                    tags.map((tag) => {
-                      const optionValue = tag.id.toString();
-                      const isChecked = field.state.value.includes(optionValue);
-                      return (
-                        <label key={tag.id} className={styles.optionRow}>
-                          <input
-                            type="checkbox"
-                            value={optionValue}
-                            checked={isChecked}
-                            onChange={(event) => {
-                              const { checked, value } = event.target;
-                              const nextValue = checked
-                                ? [...field.state.value, value]
-                                : field.state.value.filter((item) => item !== value);
-                              field.handleChange(nextValue);
-                            }}
-                            onBlur={field.handleBlur}
-                          />
-                          <span>{tag.tag}</span>
-                        </label>
-                      );
-                    })
-                  )}
-                </div>
-                <ErrorContainer
-                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
-                />
-              </div>
+              <field.CheckboxField
+                label="Tags (optional)"
+                options={tags}
+                emptyMessage="No tags available yet."
+              />
             )}
           />
 
-          <formData.Field
+          <formData.AppField
             name="menuSectionIds"
             children={(field) => (
-              <div className={styles.formFields}>
-                <span className={styles.fieldLabel}>Menu Sections</span>
-                <div className={styles.optionsGrid}>
-                  {menuSections.length === 0 ? (
-                    <span>No menu sections available yet.</span>
-                  ) : (
-                    menuSections.map((section) => {
-                      const optionValue = section.id.toString();
-                      const isChecked = field.state.value.includes(optionValue);
-                      return (
-                        <label key={section.id} className={styles.optionRow}>
-                          <input
-                            type="checkbox"
-                            value={optionValue}
-                            checked={isChecked}
-                            onChange={(event) => {
-                              const { checked, value } = event.target;
-                              const nextValue = checked
-                                ? [...field.state.value, value]
-                                : field.state.value.filter((item) => item !== value);
-                              field.handleChange(nextValue);
-                            }}
-                            onBlur={field.handleBlur}
-                          />
-                          <span>{section.label}</span>
-                        </label>
-                      );
-                    })
-                  )}
-                </div>
-                <ErrorContainer
-                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
-                />
-              </div>
+              <field.CheckboxField
+                label="Menu Sections"
+                options={menuSections}
+                emptyMessage="No menu sections available yet."
+              />
             )}
           />
 
           <formData.AppField name="image" children={(field) => <field.FileField label="Image" />} />
 
           <div className={styles.formActions}>
-            <button type="button" className={styles.cancelButton} onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className={styles.submitButton}>
-              Add Combo
-            </button>
+            <formData.Button
+              label="Cancel"
+              type="button"
+              onClick={onClose}
+            />
+            <formData.Button label="Add Item" />
           </div>
         </formData.FormContainer>
       </formData.AppForm>

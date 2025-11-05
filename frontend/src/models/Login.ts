@@ -1,17 +1,17 @@
 import { z } from "zod";
 
 export const SignupRequestSchema = z.object({
-  nombre: z.string().min(1, "Name can't be void"),
-  apellido: z.string().min(1, "Surname can't be void"),
+  name: z.string().min(1, "Name can't be void"),
+  last_name: z.string().min(1, "Surname can't be void"),
   email: z.string().min(1, "Email can't be void").email("Email must be valid"),
-  foto: z
+  photo: z
     .instanceof(File)
     .or(z.null())
     .refine((file) => file !== null, "Image is required")
     .refine((file) => file && file.size <= 2 * 1024 * 1024, "Image must be less than 2MB."),
-  edad: z.string().min(1, "Age can't be void"),
-  genero: z.string().min(1, "Genre can't be void"),
-  domicilio: z.string().min(1, "Residence can't be void"),
+  age: z.string().min(1, "Age can't be void"),
+  gender: z.string().min(1, "Genre can't be void"),
+  address: z.string().min(1, "Residence can't be void"),
   password: z.string().min(6, "Password must have at least 6 characters."),
 });
 
