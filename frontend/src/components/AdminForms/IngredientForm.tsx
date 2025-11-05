@@ -51,16 +51,12 @@ export const IngredientForm = ({ onClose }: IngredientFormProps) => {
           <formData.AppField name="stock" children={(field) => <field.TextField label="Initial stock" />} />
 
           <div className={styles.formActions}>
-            <button
+            <formData.Button
+              label="Cancel"
               type="button"
-              className={styles.cancelButton}
               onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button type="submit" className={styles.submitButton}>
-              Add Item
-            </button>
+            />
+            <formData.Button label="Add Item" />
           </div>
         </formData.FormContainer>
       </formData.AppForm>

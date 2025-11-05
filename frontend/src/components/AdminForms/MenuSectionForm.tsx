@@ -56,17 +56,12 @@ export const MenuSectionForm = ({ onClose }: MenuSectionFormProps) => {
           </formData.AppField>
 
           <div className={styles.formActions}>
-            <button
+            <formData.Button
+              label="Cancel"
               type="button"
-              className={styles.cancelButton}
               onClick={onClose}
-            >
-              Cancel
-            </button>
-
-            <button type="submit" className={styles.submitButton}>
-              Add Item
-            </button>
+            />
+            <formData.Button label="Add Item" />
           </div>
 
         </formData.FormContainer>
