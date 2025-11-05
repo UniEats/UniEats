@@ -91,14 +91,14 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
           <formData.AppField name="description" children={(field) => <field.TextField label="Description" />} />
           <formData.AppField name="price" children={(field) => <field.TextField label="Price" />} />
           
-          <formData.AppField
-            name="ingredientIds"
-            children={(field) => (
-              <field.CheckboxField
-                label="Ingredients"
-                options={ingredients}
-              />
-            )}
+          <formData.AppField 
+            name="ingredientIds" 
+            children={(field) => 
+            <field.ItemQuantityField 
+              label="Ingredients" 
+              items={ingredients}
+              emptyMessage="Please add ingredients first." 
+            />} 
           />
 
           <formData.AppField
