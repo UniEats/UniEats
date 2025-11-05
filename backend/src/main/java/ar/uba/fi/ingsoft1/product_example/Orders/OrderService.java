@@ -127,6 +127,51 @@ class OrderService {
         return Optional.of(savedOrder.toDTO());
     }
 
+    @Transactional
+    public Optional<OrderDTO> startPreparation(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        if (!STATUS_CONFIRMED.equals(order.getState().getId())) {
+            throw new IllegalStateException("Order must be confirmed to start preparation");
+        }
+
+        order.setState(new OrderStatus(STATUS_IN_PREPARATION, "in preparation"));
+        return Optional.of(orderRepository.save(order).toDTO());
+    }
+
+    @Transactional
+    public Optional<OrderDTO> confirmOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        discountIngredients(order);
+
+        order.setState(new OrderStatus(STATUS_CONFIRMED, "confirmed"));
+        return Optional.of(orderRepository.save(order).toDTO());
+    }
+
+    private void discountIngredients(Order order) {
+        for (OrderDetail detail : order.getDetails()) {
+            if (detail.getProduct() != null) {
+                Product product = detail.getProduct();
+                discountIngredientsForProduct(product, detail.getQuantity());
+            } else if (detail.getCombo() != null) {
+                discountIngredientsForCombo(detail.getCombo(), detail.getQuantity());
+            }
+        }
+    }
+
+    private void discountIngredientsForCombo(Combo combo, int quantityOrdered) {
+        if (combo.getComboProducts() == null) return;
+
+        for (var comboProduct : combo.getComboProducts()) {
+            Product product = comboProduct.getProduct();
+            int totalProductQuantity = comboProduct.getQuantity() * quantityOrdered;
+            discountIngredientsForProduct(product, totalProductQuantity);
+        }
+    }
+
     private void discountIngredientsForProduct(Product product, int quantityOrdered) {
         if (product.getProductIngredients() == null) return;
 
@@ -140,46 +185,11 @@ class OrderService {
                         "Not enough stock for ingredient: " + ingredient.getName()
                 );
             }
-
             ingredient.setStock(newStock);
             ingredientRepository.save(ingredient);
         });
     }
 
-    @Transactional
-    public Optional<OrderDTO> startPreparation(Long id) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-
-        if (!STATUS_CONFIRMED.equals(order.getState().getId())) {
-            throw new IllegalStateException("Order must be confirmed to start preparation");
-        }
-
-        for (OrderDetail detail : order.getDetails()) {
-            if (detail.getProduct() != null) {
-                Product product = detail.getProduct();
-                discountIngredientsForProduct(product, detail.getQuantity());
-            } else if (detail.getCombo() != null) {
-                Combo combo = detail.getCombo();
-                for (var comboProduct : combo.getComboProducts()) {
-                    Product product = comboProduct.getProduct();
-                    int comboQuantity = comboProduct.getQuantity() * detail.getQuantity();
-                    discountIngredientsForProduct(product, comboQuantity);
-                }
-            }
-        }
-
-        order.setState(new OrderStatus(STATUS_IN_PREPARATION, "in preparation"));
-        return Optional.of(orderRepository.save(order).toDTO());
-    }
-
-    @Transactional
-    public Optional<OrderDTO> confirmOrder(Long id) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        order.setState(new OrderStatus(STATUS_CONFIRMED, "confirmed"));
-        return Optional.of(orderRepository.save(order).toDTO());
-    }
 
     @Transactional
     public Optional<OrderDTO> markReady(Long id) {
