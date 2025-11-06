@@ -190,7 +190,6 @@ class OrderService {
         });
     }
 
-
     @Transactional
     public Optional<OrderDTO> markReady(Long id) {
         Order order = orderRepository.findById(id)
@@ -232,5 +231,15 @@ class OrderService {
         }
         orderRepository.deleteById(id);
         return true;
+    }
+
+    public List<OrderStatus> getAllStatuses() {
+        return List.of(
+                new OrderStatus(STATUS_CONFIRMED, "confirmed"),
+                new OrderStatus(STATUS_IN_PREPARATION, "in preparation"),
+                new OrderStatus(STATUS_READY, "ready"),
+                new OrderStatus(STATUS_COMPLETE, "complete"),
+                new OrderStatus(STATUS_CANCELED, "canceled")
+        );
     }
 }

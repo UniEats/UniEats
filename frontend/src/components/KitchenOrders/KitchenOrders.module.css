@@ -4,6 +4,60 @@
     margin: 0 auto;
 }
 
+.stateButtons {
+  border-bottom: 1px solid #f2f3f6;
+  padding: 18px 48px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.stateButtons ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  justify-content: center;
+}
+
+.stateButton {
+  background: transparent;
+  border: none;
+  font-size: 0.92rem;
+  padding: 10px 18px;
+  border-radius: 999px;
+  color: #3c3f44;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.active {
+  background: #bf0c2b;
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(218, 15, 51, 0.2);
+}
+
+.stateButton:hover {
+  background: #ffeef1;
+  color: #bf0c2b;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.infoText {
+  color: #999;
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
 .error {
     color: #dc3545;
     padding: 10px;
@@ -63,7 +117,7 @@
     color: #555;
 }
 
-.startButton {
+.primaryBtn {
     width: 100%;
     padding: 10px;
     background-color: #28a745;
@@ -75,11 +129,17 @@
     transition: background-color 0.2s;
 }
 
-.startButton:hover {
+.primaryBtn:hover {
     background-color: #218838;
 }
 
-.startButton:disabled {
+.activeBtn {
+  background: #bf0c2b;
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(218, 15, 51, 0.2);
+}
+
+.primaryBtn:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
 }
