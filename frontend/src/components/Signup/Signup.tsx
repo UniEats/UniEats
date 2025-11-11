@@ -39,7 +39,7 @@ export function Signup({ onSubmit, submitError }: Props) {
                 <formData.AppField name="genero" children={(field) => <field.TextField label="Genre" />} />
                 <formData.AppField name="domicilio" children={(field) => <field.TextField label="Residence" />} />
 
-                <button type="submit">Register</button>
+                <button type="submit">Sign up</button>
             </formData.FormContainer>
         </formData.AppForm>
     );
