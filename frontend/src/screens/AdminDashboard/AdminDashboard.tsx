@@ -58,6 +58,7 @@ export const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState<SectionId>("dashboard");
   const [openModal, setOpenModal] = useState<ModalType>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [selectedComboId, setSelectedComboId] = useState<number | null>(null); // ADD THIS LINE
 
   const { data: products, isPending: productsPending } = useProductList();
   const { data: ingredients, isPending: ingredientsPending } = useIngredientList();
@@ -71,6 +72,7 @@ export const AdminDashboard = () => {
   const closeModal = () => {
     setOpenModal(null);
     setSelectedProductId(null);
+    setSelectedComboId(null);
   };
   const handleLogout = () => setTokenState({ state: "LOGGED_OUT" });
 
@@ -495,6 +497,16 @@ export const AdminDashboard = () => {
                   </td>
                   <td>
                     <button
+                      className={styles.secondaryButton}
+                      style={{ marginRight: "0.5rem" }}
+                      onClick={() => {
+                        setSelectedComboId(combo.id);
+                        setOpenModal("combo-update");
+                      }}
+                    >
+                      Update
+                    </button>
+                    <button
                       className={styles.dangerButton}
                       onClick={() => handleDeleteCombo(combo.id)}
                       disabled={deleteComboMutation.isPending}
@@ -621,7 +633,7 @@ export const AdminDashboard = () => {
       )}
       {openModal === "combo-update" && (
         <Modal onClose={closeModal}>
-          <ComboUpdateForm onClose={closeModal} />
+          <ComboUpdateForm onClose={closeModal} comboIdToUpdate={selectedComboId} />
         </Modal>
       )}
       {openModal === "user-role" && (
