@@ -8,6 +8,7 @@ import { MenuSectionForm } from "@/components/AdminForms/MenuSectionForm";
 import { ProductForm } from "@/components/AdminForms/ProductForm";
 import { ProductUpdateForm } from "@/components/AdminForms/ProductUpdateForm";
 import { TagForm } from "@/components/AdminForms/TagForm";
+import { ChangeRoleForm } from "@/components/AdminForms/ChangeRoleForm";
 import { Modal } from "@/components/Modal/Modal";
 import { useComboList, useDeleteCombo } from "@/services/ComboServices";
 import { useIngredientList } from "@/services/IngredientServices";
@@ -27,6 +28,7 @@ type ModalType =
   | "menu-section"
   | "combo-create"
   | "combo-update"
+  | "user-role"
   | null;
 
 type SectionId = (typeof SIDEBAR_ITEMS)[number]["id"];
@@ -437,6 +439,12 @@ export const AdminDashboard = () => {
             Manage roles via the authentication service. Role changes will surface here once new endpoints are
             available.
           </p>
+          <button
+            className={styles.primaryButton}
+            onClick={() => setOpenModal("user-role")}
+          >
+            Manage Roles
+          </button>
         </div>
       </div>
     </section>
@@ -614,6 +622,11 @@ export const AdminDashboard = () => {
       {openModal === "combo-update" && (
         <Modal onClose={closeModal}>
           <ComboUpdateForm onClose={closeModal} />
+        </Modal>
+      )}
+      {openModal === "user-role" && (
+        <Modal onClose={closeModal}>
+          <ChangeRoleForm onClose={closeModal} />
         </Modal>
       )}
     </div>

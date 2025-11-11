@@ -44,7 +44,8 @@ public class SecurityConfig {
             "/combos/**",
             "/tags/**",
             "/ingredients/**",
-            "/users/count"
+            "/users/count",
+            "/users/change-role"
     };
 
     public static final String[] STAFF_ORDER_ENDPOINTS = {

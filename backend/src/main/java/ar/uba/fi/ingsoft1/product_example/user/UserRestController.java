@@ -153,4 +153,30 @@ class UserRestController {
     UserCountDTO getUserCount() {
         return new UserCountDTO(userService.getUserCount());
     }
+
+    @PutMapping(path = "/change-role", consumes = "application/json", produces = "application/json")
+    @Operation(summary = "Change a user's role")
+    @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+    public ResponseEntity<Map<String, String>> changeUserRole(@RequestBody ChangeRoleRequest request) {
+        Optional<User> optionalUser = userRepository.findByUsername(request.email());
+        Map<String, String> response = new HashMap<>();
+
+        if (optionalUser.isEmpty()) {
+            response.put("message", "User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        User user = optionalUser.get();
+
+        String newRole = request.role().toUpperCase();
+        if (!newRole.equals("ROLE_ADMIN") && !newRole.equals("ROLE_STAFF") && !newRole.equals("ROLE_USER")) {
+            response.put("message", "Invalid role: must be ROLE_ADMIN, ROLE_STAFF, or ROLE_USER");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        user.setRole(newRole);
+        userRepository.save(user);
+        response.put("message", "Role updated successfully for user: " + user.getEmail());
+        return ResponseEntity.ok(response);
+    }
 }

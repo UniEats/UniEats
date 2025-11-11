@@ -191,3 +191,44 @@ export const ItemQuantityField = ({ label, items, emptyMessage }: ItemQuantityFi
     </div>
   );
 };
+
+type SelectFieldProps = {
+  label: string;
+  options: { value: string; label: string }[];
+  placeholder?: string;
+};
+
+export const SelectField = ({ label, options, placeholder }: SelectFieldProps) => {
+  const id = useId();
+  const field = useFieldContext<string>();
+
+  return (
+    <>
+      <label htmlFor={id} className={styles.fieldLabel}>
+        {label}
+      </label>
+
+      <select
+        id={id}
+        name={field.name}
+        value={field.state.value}
+        onChange={(e) => field.handleChange(e.target.value)}
+        onBlur={field.handleBlur}
+        className={styles.selectInput}
+      >
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+
+      <ErrorContainer errors={field.state.meta.errors} />
+    </>
+  );
+};
