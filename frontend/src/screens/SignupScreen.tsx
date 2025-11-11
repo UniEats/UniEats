@@ -6,7 +6,7 @@ import styles from "./SignupScreen.module.css";
 
 export const SignupScreen = () => {
     const [successMessage, setSuccessMessage] = useState("");
-    const { mutate, error, data, isSuccess } = useSignup();
+    const { mutate, error, data, isSuccess, isPending } = useSignup();
 
     useEffect(() => {
         if (isSuccess && data?.message && !error) {
@@ -26,7 +26,7 @@ export const SignupScreen = () => {
                     <Signup onSubmit={mutate} submitError={error} />
                     {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
                     <a href="/login" className={styles.loginLink}>
-                        Already signed up? Sign in here
+                        Have an account? Log in
                     </a>
                 </div>
             </div>

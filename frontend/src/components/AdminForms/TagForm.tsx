@@ -46,12 +46,12 @@ export const TagForm = ({ onClose }: TagFormProps) => {
         <formData.FormContainer extraError={submissionError}>
           <formData.AppField name="tag" children={(field) => <field.TextField label="Tag name" />} />
         <div className={styles.formActions}>
-          <button type="button" className={styles.cancelButton} onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className={styles.submitButton}>
-            Add Item
-          </button>
+          <formData.Button
+            label="Cancel"
+            type="button"
+            onClick={onClose}
+          />
+          <formData.Button label="Add Item" />
         </div>
         </formData.FormContainer>
       </formData.AppForm>

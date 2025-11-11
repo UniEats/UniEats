@@ -397,6 +397,7 @@ class OrderServiceTest {
         when(ingredientRepository.save(any())).thenReturn(ingredient);
 
         orderService.startPreparation(1L);
+        orderService.confirmOrder(1L);
 
         assertEquals(6, ingredient.getStock());
     }

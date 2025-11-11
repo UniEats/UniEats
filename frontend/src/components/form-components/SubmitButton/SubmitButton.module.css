@@ -1,3 +1,29 @@
-.button {
-  display: none;
+button {
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancelButton {
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.25rem;
+}
+
+.cancelButton:hover {
+  background-color: #f9fafb;
+}
+
+.submitButton {
+  background-color: #bf0c2b;
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.25rem;
+}
+
+.submitButton:hover {
+  background-color: #a60b25;
 }

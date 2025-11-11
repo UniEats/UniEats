@@ -5,9 +5,10 @@ import styles from "../../screens/LoginScreen.module.css";
 type Props = {
   onSubmit: (value: LoginRequest) => void;
   submitError: Error | null;
+  isPending: boolean;
 };
 
-export function Login({ onSubmit, submitError }: Props) {
+export function Login({ onSubmit, submitError, isPending }: Props) {
   const formData = useAppForm({
     defaultValues: { username: "", password: "" },
     validators: { onChange: LoginRequestSchema },
@@ -19,7 +20,7 @@ export function Login({ onSubmit, submitError }: Props) {
   return (
     <AppForm>
       <FormContainer extraError={submitError}>
-        <AppField name="username" children={(field) => <field.TextField label="Username" />} />
+        <AppField name="username" children={(field) => <field.TextField label="Email" />} />
         <AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
 
         <div style={{ marginTop: 8, marginBottom: 8 }}>
@@ -28,7 +29,7 @@ export function Login({ onSubmit, submitError }: Props) {
           </a>
         </div>
 
-        <button type="submit">Log In</button>
+        <formData.Button label="Log In" isPending={isPending} />
       </FormContainer>
     </AppForm>
   );
