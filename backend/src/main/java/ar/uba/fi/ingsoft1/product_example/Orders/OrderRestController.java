@@ -101,4 +101,17 @@ class OrderRestController {
         boolean deleted = orderService.deleteOrder(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/states")
+    public List<OrderStatus> getAllStates() {
+        return orderService.getAllStatuses();
+    }
+
+    @GetMapping("/state/{stateId}")
+    public List<OrderDTO> getOrdersByState(@PathVariable Long stateId) {
+        return orderService.geAlltOrders()
+                .stream()
+                .filter(o -> o.stateId() == stateId)
+                .toList();
+    }
 }

@@ -14,20 +14,20 @@ public class EmailService {
     public void sendVerificationEmail(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("Verificación de correo");
-        message.setText("Tu código de verificación es: " + code);
+        message.setSubject("Email verification");
+        message.setText("Your verification code is: " + code);
         mailSender.send(message);
     }
 
     public void sendPasswordResetEmail(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("Recuperación de contraseña");
+        message.setSubject("Password recovery");
         message.setText(
-            "Tu código de verificación para recuperar tu contraseña es: " +
+            "Your verification code to recover your password is: " +
                 code +
                 "\n\n" +
-                "Si no solicitaste recuperar tu contraseña, ignora este mensaje."
+                "If you did not request to recover your password, ignore this message."
         );
         mailSender.send(message);
     }
@@ -35,16 +35,16 @@ public class EmailService {
     public void sendAccountLockedEmail(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("Tu cuenta ha sido bloqueada [Comedor FIUBA]");
+        message.setSubject("Your account has been blocked [FIUBA Dining Hall]");
         message.setText(
-            "Detectamos el numero limite de intentos fallidos de inicio de sesión en tu cuenta.\n\n" +
-                "Por tu seguridad, hemos bloqueado temporalmente tu cuenta.\n\n" +
-                "Para desbloquearla, por favor reinicia tu contraseña usando el siguiente código de verificación:\n\n" +
-                "Código de verificación: " +
+            "We detected the limit of failed login attempts for your account.\n\n" +
+                "For your security, we have temporarily blocked your account.\n\n" +
+                "To unlock it, please reset your password using the following verification code:\n\n" +
+                "Verification code\n: " +
                 code +
                 "\n\n" +
-                "Puedes cambiarla en /reset-password \n\n" +
-                "Si no intentaste iniciar sesión, te recomendamos cambiar tu contraseña de todos modos para proteger tu cuenta."
+                "You can change it at /reset-password \n\n" +
+                "Even if you haven't tried to log in, we recommend changing your password anyway to protect your account."
         );
         mailSender.send(message);
     }

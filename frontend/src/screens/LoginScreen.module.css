@@ -165,3 +165,16 @@
 .resetButton:hover {
   text-decoration: underline;
 }
+
+.signupLink {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #660000;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signupLink:hover {
+  text-decoration: underline;
+}
