@@ -178,6 +178,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                 label="Tags (optional)"
                 options={tags}
                 emptyMessage="No tags available yet."
+                searchable={true}
               />
             )}
           />
@@ -189,6 +190,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                 label="Menu Sections"
                 options={menuSections}
                 emptyMessage="No menu sections available yet."
+                searchable={true}
               />
             )}
           />

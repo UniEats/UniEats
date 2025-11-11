@@ -105,6 +105,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
                 label="Tags (optional)"
                 options={tags}
                 emptyMessage="No tags available yet."
+                searchable={true}
               />
             )}
           />
@@ -116,6 +117,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
                 label="Menu Sections"
                 options={menuSections}
                 emptyMessage="No menu sections available yet."
+                searchable={true}
               />
             )}
           />

@@ -49,7 +49,7 @@
   background-color: #ffffff;
 }
 
-.signupCard button {
+.signupCard button[type="submit"] {
   background-color: #660000;
   color: white;
   font-weight: 600;
@@ -72,7 +72,7 @@
   margin-top: 0.25rem;
 }
 
-.signupCard .loginLink {
+.signupCard .signupLink {
   margin-top: 0.75rem;
   text-align: center;
   font-size: 0.95rem;
@@ -81,6 +81,14 @@
   font-weight: 500;
 }
 
-.signupCard .loginLink:hover {
+.signupCard .signupLink:hover {
   text-decoration: underline;
+}
+
+.responseMessage.success {
+  color: green;
+}
+
+.responseMessage.error {
+  color: red;
 }

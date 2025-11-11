@@ -22,7 +22,7 @@ export const SignupScreen = () => {
         <CommonLayout>
             <div className={styles.signupContainer}>
                 <div className={styles.signupCard}>
-                    <h1>Registro</h1>
+                    <h1>Sign Up</h1>
                     <Signup onSubmit={mutate} submitError={error} isPending={isPending} />
                     {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
                     <a href="/login" className={styles.loginLink}>

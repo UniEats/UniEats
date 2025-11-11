@@ -200,6 +200,7 @@ export const ProductUpdateForm = ({ onClose, productIdToUpdate }: ProductUpdateF
                 label="Tags (optional)"
                 options={tags}
                 emptyMessage="No tags available yet."
+                searchable={true}
               />
             )}
           />
@@ -211,6 +212,7 @@ export const ProductUpdateForm = ({ onClose, productIdToUpdate }: ProductUpdateF
                 label="Menu Sections"
                 options={menuSections}
                 emptyMessage="No menu sections available yet."
+                searchable={true}
               />
             )}
           />
