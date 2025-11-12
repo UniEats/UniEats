@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, useMemo } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
@@ -42,7 +42,7 @@ export const ComboUpdateForm = ({ onClose, comboIdToUpdate }: ComboUpdateFormPro
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const comboSelectId = useId();
 
-  const combos = combosQuery.data ?? [];
+  const combos = useMemo(() => combosQuery.data ?? [], [combosQuery.data]);
   const products = productsQuery.data ?? [];
   const tags = tagsQuery.data ?? [];
   const menuSections = menuSectionsQuery.data ?? [];

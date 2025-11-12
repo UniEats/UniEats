@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, useMemo } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
@@ -31,7 +31,7 @@ export const IngredientUpdateForm = ({ onClose, ingredientIdToUpdate }: Ingredie
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const ingredientSelectId = useId();
 
-  const ingredients = ingredientsQuery.data ?? [];
+  const ingredients = useMemo(() => ingredientsQuery.data ?? [], [ingredientsQuery.data]);
 
   const formData = useAppForm({
     defaultValues: INGREDIENT_UPDATE_DEFAULT_VALUES,

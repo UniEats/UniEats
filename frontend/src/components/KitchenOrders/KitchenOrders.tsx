@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { OrderService } from '../../services/OrderService';
 import { useAccessTokenGetter, useHandleResponse } from '@/services/TokenContext';
 import { BASE_API_URL } from '@/config/app-query-client';
 import styles from './KitchenOrders.module.css';
@@ -28,10 +27,17 @@ type OrderDTO = {
     details: OrderDetailDTO[];
 };
 
+type OrderState = {
+  id: number;
+  name: string;
+};
+
 export const KitchenOrders = () => {
     const [orders, setOrders] = useState<OrderDTO[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [orderStates, setOrderStates] = useState<OrderState[]>([]);
+    const [selectedState, setSelectedState] = useState<OrderState | null>(null);
+    const [_loading, setLoading] = useState(true);
+    const [_error, setError] = useState<string | null>(null);
     const { productsMap, combosMap } = useProducts();
     const [activeOrder, setActiveOrder] = useState<OrderDTO | null>(null);
     const [checkState, setCheckState] = useState<Record<string, boolean>>({});
@@ -42,22 +48,41 @@ export const KitchenOrders = () => {
     const getAccessToken = useAccessTokenGetter();
     const handleResponse = useHandleResponse();
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        loadConfirmedOrders();
+      const fetchStates = async () => {
+        try {
+          const resp = await fetch(`${BASE_API_URL}/orders/states`, {
+            headers: {
+              Authorization: `Bearer ${await getAccessToken()}`,
+              Accept: 'application/json',
+            },
+          });
+          const data = await handleResponse(resp, (json) => json as OrderState[]);
+          setOrderStates(data);
+          if (data.length > 0) setSelectedState(data[0]);
+        } catch (err) {
+          console.error('Error fetching order states:', err);
+          setError('Error al cargar los estados');
+        }
+      };
+      fetchStates();
     }, []);
 
-    const loadConfirmedOrders = async () => {
+    useEffect(() => {
+      if (!selectedState) return;
+      loadOrdersByState(selectedState.id);
+    }, [selectedState]);
+
+    const loadOrdersByState = async (stateId: number) => {
+        setLoading(true);
         try {
-            const confirmedOrders = await OrderService.getConfirmedOrders();
-            const list = Array.isArray(confirmedOrders)
-                ? confirmedOrders
-                : (confirmedOrders && typeof confirmedOrders === 'object' && Array.isArray((confirmedOrders as { content?: unknown }).content))
-                    ? (confirmedOrders as { content: OrderDTO[] }).content
-                    : [];
-            setOrders(list as OrderDTO[]);
-            if (!Array.isArray(confirmedOrders)) {
-                console.warn('Unexpected confirmed orders payload shape:', confirmedOrders);
-            }
+            const response = await fetch(`${BASE_API_URL}/orders/state/${stateId}`, {
+                method: 'GET',
+                headers: { Accept: 'application/json', Authorization: `Bearer ${await getAccessToken()}` },
+            });
+            const data = await handleResponse(response, (json) => json as OrderDTO[]);
+            setOrders(Array.isArray(data) ? data : []);
             setError(null);
         } catch (err) {
             setError('Error al cargar los pedidos');
@@ -69,33 +94,61 @@ export const KitchenOrders = () => {
 
     const handleStartPreparation = async (orderId: number) => {
         try {
-            const orderResp1 = await fetch(`${BASE_API_URL}/orders/${orderId}`, {
+            const orderResp = await fetch(`${BASE_API_URL}/orders/${orderId}`, {
                 method: 'GET',
                 headers: { Accept: 'application/json', Authorization: `Bearer ${await getAccessToken()}` },
             });
-            const freshOrder1 = await handleResponse(orderResp1, (json) => json as OrderDTO) as OrderDTO;
-            if ((freshOrder1 as OrderDTO).stateId === 1) {
+            const freshOrder = await handleResponse(orderResp, (json) => json as OrderDTO);
+            if ((freshOrder as OrderDTO).stateId === 1) {
                 const startResp = await fetch(`${BASE_API_URL}/orders/${orderId}/start-preparation`, {
                     method: 'POST',
                     headers: { Authorization: `Bearer ${await getAccessToken()}` },
                 });
                 await handleResponse(startResp, (json) => json);
-                const orderResp2 = await fetch(`${BASE_API_URL}/orders/${orderId}`, {
-                    method: 'GET',
-                    headers: { Accept: 'application/json', Authorization: `Bearer ${await getAccessToken()}` },
-                });
-                const freshOrder2 = await handleResponse(orderResp2, (json) => json as OrderDTO) as OrderDTO;
-                setActiveOrder(freshOrder2);
-                setCheckState(buildInitialChecklist(freshOrder2));
-                return;
             }
-            setActiveOrder(freshOrder1 as OrderDTO);
-            setCheckState(buildInitialChecklist(freshOrder1 as OrderDTO));
-
+            await loadOrdersByState(selectedState?.id ?? 0);
         } catch (err) {
             setError('Error al actualizar el estado del pedido');
             console.error('Error updating order:', err);
         }
+    };
+
+    const handleMarkReady = async (orderId: number) => {
+      try {
+        setSubmitting(true);
+        const orderResp = await fetch(`${BASE_API_URL}/orders/${orderId}`, {
+          method: 'GET',
+          headers: { Accept: 'application/json', Authorization: `Bearer ${await getAccessToken()}` },
+        });
+        const freshOrder = await handleResponse(orderResp, (json) => json as OrderDTO);
+
+        if (freshOrder.stateId !== 2) {
+          setError('El pedido no está en preparación.');
+          return;
+        }
+
+        setActiveOrder(freshOrder);
+        setCheckState(buildInitialChecklist(freshOrder));
+      } catch (err) {
+        console.error('Error preparando para marcar como listo:', err);
+        setError('No se pudo cargar el pedido para marcar como listo.');
+      } finally {
+        setSubmitting(false);
+      }
+    };
+
+    const handleMarkComplete = async (orderId: number) => {
+      try {
+        const response = await fetch(`${BASE_API_URL}/orders/${orderId}/pickup`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${await getAccessToken()}` },
+        });
+        await handleResponse(response, (json) => json);
+        await loadOrdersByState(selectedState?.id ?? 0);
+      } catch (err) {
+        console.error('Error marking order complete:', err);
+        setError('No se pudo marcar el pedido como completo');
+      }
     };
 
     const closeOverlay = () => {
@@ -134,12 +187,12 @@ export const KitchenOrders = () => {
         return map;
     };
 
-        type IngredientEntry = { id?: number | string; name: string; quantity?: number };
-        type ProductWithIngredientsLocal = { id?: number; name?: string; ingredients?: unknown };
-        type ComboProductEntry = { id: number; name?: string; quantity?: number };
-        type ComboLocal = { id: number; name?: string; products?: ComboProductEntry[] };
+    type IngredientEntry = { id?: number | string; name: string; quantity?: number };
+    type ProductWithIngredientsLocal = { id?: number; name?: string; ingredients?: unknown };
+    type ComboProductEntry = { id: number; name?: string; quantity?: number };
+    type ComboLocal = { id: number; name?: string; products?: ComboProductEntry[] };
 
-        const getProductIngredients = (product?: ProductWithIngredientsLocal | null): IngredientEntry[] => {
+    const getProductIngredients = (product?: ProductWithIngredientsLocal | null): IngredientEntry[] => {
         if (!product) return [];
         const ings: IngredientEntry[] = [];
             const prodIngredients = (product as ProductWithIngredientsLocal).ingredients;
@@ -230,25 +283,25 @@ export const KitchenOrders = () => {
                 headers: { Accept: 'application/json', Authorization: `Bearer ${await getAccessToken()}` },
             });
             const freshOrder = await handleResponse(orderResp, (json) => json as OrderDTO) as OrderDTO;
-            if ((freshOrder as OrderDTO).stateId !== 2) {
-                if ((freshOrder as OrderDTO).stateId === 1) {
-                    const startResp = await fetch(`${BASE_API_URL}/orders/${freshOrder.id}/start-preparation`, {
-                        method: 'POST',
-                        headers: { Authorization: `Bearer ${await getAccessToken()}` },
-                    });
-                    await handleResponse(startResp, (json) => json);
-                } else {
-                    setError('No se puede finalizar: el pedido no está en preparación');
-                    return;
-                }
+
+            if (freshOrder.stateId === 1) {
+                setError('El pedido aún no está en preparación. Inícielo antes de marcarlo como listo.');
+                return;
             }
-            const markResp = await fetch(`${BASE_API_URL}/orders/${activeOrder.id}/mark-ready`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${await getAccessToken()}` },
-            });
-            await handleResponse(markResp, (json) => json);
-            closeOverlay();
-            loadConfirmedOrders();
+
+            if (freshOrder.stateId === 2) {
+                const markResp = await fetch(`${BASE_API_URL}/orders/${activeOrder.id}/mark-ready`, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${await getAccessToken()}` },
+                });
+                await handleResponse(markResp, (json) => json);
+                closeOverlay();
+                if (selectedState) {
+                    await loadOrdersByState(selectedState.id);
+                }
+            } else {
+                setError('No se puede finalizar: el pedido no está en preparación.');
+            }
         } catch (err) {
             console.error('Error finalizando pedido:', err);
             setError('No se pudo finalizar el pedido');
@@ -257,44 +310,109 @@ export const KitchenOrders = () => {
         }
     };
 
-    if (loading) return <div>Loading orders...</div>;
-    if (error) return <div className={styles.error}>{error}</div>;
-    if (!orders || orders.length === 0) return (
-        <div className={styles.emptyState}>
-            <div className={styles.emptyInner}>
-                <div className={styles.emptyIcon} aria-hidden>🍽️</div>
-                <div>
-                    <h3>There are no confirmed orders</h3>
-                    <p className={styles.emptySubtitle}>There are no orders ready to prepare at the moment. Please wait for new orders or check your connection.</p>
-                </div>
-            </div>
-        </div>
-    );
-
     return (
         <div className={styles.container}>
-            <h2>Confirmed Orders</h2>
-            <div className={styles.ordersList}>
-                {orders.map((order: OrderDTO) => {
-                    const when = order.createdAt ?? order.creationDate ?? '';
-                    return (
-                        <div key={order.id} className={styles.orderCard}>
-                            <div className={styles.orderHeader}>
-                                <h3>Order #{order.id}</h3>
-                                <span className={styles.timestamp}>
-                                    {when ? new Date(when).toLocaleString() : ''}
-                                </span>
-                            </div>
-                            <button
-                                className={styles.startButton}
-                                onClick={() => handleStartPreparation(order.id)}
-                            >
-                                Start preparation
-                            </button>
-                        </div>
-                    );
-                })}
+          <h2>Kitchen Orders</h2>
+
+          {_loading && <div className={styles.info}>Cargando pedidos...</div>}
+          {_error && <div className={styles.error}>{_error}</div>}
+
+          <div className={styles.stateButtons}>
+            {orderStates.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSelectedState(s)}
+                className={`${styles.stateButton} ${selectedState?.id === s.id ? styles.active : ''}`}
+              >
+                {s.name.charAt(0).toUpperCase() + s.name.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {(!orders || orders.length === 0) ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyInner}>
+                <div className={styles.emptyIcon} aria-hidden>🍽️</div>
+                <div>
+                  <h3>No {selectedState?.name} orders</h3>
+                  <p className={styles.emptySubtitle}>
+                    There are no orders in this state. Please wait for new orders or check your connection.
+                  </p>
+                </div>
+              </div>
             </div>
+          ) : (
+            <div className={styles.ordersList}>
+                {orders.map((order) => (
+                  <div key={order.id} className={styles.orderCard}>
+                    <div className={styles.orderHeader}>
+                      <h3>Order #{order.id}</h3>
+                      <span className={styles.timestamp}>
+                        {new Date(order.createdAt ?? order.creationDate ?? '').toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className={styles.actions}>
+                      {order.stateId === 1 && (
+                        <button
+                          className={styles.primaryBtn}
+                          onClick={() => handleStartPreparation(order.id)}
+                        >
+                          Start Preparation
+                        </button>
+                      )}
+
+                      {order.stateId === 2 && (
+                        <button
+                          className={styles.primaryBtn}
+                          onClick={() => handleMarkReady(order.id)}
+                        >
+                          Mark as Ready
+                        </button>
+                      )}
+
+                      {order.stateId === 3 && (
+                        <button
+                          className={styles.primaryBtn}
+                          onClick={() => handleMarkComplete(order.id)}
+                        >
+                          Mark as Picked Up
+                        </button>
+                      )}
+
+                      {order.stateId === 4 && (
+                        <div className={styles.infoText}>Picked up</div>
+                      )}
+
+                      {order.stateId === 5 && (
+                        <div className={styles.infoText}>Canceled</div>
+                      )}
+
+                      {order.stateId === 1 && (
+                        <button
+                          className={styles.secondaryBtn}
+                          onClick={async () => {
+                            try {
+                              const resp = await fetch(`${BASE_API_URL}/orders/${order.id}/cancel`, {
+                                method: 'POST',
+                                headers: { Authorization: `Bearer ${await getAccessToken()}` },
+                              });
+                              await handleResponse(resp, (json) => json);
+                              await loadOrdersByState(selectedState?.id ?? 0);
+                            } catch (err) {
+                              console.error('Error canceling order:', err);
+                              setError('No se pudo cancelar el pedido');
+                            }
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
 
             {activeOrder && (
                 <div className={styles.prepOverlay} role="dialog" aria-modal="true" aria-labelledby="prep-title">

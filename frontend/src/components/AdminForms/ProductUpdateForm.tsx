@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, useMemo } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
@@ -42,7 +42,8 @@ export const ProductUpdateForm = ({ onClose, productIdToUpdate }: ProductUpdateF
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const productSelectId = useId();
 
-  const products = productsQuery.data ?? [];
+  
+  const products = useMemo(() => productsQuery.data ?? [], [productsQuery.data]);
   const ingredients = ingredientsQuery.data ?? [];
   const tags = tagsQuery.data ?? [];
   const menuSections = menuSectionsQuery.data ?? [];

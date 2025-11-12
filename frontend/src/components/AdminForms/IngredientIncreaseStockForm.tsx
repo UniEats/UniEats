@@ -1,4 +1,4 @@
-import { useEffect, useState, useId } from "react";
+import { useEffect, useState, useId, useMemo } from "react";
 import { useAppForm } from "@/config/use-app-form";
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useIngredientList, useIncreaseStockIngredient } from "@/services/IngredientServices";
@@ -33,7 +33,7 @@ export const IngredientIncreaseStockForm = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const ingredientSelectId = useId();
 
-  const ingredients = ingredientsQuery.data ?? [];
+  const ingredients = useMemo(() => ingredientsQuery.data ?? [], [ingredientsQuery.data]);
 
   const formData = useAppForm({
     defaultValues: INGREDIENT_INCREASE_STOCK_DEFAULT_VALUES,

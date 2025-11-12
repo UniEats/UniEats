@@ -51,3 +51,10 @@ services:
       - db
     ports:
       - "${ADMINER_EXTERNAL_PORT}:8080"
+
+  dozzle:
+    image: amir20/dozzle
+    volumes:
+      - "${DOCKER_SOCKET}:/var/run/docker.sock"
+    environment:
+      DOZZLE_BASE: /logs
