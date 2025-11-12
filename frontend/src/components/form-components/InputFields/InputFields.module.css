@@ -67,19 +67,19 @@
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  background: transparent  !important;;
-  border: none !important;;
+  background: transparent  !important;
+  border: none !important;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #333 !important;;
+  color: #333 !important;
   padding: 0 4px;
   line-height: 1;
   margin: 0;
   vertical-align: middle;
 
-  outline: 2px solid transparent !important;;
-  outline-offset: -2px !important;;
-  box-shadow: none !important;;
+  outline: 2px solid transparent !important;
+  outline-offset: -2px !important;
+  box-shadow: none !important;
   transition: none;
 }
 
@@ -87,4 +87,10 @@
 .showHideButton:focus,
 .showHideButton:active {
   transform: translateY(-50%) !important;
+}
+
+.inputReadOnly {
+  cursor: default !important;
+  background-color: transparent !important;
+  border: none !important;
 }

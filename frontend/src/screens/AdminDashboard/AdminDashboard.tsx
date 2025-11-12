@@ -4,6 +4,8 @@ import { Link } from "wouter";
 import { ComboForm } from "@/components/AdminForms/ComboForm";
 import { ComboUpdateForm } from "@/components/AdminForms/ComboUpdateForm";
 import { IngredientForm } from "@/components/AdminForms/IngredientForm";
+import { IngredientUpdateForm } from "@/components/AdminForms/IngredientUpdateForm";
+import { IngredientIncreaseStockForm } from "@/components/AdminForms/IngredientIncreaseStockForm"; 
 import { MenuSectionForm } from "@/components/AdminForms/MenuSectionForm";
 import { ProductForm } from "@/components/AdminForms/ProductForm";
 import { ProductUpdateForm } from "@/components/AdminForms/ProductUpdateForm";
@@ -22,6 +24,8 @@ import styles from "./AdminDashboard.module.css";
 
 type ModalType =
   | "ingredient"
+  | "ingredient-update"
+  | "ingredient-increase-stock"
   | "tag"
   | "product-create"
   | "product-update"
@@ -59,6 +63,7 @@ export const AdminDashboard = () => {
   const [openModal, setOpenModal] = useState<ModalType>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [selectedComboId, setSelectedComboId] = useState<number | null>(null); // ADD THIS LINE
+  const [selectedIngredientId, setSelectedIngredientId] = useState<number | null>(null);
 
   const { data: products, isPending: productsPending } = useProductList();
   const { data: ingredients, isPending: ingredientsPending } = useIngredientList();
@@ -175,7 +180,7 @@ export const AdminDashboard = () => {
           <button className={styles.secondaryButton} onClick={() => setOpenModal("product-create")}>
             + Add product
           </button>
-          <button className={styles.secondaryButton} onClick={() => setOpenModal("ingredient")}>
+          <button className={styles.secondaryButton} onClick={() => setOpenModal("ingredient-increase-stock")}>
             + Restock ingredient
           </button>
         </div>
@@ -363,6 +368,9 @@ export const AdminDashboard = () => {
           <button className={styles.primaryButton} onClick={() => setOpenModal("ingredient")}>
             Add ingredient
           </button>
+          <button className={styles.secondaryButton} onClick={() => setOpenModal("ingredient-update")}>
+            Update ingredient
+          </button>
         </div>
       </header>
       <div className={styles.tableWrapper}>
@@ -372,6 +380,7 @@ export const AdminDashboard = () => {
               <th scope="col">Name</th>
               <th scope="col">Description</th>
               <th scope="col">Stock</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -383,6 +392,18 @@ export const AdminDashboard = () => {
                   <span className={ingredient.stock < LOW_STOCK_THRESHOLD ? styles.stockWarning : styles.stockNormal}>
                     {ingredient.stock}
                   </span>
+                </td>
+                <td>
+                  <button
+                    className={styles.secondaryButton}
+                    style={{ marginRight: "0.5rem" }}
+                    onClick={() => {
+                      setSelectedIngredientId(ingredient.id);
+                      setOpenModal("ingredient-increase-stock");
+                    }}
+                  >
+                    Increase Stock
+                  </button>
                 </td>
               </tr>
             ))}
@@ -604,6 +625,16 @@ export const AdminDashboard = () => {
       {openModal === "ingredient" && (
         <Modal onClose={closeModal}>
           <IngredientForm onClose={closeModal} />
+        </Modal>
+      )}
+      {openModal === "ingredient-update" && (
+        <Modal onClose={closeModal}>
+          <IngredientUpdateForm onClose={closeModal} />
+        </Modal>
+      )}
+      {openModal === "ingredient-increase-stock" && (
+        <Modal onClose={closeModal}>
+          <IngredientIncreaseStockForm onClose={closeModal} ingredientIdToIncreaseStock={selectedIngredientId} />
         </Modal>
       )}
       {openModal === "tag" && (

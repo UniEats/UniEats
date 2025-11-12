@@ -1,7 +1,6 @@
 import { useState } from "react";
 import styles from "./AdminForms.module.css";
 import { useIngredientList, useUpdateIngredient, useDeleteIngredient } from "@/services/IngredientServices";
-import { IngredientFormValues } from "@/models/Ingredient";
 
 export const IngredientList = () => {
   const { data: items, isLoading, error } = useIngredientList();
@@ -27,7 +26,22 @@ export const IngredientList = () => {
               <input value={description} onChange={(e) => setDescription(e.target.value)} />
               <input value={String(stock)} onChange={(e) => setStock(Number.parseInt(e.target.value || "0", 10))} />
               <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
-                <button className={styles.submitButton} onClick={() => { update.mutate({ id: i.id, values: { name, description, stock: String(stock) } as IngredientFormValues }); setEditingId(null); }}>Update</button>
+                <button
+                  className={styles.submitButton}
+                  onClick={() => {
+                    update.mutate({
+                      id: i.id,
+                      values: {
+                        ingredientId: i.id.toString(),
+                        name,
+                        description,
+                      },
+                    });
+                    setEditingId(null);
+                  }}
+                >
+                  Update
+                </button>
                 <button className={styles.cancelButton} onClick={() => setEditingId(null)}>Cancel</button>
               </div>
             </div>

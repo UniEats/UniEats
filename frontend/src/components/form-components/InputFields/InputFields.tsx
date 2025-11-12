@@ -6,8 +6,8 @@ import { useState } from 'react';
 
 import styles from "./InputFields.module.css";
 
-export const TextField = ({ label }: { label: string }) => {
-  return <FieldWithType type="text" label={label} />;
+export const TextField = ({ label, readOnly }: { label: string, readOnly?: boolean }) => {
+  return <FieldWithType type="text" label={label} readOnly={readOnly} />;
 };
 
 export const PasswordField = ({ label }: { label: string }) => {
@@ -51,10 +51,11 @@ export const FileField = ({ label }: { label: string }) => {
   );
 };
 
-const FieldWithType = ({ label, type, toggleShow, showPassword,}: { label: string; type: string; toggleShow?: () => void; showPassword?: boolean; }) => {
+const FieldWithType = ({ label, type, toggleShow, showPassword, readOnly, }: { label: string; type: string; toggleShow?: () => void; showPassword?: boolean; readOnly?: boolean; }) => {
   const id = useId();
   const field = useFieldContext<string>();
 
+  const inputClass = readOnly ? `${styles.input} ${styles.inputReadOnly}` : styles.input;
   return (
     <>
       <label htmlFor={id} className={styles.fieldLabel}>
@@ -66,12 +67,13 @@ const FieldWithType = ({ label, type, toggleShow, showPassword,}: { label: strin
             id={id}
             name={field.name}
             value={field.state.value}
-            className={styles.input}
+            className={inputClass}
             type={type}
             onBlur={field.handleBlur}
             onChange={(e) => field.handleChange(e.target.value)}
+            readOnly={readOnly}
           />
-          {toggleShow && (
+          {toggleShow && !readOnly && (
             <button
               type="button"
               onClick={toggleShow}
@@ -80,7 +82,7 @@ const FieldWithType = ({ label, type, toggleShow, showPassword,}: { label: strin
               {showPassword ? "Hide" : "Show"}
             </button>
           )}
-      </div>
+        </div>
         <ErrorContainer errors={field.state.meta.errors} />
       </div>
     </>
