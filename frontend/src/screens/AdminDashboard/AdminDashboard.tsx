@@ -4,10 +4,13 @@ import { Link } from "wouter";
 import { ComboForm } from "@/components/AdminForms/ComboForm";
 import { ComboUpdateForm } from "@/components/AdminForms/ComboUpdateForm";
 import { IngredientForm } from "@/components/AdminForms/IngredientForm";
+import { IngredientUpdateForm } from "@/components/AdminForms/IngredientUpdateForm";
+import { IngredientIncreaseStockForm } from "@/components/AdminForms/IngredientIncreaseStockForm"; 
 import { MenuSectionForm } from "@/components/AdminForms/MenuSectionForm";
 import { ProductForm } from "@/components/AdminForms/ProductForm";
 import { ProductUpdateForm } from "@/components/AdminForms/ProductUpdateForm";
 import { TagForm } from "@/components/AdminForms/TagForm";
+import { ChangeRoleForm } from "@/components/AdminForms/ChangeRoleForm";
 import { Modal } from "@/components/Modal/Modal";
 import { useComboList, useDeleteCombo } from "@/services/ComboServices";
 import { useIngredientList } from "@/services/IngredientServices";
@@ -21,12 +24,15 @@ import styles from "./AdminDashboard.module.css";
 
 type ModalType =
   | "ingredient"
+  | "ingredient-update"
+  | "ingredient-increase-stock"
   | "tag"
   | "product-create"
   | "product-update"
   | "menu-section"
   | "combo-create"
   | "combo-update"
+  | "user-role"
   | null;
 
 type SectionId = (typeof SIDEBAR_ITEMS)[number]["id"];
@@ -56,6 +62,8 @@ export const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState<SectionId>("dashboard");
   const [openModal, setOpenModal] = useState<ModalType>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [selectedComboId, setSelectedComboId] = useState<number | null>(null); // ADD THIS LINE
+  const [selectedIngredientId, setSelectedIngredientId] = useState<number | null>(null);
 
   const { data: products, isPending: productsPending } = useProductList();
   const { data: ingredients, isPending: ingredientsPending } = useIngredientList();
@@ -69,6 +77,7 @@ export const AdminDashboard = () => {
   const closeModal = () => {
     setOpenModal(null);
     setSelectedProductId(null);
+    setSelectedComboId(null);
   };
   const handleLogout = () => setTokenState({ state: "LOGGED_OUT" });
 
@@ -171,7 +180,7 @@ export const AdminDashboard = () => {
           <button className={styles.secondaryButton} onClick={() => setOpenModal("product-create")}>
             + Add product
           </button>
-          <button className={styles.secondaryButton} onClick={() => setOpenModal("ingredient")}>
+          <button className={styles.secondaryButton} onClick={() => setOpenModal("ingredient-increase-stock")}>
             + Restock ingredient
           </button>
         </div>
@@ -359,6 +368,9 @@ export const AdminDashboard = () => {
           <button className={styles.primaryButton} onClick={() => setOpenModal("ingredient")}>
             Add ingredient
           </button>
+          <button className={styles.secondaryButton} onClick={() => setOpenModal("ingredient-update")}>
+            Update ingredient
+          </button>
         </div>
       </header>
       <div className={styles.tableWrapper}>
@@ -368,6 +380,7 @@ export const AdminDashboard = () => {
               <th scope="col">Name</th>
               <th scope="col">Description</th>
               <th scope="col">Stock</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -379,6 +392,18 @@ export const AdminDashboard = () => {
                   <span className={ingredient.stock < LOW_STOCK_THRESHOLD ? styles.stockWarning : styles.stockNormal}>
                     {ingredient.stock}
                   </span>
+                </td>
+                <td>
+                  <button
+                    className={styles.secondaryButton}
+                    style={{ marginRight: "0.5rem" }}
+                    onClick={() => {
+                      setSelectedIngredientId(ingredient.id);
+                      setOpenModal("ingredient-increase-stock");
+                    }}
+                  >
+                    Increase Stock
+                  </button>
                 </td>
               </tr>
             ))}
@@ -437,6 +462,12 @@ export const AdminDashboard = () => {
             Manage roles via the authentication service. Role changes will surface here once new endpoints are
             available.
           </p>
+          <button
+            className={styles.primaryButton}
+            onClick={() => setOpenModal("user-role")}
+          >
+            Manage Roles
+          </button>
         </div>
       </div>
     </section>
@@ -486,6 +517,16 @@ export const AdminDashboard = () => {
                       : "—"}
                   </td>
                   <td>
+                    <button
+                      className={styles.secondaryButton}
+                      style={{ marginRight: "0.5rem" }}
+                      onClick={() => {
+                        setSelectedComboId(combo.id);
+                        setOpenModal("combo-update");
+                      }}
+                    >
+                      Update
+                    </button>
                     <button
                       className={styles.dangerButton}
                       onClick={() => handleDeleteCombo(combo.id)}
@@ -586,6 +627,16 @@ export const AdminDashboard = () => {
           <IngredientForm onClose={closeModal} />
         </Modal>
       )}
+      {openModal === "ingredient-update" && (
+        <Modal onClose={closeModal}>
+          <IngredientUpdateForm onClose={closeModal} />
+        </Modal>
+      )}
+      {openModal === "ingredient-increase-stock" && (
+        <Modal onClose={closeModal}>
+          <IngredientIncreaseStockForm onClose={closeModal} ingredientIdToIncreaseStock={selectedIngredientId} />
+        </Modal>
+      )}
       {openModal === "tag" && (
         <Modal onClose={closeModal}>
           <TagForm onClose={closeModal} />
@@ -613,7 +664,12 @@ export const AdminDashboard = () => {
       )}
       {openModal === "combo-update" && (
         <Modal onClose={closeModal}>
-          <ComboUpdateForm onClose={closeModal} />
+          <ComboUpdateForm onClose={closeModal} comboIdToUpdate={selectedComboId} />
+        </Modal>
+      )}
+      {openModal === "user-role" && (
+        <Modal onClose={closeModal}>
+          <ChangeRoleForm onClose={closeModal} />
         </Modal>
       )}
     </div>

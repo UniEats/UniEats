@@ -52,19 +52,19 @@ class IngredientRestController {
         @PathVariable Long id,
         @RequestParam int amount
     ) {
-    try {
-        return ingredientService.increaseStock(id, amount)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().build();
-    }
+        try {
+            return ingredientService.increaseStock(id, amount)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<IngredientDTO> updateIngredient(
             @PathVariable long id,
-            @RequestBody IngredientCreateDTO data
+            @RequestBody IngredientUpdateDTO data
     ) {
         return ingredientService.updateIngredient(id, data)
                 .map(ResponseEntity::ok)

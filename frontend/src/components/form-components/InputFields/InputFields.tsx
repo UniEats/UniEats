@@ -2,15 +2,25 @@ import { useId } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useFieldContext } from "@/config/form-context";
+import { useState } from 'react';
 
 import styles from "./InputFields.module.css";
 
-export const TextField = ({ label }: { label: string }) => {
-  return <FieldWithType type="text" label={label} />;
+export const TextField = ({ label, readOnly }: { label: string, readOnly?: boolean }) => {
+  return <FieldWithType type="text" label={label} readOnly={readOnly} />;
 };
 
 export const PasswordField = ({ label }: { label: string }) => {
-  return <FieldWithType type="password" label={label} />;
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <FieldWithType
+      type={showPassword ? "text" : "password"}
+      label={label}
+      toggleShow={() => setShowPassword((prev) => !prev)}
+      showPassword={showPassword}
+    />
+  );
 };
 
 export const FileField = ({ label }: { label: string }) => {
@@ -41,24 +51,38 @@ export const FileField = ({ label }: { label: string }) => {
   );
 };
 
-const FieldWithType = ({ label, type }: { label: string; type: string }) => {
+const FieldWithType = ({ label, type, toggleShow, showPassword, readOnly, }: { label: string; type: string; toggleShow?: () => void; showPassword?: boolean; readOnly?: boolean; }) => {
   const id = useId();
   const field = useFieldContext<string>();
+
+  const inputClass = readOnly ? `${styles.input} ${styles.inputReadOnly}` : styles.input;
   return (
     <>
       <label htmlFor={id} className={styles.fieldLabel}>
         {label}
       </label>
       <div className={styles.dataContainer}>
-        <input
-          id={id}
-          name={field.name}
-          value={field.state.value}
-          className={styles.input}
-          type={type}
-          onBlur={field.handleBlur}
-          onChange={(e) => field.handleChange(e.target.value)}
-        />
+        <div style={{ position: "relative", width: "100%" }}>
+          <input
+            id={id}
+            name={field.name}
+            value={field.state.value}
+            className={inputClass}
+            type={type}
+            onBlur={field.handleBlur}
+            onChange={(e) => field.handleChange(e.target.value)}
+            readOnly={readOnly}
+          />
+          {toggleShow && !readOnly && (
+            <button
+              type="button"
+              onClick={toggleShow}
+              className={styles.showHideButton}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          )}
+        </div>
         <ErrorContainer errors={field.state.meta.errors} />
       </div>
     </>
@@ -79,18 +103,44 @@ type CheckboxFieldProps = {
   emptyMessage?: string;
 };
 
-export const CheckboxField = ({ label, options, emptyMessage }: CheckboxFieldProps) => {
+export const CheckboxField = ({ label, options, emptyMessage, searchable = false }: CheckboxFieldProps & { searchable?: boolean }) => {
   const field = useFieldContext<string[]>();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredOptions = searchQuery
+    ? options.filter((option) =>
+        [option.name, option.tag, option.label, option.description]
+          .filter(Boolean)
+          .some((text) =>
+            text!.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+      )
+    : options;
+
+  const noOptionsAvailable = options.length === 0;
+  const noFilteredResults = options.length > 0 && filteredOptions.length === 0;
 
   return (
-    <div className={styles.formFields}>
+    <>
       <span className={styles.fieldLabel}>{label}</span>
 
+      {searchable && (
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={styles.searchInput}
+        />
+      )}
+
       <div className={styles.optionsGrid}>
-        {options.length === 0 ? (
-          <span>{emptyMessage ?? "No options available."}</span>
+        {noOptionsAvailable ? (
+          <span className={styles.emptyMessage}>{emptyMessage ?? "No options available."}</span>
+        ) : noFilteredResults ? (
+          <span className={styles.emptyMessage}>No results found.</span>
         ) : (
-          options.map((option) => {
+          filteredOptions.map((option) => {
             const optionValue = option.id.toString();
             const isChecked = field.state.value.includes(optionValue);
 
@@ -120,7 +170,7 @@ export const CheckboxField = ({ label, options, emptyMessage }: CheckboxFieldPro
       </div>
 
       <ErrorContainer errors={field.state.meta.errors} />
-    </div>
+    </>
   );
 };
 
@@ -135,17 +185,39 @@ type ItemQuantityFieldProps = {
   emptyMessage?: string;
 };
 
-export const ItemQuantityField = ({ label, items, emptyMessage }: ItemQuantityFieldProps) => {
+export const ItemQuantityField = ({ label, items, emptyMessage, searchable = false }: ItemQuantityFieldProps & { searchable?: boolean }) => {
   const field = useFieldContext<{ id: string; quantity: number }[]>();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredItems = searchQuery
+    ? items.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : items;
+
+  const noItemsAvailable = items.length === 0;
+  const noFilteredResults = items.length > 0 && filteredItems.length === 0;
 
   return (
-    <div className={styles.formFields}>
+    <>
       <span className={styles.fieldLabel}>{label}</span>
 
-      {items.length === 0 ? (
-        <span>{emptyMessage ?? "No products available."}</span>
+      {searchable && (
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={styles.searchInput}
+        />
+      )}
+
+      {noItemsAvailable ? (
+        <span className={styles.emptyMessage}>{emptyMessage ?? "No products available."}</span>
+      ) : noFilteredResults ? (
+        <span className={styles.emptyMessage}>No results found.</span>
       ) : (
-        items.map((item) => {
+        filteredItems.map((item) => {
           const selectedProduct = field.state.value.find((p) => p.id === item.id.toString());
           const quantity = selectedProduct?.quantity ?? 1;
 
@@ -188,6 +260,47 @@ export const ItemQuantityField = ({ label, items, emptyMessage }: ItemQuantityFi
       )}
 
       <ErrorContainer errors={field.state.meta.errors} />
-    </div>
+    </>
+  );
+};
+
+type SelectFieldProps = {
+  label: string;
+  options: { value: string; label: string }[];
+  placeholder?: string;
+};
+
+export const SelectField = ({ label, options, placeholder }: SelectFieldProps) => {
+  const id = useId();
+  const field = useFieldContext<string>();
+
+  return (
+    <>
+      <label htmlFor={id} className={styles.fieldLabel}>
+        {label}
+      </label>
+
+      <select
+        id={id}
+        name={field.name}
+        value={field.state.value}
+        onChange={(e) => field.handleChange(e.target.value)}
+        onBlur={field.handleBlur}
+        className={styles.selectInput}
+      >
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+
+      <ErrorContainer errors={field.state.meta.errors} />
+    </>
   );
 };
