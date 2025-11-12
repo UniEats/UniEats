@@ -9,7 +9,7 @@ import java.util.List;
 
 public record OrderDTO(
         long id,
-        long userId,
+        Long userId,
         LocalDateTime creationDate,
         BigDecimal totalPrice,
         long stateId,
@@ -18,7 +18,7 @@ public record OrderDTO(
     public OrderDTO(Order order) {
         this (
                 order.getId(),
-                order.getUserId(),
+                order.getUser() != null ? order.getUser().getId() : null,
                 order.getCreationDate(),
                 order.getTotalPrice(),
                 order.getState().getId(),

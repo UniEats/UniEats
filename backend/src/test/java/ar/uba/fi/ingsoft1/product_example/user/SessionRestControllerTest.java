@@ -34,6 +34,9 @@ class SessionRestControllerTest {
     private JwtService jwtService;
 
     @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
     private SecurityConfig securityConfig;
 
     @Autowired

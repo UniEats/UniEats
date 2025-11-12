@@ -35,8 +35,8 @@ class EmailServiceTest {
         SimpleMailMessage msg = captor.getValue();
 
         assertEquals(to, msg.getTo()[0]);
-        assertEquals("Verificación de correo", msg.getSubject());
-        assertEquals("Tu código de verificación es: " + code, msg.getText());
+        assertEquals("Email verification", msg.getSubject());
+        assertEquals("Your verification code is: " + code, msg.getText());
     }
 
     @Test
@@ -52,7 +52,7 @@ class EmailServiceTest {
         SimpleMailMessage msg = captor.getValue();
 
         assertEquals(to, msg.getTo()[0]);
-        assertEquals("Recuperación de contraseña", msg.getSubject());
+        assertEquals("Password recovery", msg.getSubject());
         assert msg.getText().contains(code);
     }
 
@@ -69,8 +69,8 @@ class EmailServiceTest {
         SimpleMailMessage msg = captor.getValue();
 
         assertEquals(to, msg.getTo()[0]);
-        assertEquals("Tu cuenta ha sido bloqueada [Comedor FIUBA]", msg.getSubject());
+        assertEquals("Your account has been blocked [FIUBA Dining Hall]", msg.getSubject());
         assert msg.getText().contains(code);
-        assert msg.getText().contains("bloqueado temporalmente");
+        assert msg.getText().contains("temporarily blocked");
     }
 }

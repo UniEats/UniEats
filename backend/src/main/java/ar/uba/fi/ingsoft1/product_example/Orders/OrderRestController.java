@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import ar.uba.fi.ingsoft1.product_example.user.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,10 +45,10 @@ class OrderRestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<OrderDTO> createOrder(
-            @RequestBody @Validated OrderCreateDTO dto
+            @RequestBody @Validated OrderCreateDTO dto,
+            @AuthenticationPrincipal User authenticatedUser
     ) {
-        Long userId = 1L;
-        return orderService.createOrder(dto, userId)
+        return orderService.createOrder(dto, authenticatedUser)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.INTERNAL_SERVER_ERROR, "Order could not be created"

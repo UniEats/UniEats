@@ -8,6 +8,7 @@ import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
 import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
+import ar.uba.fi.ingsoft1.product_example.user.User;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -79,9 +80,10 @@ class OrderService {
     }
 
     @Transactional
-    public Optional<OrderDTO> createOrder(OrderCreateDTO dto, Long userId) {
+    public Optional<OrderDTO> createOrder(OrderCreateDTO dto, User user) {
         Order order = new Order();
-        order.setUserId(userId);
+
+        order.setUser(user);
         order.setCreationDate(LocalDateTime.now());
 
         OrderStatus confirmedStatus = new OrderStatus(STATUS_CONFIRMED, "confirmed");
