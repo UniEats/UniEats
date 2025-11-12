@@ -43,6 +43,13 @@ class OrderService {
                 .toList();
     }
 
+    public List<OrderDTO> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUser_Id(userId)
+                .stream()
+                .map(Order::toDTO)
+                .toList();
+    }
+
     public List<OrderDTO> getConfirmedOrders() {
         return orderRepository.findAll()
                 .stream()

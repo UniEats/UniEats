@@ -116,4 +116,12 @@ class OrderRestController {
                 .filter(o -> o.stateId() == stateId)
                 .toList();
     }
+
+    @GetMapping("/my-orders")
+    public List<OrderDTO> getMyOrders(@AuthenticationPrincipal User authenticatedUser) {
+        if (authenticatedUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+        return orderService.getOrdersByUserId(authenticatedUser.getId());
+    }
 }
