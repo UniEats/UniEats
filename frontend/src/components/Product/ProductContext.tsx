@@ -42,6 +42,7 @@ export const ProductsProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useProducts = () => {
   const context = useContext(ProductsContext);
   if (!context) throw new Error("useProducts must be used within a ProductsProvider");

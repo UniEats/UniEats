@@ -1,13 +1,12 @@
 import { useState } from "react";
 
 import { useAppForm } from "@/config/use-app-form";
-import { IngredientFormSchema, IngredientFormValues } from "@/models/Ingredient";
+import { IngredientCreateFormSchema, IngredientCreateFormValues } from "@/models/Ingredient";
 import { useCreateIngredient } from "@/services/IngredientServices";
 
 import styles from "./AdminForms.module.css";
-import { IngredientList } from "./IngredientList";
 
-const INGREDIENT_DEFAULT_VALUES: IngredientFormValues = {
+const INGREDIENT_DEFAULT_VALUES: IngredientCreateFormValues = {
   name: "",
   description: "",
   stock: "",
@@ -24,7 +23,7 @@ export const IngredientForm = ({ onClose }: IngredientFormProps) => {
   const formData = useAppForm({
     defaultValues: INGREDIENT_DEFAULT_VALUES,
     validators: {
-      onChange: IngredientFormSchema,
+      onChange: IngredientCreateFormSchema,
     },
     onSubmit: async ({ value }) => {
       setSuccessMessage(null);
@@ -61,9 +60,6 @@ export const IngredientForm = ({ onClose }: IngredientFormProps) => {
         </formData.FormContainer>
       </formData.AppForm>
       {successMessage ? <p className={styles.formMessage}>{successMessage}</p> : null}
-      <hr />
-      <h3 style={{ margin: "0.5rem 0" }}>Existing ingredients</h3>
-      <IngredientList />
     </section>
   );
 };

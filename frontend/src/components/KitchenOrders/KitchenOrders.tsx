@@ -48,6 +48,7 @@ export const KitchenOrders = () => {
     const getAccessToken = useAccessTokenGetter();
     const handleResponse = useHandleResponse();
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
       const fetchStates = async () => {
         try {
@@ -312,6 +313,9 @@ export const KitchenOrders = () => {
     return (
         <div className={styles.container}>
           <h2>Kitchen Orders</h2>
+
+          {_loading && <div className={styles.info}>Cargando pedidos...</div>}
+          {_error && <div className={styles.error}>{_error}</div>}
 
           <div className={styles.stateButtons}>
             {orderStates.map((s) => (

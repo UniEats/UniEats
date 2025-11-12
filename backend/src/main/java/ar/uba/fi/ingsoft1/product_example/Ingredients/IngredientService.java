@@ -31,12 +31,11 @@ class IngredientService {
         return new IngredientDTO(ingredientRepository.save(data.asIngredient()));
     }
 
-    public Optional<IngredientDTO> updateIngredient(long id, IngredientCreateDTO data) {
+    public Optional<IngredientDTO> updateIngredient(long id, IngredientUpdateDTO data) {
         return ingredientRepository.findById(id)
                 .map(ingredient -> {
                     ingredient.setName(data.name());
                     ingredient.setDescription(data.description());
-                    ingredient.setStock(data.stock());
                     return new IngredientDTO(ingredientRepository.save(ingredient));
                 });
     }
@@ -59,6 +58,7 @@ class IngredientService {
         return false;
     }
 
+    @Transactional
     public Optional<IngredientDTO> increaseStock(Long ingredientId, int amount) {
         Optional<Ingredient> ingredientOpt = ingredientRepository.findById(ingredientId);
 
