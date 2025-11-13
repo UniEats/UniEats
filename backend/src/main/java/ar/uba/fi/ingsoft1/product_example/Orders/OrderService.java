@@ -137,7 +137,7 @@ class OrderService {
     }
 
     @Transactional
-    public Optional<OrderDTO> startPreparation(Long id) {
+    public Optional<OrderDTO> startPreparation(Long id, EstimatedDeliveryTimeDTO estimatedDTO) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
@@ -145,7 +145,9 @@ class OrderService {
             throw new IllegalStateException("Order must be confirmed to start preparation");
         }
 
+        order.setEstimatedDeliveryTime(estimatedDTO.estimatedDeliveryTime());
         order.setState(new OrderStatus(STATUS_IN_PREPARATION, "in preparation"));
+
         return Optional.of(orderRepository.save(order).toDTO());
     }
 

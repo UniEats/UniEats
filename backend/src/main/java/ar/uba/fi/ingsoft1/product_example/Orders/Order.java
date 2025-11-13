@@ -38,6 +38,8 @@ public class Order {
     @NonNull
     private LocalDateTime creationDate;
 
+    private LocalDateTime estimatedDeliveryTime;
+
     @NonNull @Digits(integer = 10, fraction = 2)
     @DecimalMin("0.00")
     private BigDecimal totalPrice;
@@ -73,6 +75,7 @@ public class Order {
                 this.getId(),
                 this.getUser() != null ? this.getUser().getId() : null,
                 this.getCreationDate(),
+                this.getEstimatedDeliveryTime(),
                 this.getTotalPrice(),
                 this.getState().getId(),
                 detailDTOs

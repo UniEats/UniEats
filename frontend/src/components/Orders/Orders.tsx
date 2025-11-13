@@ -68,6 +68,13 @@ export const Orders = ({
               <p className={styles.timestamp}>
                 Placed on: {new Date(order.creationDate).toLocaleString()}
               </p>
+              {order.estimatedDeliveryTime && (
+                <p className={`${styles.timestamp} ${styles.deliveryTime}`}>
+                  <strong>
+                    Estimated Delivery: {new Date(order.estimatedDeliveryTime).toLocaleString()}
+                  </strong>
+                </p>
+              )}
               <ul className={styles.orderItems}>
                 {order.details.map((detail) => (
                   <li key={detail.id} className={styles.item}>
