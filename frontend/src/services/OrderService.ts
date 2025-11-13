@@ -64,8 +64,11 @@ export class OrderService {
         return [];
     }
 
-    static async startPreparation(orderId: number): Promise<Order> {
-        const response = await axios.post<Order>(`${this.BASE_URL}/${orderId}/start-preparation`, {}, {
+    static async startPreparation(orderId: number, estimatedDeliveryTime: string): Promise<Order> {
+        const payload = {
+            estimatedDeliveryTime: estimatedDeliveryTime
+        };
+        const response = await axios.post<Order>(`${this.BASE_URL}/${orderId}/start-preparation`, payload, {
             headers: this.getAuthHeaders(),
         });
         return response.data;

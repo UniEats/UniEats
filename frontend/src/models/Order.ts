@@ -31,6 +31,7 @@ export interface OrderDTO {
   id: number;
   userId: number;
   creationDate: string;
+  estimatedDeliveryTime?: string;
   totalPrice: number;
   stateId: number;
   details: OrderDetailDTO[];
