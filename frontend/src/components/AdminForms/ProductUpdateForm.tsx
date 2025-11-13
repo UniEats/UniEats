@@ -191,6 +191,7 @@ export const ProductUpdateForm = ({ onClose, productIdToUpdate }: ProductUpdateF
               label="Ingredients" 
               items={ingredients}
               emptyMessage="Please add ingredients first." 
+              searchable={true}
             />} 
           />
 

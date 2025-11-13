@@ -95,6 +95,7 @@ export const ComboForm = ({ onClose }: ComboFormProps) => {
               label="Products" 
               items={products}
               emptyMessage="Please add products first." 
+              searchable={true}
             />} 
           />
 

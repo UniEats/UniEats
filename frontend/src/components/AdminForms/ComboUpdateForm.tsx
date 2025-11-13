@@ -186,7 +186,7 @@ export const ComboUpdateForm = ({ onClose, comboIdToUpdate }: ComboUpdateFormPro
           <formData.AppField
             name="productIds"
             children={(field) => (
-              <field.ItemQuantityField label="Products" items={products} emptyMessage="Please add products first." />
+              <field.ItemQuantityField label="Products" items={products} emptyMessage="Please add products first." searchable={true}/>
             )}
           />
 
