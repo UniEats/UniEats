@@ -6,6 +6,7 @@ import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetailCreateDTO;
 import ar.uba.fi.ingsoft1.product_example.user.User;
 import ar.uba.fi.ingsoft1.product_example.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -51,10 +52,13 @@ class OrderRestControllerTest {
 
     @BeforeEach
     void setUp() {
+        objectMapper.registerModule(new JavaTimeModule());
+
         orderDTO = new OrderDTO(
                 1L,                    
                 1L,
                 LocalDateTime.now(),
+                null,
                 new BigDecimal("500.00"),
                 10L,                   
                 List.of()         
@@ -208,10 +212,14 @@ class OrderRestControllerTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void startPreparation_success() throws Exception {
-        Mockito.when(orderService.startPreparation(1L))
+        EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now().plusHours(1));
+
+        Mockito.when(orderService.startPreparation(eq(1L), any(EstimatedDeliveryTimeDTO.class)))
                 .thenReturn(Optional.of(orderDTO));
 
-        mockMvc.perform(post("/orders/1/start-preparation"))
+        mockMvc.perform(post("/orders/1/start-preparation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(estimatedDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)));
     }
@@ -219,10 +227,14 @@ class OrderRestControllerTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void startPreparation_notFound() throws Exception {
-        Mockito.when(orderService.startPreparation(999L))
+        EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now().plusHours(1));
+
+        Mockito.when(orderService.startPreparation(eq(999L), any(EstimatedDeliveryTimeDTO.class)))
                 .thenReturn(Optional.empty());
 
-        mockMvc.perform(post("/orders/999/start-preparation"))
+        mockMvc.perform(post("/orders/999/start-preparation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(estimatedDto)))
                 .andExpect(status().isNotFound());
     }
 
