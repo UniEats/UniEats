@@ -16,7 +16,7 @@ export const SignupScreen = () => {
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [isSuccess, data]);
+        }, [isSuccess, data, error]);
 
     return (
         <CommonLayout>

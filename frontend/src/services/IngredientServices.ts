@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { BASE_API_URL } from "@/config/app-query-client";
-import { IngredientCreateRequest, IngredientFormValues, IngredientSchema, Ingredient } from "@/models/Ingredient";
+import { IngredientCreateRequest, IngredientCreateFormValues, IngredientSchema, Ingredient, /*IngredientUpdateFormSchema,*/ IngredientUpdateFormValues } from "@/models/Ingredient";
 import { useAccessTokenGetter, useHandleResponse } from "@/services/TokenContext";
 
 async function postIngredient(
@@ -48,7 +48,7 @@ export function useCreateIngredient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (values: IngredientFormValues) => {
+    mutationFn: async (values: IngredientCreateFormValues) => {
       const payload: IngredientCreateRequest = {
         name: values.name,
         description: values.description,
@@ -69,7 +69,7 @@ export function useUpdateIngredient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, values }: { id: number; values: IngredientFormValues }) => {
+    mutationFn: async ({ id, values }: { id: number; values: IngredientUpdateFormValues }) => {
       const response = await fetch(`${BASE_API_URL}/ingredients/${id}`, {
         method: "PATCH",
         headers: {
@@ -77,7 +77,7 @@ export function useUpdateIngredient() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${await getAccessToken()}`,
         },
-        body: JSON.stringify({ name: values.name, description: values.description, stock: Number.parseInt(values.stock, 10) }),
+        body: JSON.stringify({ name: values.name, description: values.description }),
       });
 
       if (response.ok) {
@@ -88,11 +88,11 @@ export function useUpdateIngredient() {
 
       return handleResponse(response, (json) => IngredientSchema.parse(json));
     },
-    onMutate: async ({ id, values }: { id: number; values: IngredientFormValues }) => {
+    onMutate: async ({ id, values }: { id: number; values: IngredientUpdateFormValues }) => {
       await queryClient.cancelQueries({ queryKey: ["ingredients"] });
       const previous = queryClient.getQueryData<Ingredient[]>(["ingredients"]);
       queryClient.setQueryData(["ingredients"], (old: Ingredient[] | undefined) =>
-        old ? old.map((i) => (i.id === id ? { ...i, name: values.name, description: values.description, stock: Number.parseInt(values.stock, 10) } : i)) : old,
+        old ? old.map((i) => (i.id === id ? { ...i, name: values.name, description: values.description } : i)) : old,
       );
       return { previous };
     },
@@ -127,6 +127,52 @@ export function useDeleteIngredient() {
       await queryClient.cancelQueries({ queryKey: ["ingredients"] });
       const previous = queryClient.getQueryData<Ingredient[]>(["ingredients"]);
       queryClient.setQueryData(["ingredients"], (old: Ingredient[] | undefined) => (old ? old.filter((i) => i.id !== id) : old));
+      return { previous };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previous) queryClient.setQueryData(["ingredients"], context.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["ingredients"] });
+    },
+  });
+}
+
+export function useIncreaseStockIngredient() {
+  const getAccessToken = useAccessTokenGetter();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, amount }: { id: number; amount: number }) => {
+      const response = await fetch(`${BASE_API_URL}/ingredients/${id}/stock?amount=${amount}`, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getAccessToken()}`,
+        },
+      });
+
+      if (response.ok) {
+        const text = await response.text();
+        if (!text) return null;
+        return JSON.parse(text);
+      }
+
+      throw new Error("Error increasing stock");
+    },
+    onMutate: async ({ id, amount }) => {
+      await queryClient.cancelQueries({ queryKey: ["ingredients"] });
+      const previous = queryClient.getQueryData<Ingredient[]>(["ingredients"]);
+      queryClient.setQueryData(["ingredients"], (old: Ingredient[] | undefined) =>
+        old
+          ? old.map((ingredient) =>
+              ingredient.id === id
+                ? { ...ingredient, stock: (ingredient.stock ?? 0) + amount }
+                : ingredient
+            )
+          : old
+      );
       return { previous };
     },
     onError: (_err, _variables, context) => {

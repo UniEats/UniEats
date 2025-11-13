@@ -98,6 +98,7 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
               label="Ingredients" 
               items={ingredients}
               emptyMessage="Please add ingredients first." 
+              searchable={true} 
             />} 
           />
 
@@ -108,6 +109,7 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
                 label="Tags (optional)"
                 options={tags}
                 emptyMessage="No tags available yet."
+                searchable={true} 
               />
             )}
           />
@@ -119,6 +121,7 @@ export const ProductForm = ({ onClose }: ProductFormProps) => {
                 label="Menu Sections"
                 options={menuSections}
                 emptyMessage="No menu sections available yet."
+                searchable={true} 
               />
             )}
           />

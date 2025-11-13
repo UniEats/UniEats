@@ -140,3 +140,34 @@ export function useUserCount() {
     },
   });
 }
+
+type ChangeUserRoleRequest = {
+  email: string;
+  role: string;
+};
+
+export function useChangeUserRole() {
+  const getAccessToken = useAccessTokenGetter();
+
+  return useMutation({
+    mutationFn: async (data: ChangeUserRoleRequest) => {
+      const token = await getAccessToken();
+
+      const response = await fetch(`${BASE_API_URL}/users/change-role`, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        return MessageResponseSchema.parse(await response.json());
+      } else {
+        throw new Error(`Error usuario no encontrado`);
+      }
+    },
+  });
+}

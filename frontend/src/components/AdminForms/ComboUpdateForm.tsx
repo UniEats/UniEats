@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState, useMemo } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
@@ -30,9 +30,10 @@ const COMBO_UPDATE_DEFAULT_VALUES: ComboFormValues & { comboId: number } = {
 
 type ComboUpdateFormProps = {
   onClose: () => void;
+  comboIdToUpdate?: number | null;
 };
 
-export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
+export const ComboUpdateForm = ({ onClose, comboIdToUpdate }: ComboUpdateFormProps) => {
   const updateCombo = useUpdateCombo();
   const combosQuery = useComboList();
   const productsQuery = useProductList();
@@ -40,6 +41,11 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
   const menuSectionsQuery = useMenuSectionList();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const comboSelectId = useId();
+
+  const combos = useMemo(() => combosQuery.data ?? [], [combosQuery.data]);
+  const products = productsQuery.data ?? [];
+  const tags = tagsQuery.data ?? [];
+  const menuSections = menuSectionsQuery.data ?? [];
 
   const formData = useAppForm({
     defaultValues: COMBO_UPDATE_DEFAULT_VALUES,
@@ -52,6 +58,27 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
       setSuccessMessage(`Combo "${value.name}" updated successfully.`);
     },
   });
+
+  useEffect(() => {
+    // Check if we have the ID prop and the combo list is ready
+    if (comboIdToUpdate && combos.length > 0) {
+      const matchedCombo = combos.find((combo) => combo.id === comboIdToUpdate);
+
+      // If we found the combo, set all the form fields
+      if (matchedCombo) {
+        formData.setFieldValue("comboId", matchedCombo.id);
+        formData.setFieldValue("name", matchedCombo?.name ?? "");
+        formData.setFieldValue("description", matchedCombo?.description ?? "");
+        formData.setFieldValue("price", matchedCombo?.price?.toString() ?? "");
+        formData.setFieldValue(
+          "productIds",
+          (matchedCombo?.products || []).map((p) => ({ id: String(p.id), quantity: p.quantity })),
+        );
+        formData.setFieldValue("tagIds", Object.keys(matchedCombo?.tags || {}));
+        formData.setFieldValue("menuSectionIds", Object.keys(matchedCombo?.menuSections || {}));
+      }
+    }
+  }, [comboIdToUpdate, combos, formData]); // Dependencies
 
   const submissionError = updateCombo.error
     ? updateCombo.error instanceof Error
@@ -88,11 +115,6 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
       </section>
     );
   }
-
-  const combos = combosQuery.data ?? [];
-  const products = productsQuery.data ?? [];
-  const tags = tagsQuery.data ?? [];
-  const menuSections = menuSectionsQuery.data ?? [];
 
   if (combos.length === 0) {
     return (
@@ -161,15 +183,12 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
           <formData.AppField name="description" children={(field) => <field.TextField label="New description" />} />
           <formData.AppField name="price" children={(field) => <field.TextField label="Price" />} />
 
-          <formData.AppField 
-            name="productIds" 
-            children={(field) => 
-            <field.ItemQuantityField 
-              label="Products" 
-              items={products}
-              emptyMessage="Please add products first." 
-            />} 
-          /> 
+          <formData.AppField
+            name="productIds"
+            children={(field) => (
+              <field.ItemQuantityField label="Products" items={products} emptyMessage="Please add products first." />
+            )}
+          />
 
           <formData.AppField
             name="tagIds"
@@ -178,6 +197,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                 label="Tags (optional)"
                 options={tags}
                 emptyMessage="No tags available yet."
+                searchable={true}
               />
             )}
           />
@@ -189,6 +209,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
                 label="Menu Sections"
                 options={menuSections}
                 emptyMessage="No menu sections available yet."
+                searchable={true}
               />
             )}
           />
@@ -196,11 +217,7 @@ export const ComboUpdateForm = ({ onClose }: ComboUpdateFormProps) => {
           <formData.AppField name="image" children={(field) => <field.FileField label="Image" />} />
 
           <div className={styles.formActions}>
-            <formData.Button
-              label="Cancel"
-              type="button"
-              onClick={onClose}
-            />
+            <formData.Button label="Cancel" type="button" onClick={onClose} />
             <formData.Button label="Add Item" />
           </div>
         </formData.FormContainer>

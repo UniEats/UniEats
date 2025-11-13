@@ -27,21 +27,22 @@ export function Signup({ onSubmit, submitError, isPending }: Props) {
         },
     });
 
+    const { AppForm, FormContainer, AppField } = formData;
 
     return (
-        <formData.AppForm>
-            <formData.FormContainer extraError={submitError}>
-                <formData.AppField name="name" children={(field) => <field.TextField label="Nombre" />} />
-                <formData.AppField name="last_name" children={(field) => <field.TextField label="Last Name" />} />
-                <formData.AppField name="email" children={(field) => <field.TextField label="Email" />} />
-                <formData.AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
-                <formData.AppField name="photo" children={(field) => <field.FileField label="Photo" />} />
-                <formData.AppField name="age" children={(field) => <field.TextField label="Age" />} />
-                <formData.AppField name="gender" children={(field) => <field.TextField label="Gender" />} />
-                <formData.AppField name="address" children={(field) => <field.TextField label="Address" />} />
+        <AppForm>
+            <FormContainer extraError={submitError}>
+                <AppField name="name" children={(field) => <field.TextField label="Name" />} />
+                <AppField name="last_name" children={(field) => <field.TextField label="Last Name" />} />
+                <AppField name="email" children={(field) => <field.TextField label="Email" />} />
+                <AppField name="password" children={(field) => <field.PasswordField label="Password" />} />
+                <AppField name="photo" children={(field) => <field.FileField label="Photo" />} />
+                <AppField name="age" children={(field) => <field.TextField label="Age" />} />
+                <AppField name="gender" children={(field) => <field.TextField label="Gender" />} />
+                <AppField name="address" children={(field) => <field.TextField label="Address" />} />
                 
                 <formData.Button label="Sign Up" isPending={isPending} />
-            </formData.FormContainer>
-        </formData.AppForm>
+            </FormContainer>
+        </AppForm>
     );
 }
