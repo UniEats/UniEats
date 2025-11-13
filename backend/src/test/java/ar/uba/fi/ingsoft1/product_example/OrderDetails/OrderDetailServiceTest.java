@@ -5,6 +5,7 @@ import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
+import ar.uba.fi.ingsoft1.product_example.user.User;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +44,11 @@ class OrderDetailServiceTest {
     private Order createOrder() {
         Order order = new Order();
         order.setId(1L);
-        order.setUserId(1L);
+
+        User user = new User();
+        user.setId(1L);
+        order.setUser(user);
+
         order.setCreationDate(LocalDateTime.now());
         order.setState(new OrderStatus(1L, "confirmed"));
         return order;

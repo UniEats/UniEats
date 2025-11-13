@@ -3,6 +3,8 @@ package ar.uba.fi.ingsoft1.product_example.Orders;
 import ar.uba.fi.ingsoft1.product_example.config.security.JwtService;
 import ar.uba.fi.ingsoft1.product_example.config.security.SecurityConfig;
 import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetailCreateDTO;
+import ar.uba.fi.ingsoft1.product_example.user.User;
+import ar.uba.fi.ingsoft1.product_example.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,9 @@ class OrderRestControllerTest {
     @MockBean
     private JwtService jwtService;
 
+    @MockBean
+    private UserRepository userRepository;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -48,7 +53,7 @@ class OrderRestControllerTest {
     void setUp() {
         orderDTO = new OrderDTO(
                 1L,                    
-                1L,                   
+                1L,
                 LocalDateTime.now(),
                 new BigDecimal("500.00"),
                 10L,                   
@@ -101,14 +106,15 @@ class OrderRestControllerTest {
         OrderCreateDTO dto = new OrderCreateDTO(List.of(createDetail()));
         String json = objectMapper.writeValueAsString(dto);
 
-        Mockito.when(orderService.createOrder(any(), eq(1L)))
+        Mockito.when(orderService.createOrder(any(), any()))
                 .thenReturn(Optional.of(orderDTO));
 
         mockMvc.perform(post("/orders")
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.userId", is(1)));
     }
 
     @Test
@@ -117,7 +123,9 @@ class OrderRestControllerTest {
         OrderCreateDTO dto = new OrderCreateDTO(List.of(createDetail()));
         String json = objectMapper.writeValueAsString(dto);
 
-        Mockito.when(orderService.createOrder(any(), eq(1L)))
+        User user = new User("test@example.com", "password", "ROLE_ADMIN", 1L);
+
+        Mockito.when(orderService.createOrder(any(), eq(user)))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(post("/orders")

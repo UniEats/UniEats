@@ -6,6 +6,7 @@ import { KitchenOrders } from "@/components/KitchenOrders/KitchenOrders";
 import { LoginScreen } from "@/screens/LoginScreen";
 import { MainScreen } from "@/screens/MainScreen";
 import { SignupScreen } from "@/screens/SignupScreen";
+import { MyOrdersScreen } from "@/screens/MyOrdersScreen"
 import { useToken, useUserRole } from "@/services/TokenContext";
 
 import { ForgotPasswordScreen } from "./screens/ForgotPasswordScreen";
@@ -41,6 +42,7 @@ export const Navigation = () => {
         <Switch>
           <Route path="/menu">{userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <MenuScreen />}</Route>
           <Route path="/cart">{userRole === "ROLE_STAFF" ? <Redirect href="/kitchen" /> : <CartView />}</Route>
+          <Route path="/my-orders">{userRole === "ROLE_USER" ? <MyOrdersScreen /> : <Redirect href="/" />}</Route>
           <Route path="/kitchen">
             <KitchenRouteGuard />
           </Route>

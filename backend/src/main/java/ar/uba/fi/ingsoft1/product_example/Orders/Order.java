@@ -2,6 +2,7 @@ package ar.uba.fi.ingsoft1.product_example.Orders;
 
 import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetail;
 import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetailDTO;
+import ar.uba.fi.ingsoft1.product_example.user.User;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
@@ -30,8 +31,9 @@ public class Order {
     @GeneratedValue
     private Long id;
 
-    @NonNull
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @NonNull
     private LocalDateTime creationDate;
@@ -69,7 +71,7 @@ public class Order {
 
         return new OrderDTO(
                 this.getId(),
-                this.getUserId(),
+                this.getUser() != null ? this.getUser().getId() : null,
                 this.getCreationDate(),
                 this.getTotalPrice(),
                 this.getState().getId(),

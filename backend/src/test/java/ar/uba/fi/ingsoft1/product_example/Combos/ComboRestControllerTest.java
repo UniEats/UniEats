@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import ar.uba.fi.ingsoft1.product_example.user.UserRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -36,6 +37,9 @@ class ComboRestControllerTest {
 
     @MockBean
     private JwtService jwtService;
+
+    @MockBean
+    private UserRepository userRepository;
 
     @Autowired
     private ObjectMapper objectMapper;

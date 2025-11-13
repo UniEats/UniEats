@@ -15,3 +15,23 @@ export interface Order {
     updatedAt: string;
     totalAmount: number;
 }
+
+export interface OrderDetailDTO {
+  id: number;
+  orderId: number;
+  productId: number | null;
+  comboId: number | null;
+  quantity: number;
+  price: number;
+  discount: number;
+  totalPrice: number;
+}
+
+export interface OrderDTO {
+  id: number;
+  userId: number;
+  creationDate: string;
+  totalPrice: number;
+  stateId: number;
+  details: OrderDetailDTO[];
+}

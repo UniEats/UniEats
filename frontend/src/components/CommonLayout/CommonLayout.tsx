@@ -34,11 +34,19 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
                 <Link href="/" className={styles.siteNavLink}>
                   Main Page
                 </Link>
-              </> )}
-              {userRole !== "ROLE_STAFF" && (
                 <Link href="/menu" className={styles.siteNavLink}>
                   Menu
                 </Link>
+              </> )}
+              {userRole === "ROLE_USER" && (
+                <>
+                  <Link href="/menu" className={styles.siteNavLink}>
+                    Menu
+                  </Link>
+                  <Link href="/my-orders" className={styles.siteNavLink}>
+                    My Orders
+                  </Link>
+                </>
               )}
             </>
           ) : (

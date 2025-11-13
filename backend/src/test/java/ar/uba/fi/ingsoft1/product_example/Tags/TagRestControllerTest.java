@@ -2,6 +2,7 @@ package ar.uba.fi.ingsoft1.product_example.Tags;
 
 import ar.uba.fi.ingsoft1.product_example.config.security.JwtService;
 import ar.uba.fi.ingsoft1.product_example.config.security.SecurityConfig;
+import ar.uba.fi.ingsoft1.product_example.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,9 @@ class TagRestControllerTest {
 
     @MockBean
     private JwtService jwtService;
+
+    @MockBean
+    private UserRepository userRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
