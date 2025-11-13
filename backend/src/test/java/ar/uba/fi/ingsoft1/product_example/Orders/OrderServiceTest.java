@@ -11,6 +11,7 @@ import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProductId;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
+import ar.uba.fi.ingsoft1.product_example.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -50,7 +51,11 @@ class OrderServiceTest {
     private Order createValidOrder() {
         Order order = new Order();
         order.setId(1L);
-        order.setUserId(1L);
+
+        User user = new User();
+        user.setId(1L);
+        order.setUser(user);
+
         order.setCreationDate(LocalDateTime.now());
         order.setState(new OrderStatus(1L, "confirmed"));
         return order;
@@ -103,7 +108,10 @@ class OrderServiceTest {
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order saved = inv.getArgument(0);
             saved.setId(10L);
-            saved.setUserId(1L);
+
+            User user = new User();
+            user.setId(1L);
+            saved.setUser(user);
 
             saved.getDetails().forEach(d -> {
                 d.setId(1L);
@@ -212,8 +220,11 @@ class OrderServiceTest {
         Order order = new Order();
         order.setId(1L);
         order.setState(new OrderStatus(3L, "ready"));
-        order.setUserId(1L);
-        
+
+        User user = new User();
+        user.setId(1L);
+        order.setUser(user);
+
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
 

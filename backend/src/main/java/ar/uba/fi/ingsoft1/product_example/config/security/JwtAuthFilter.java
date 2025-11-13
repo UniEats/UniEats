@@ -15,6 +15,9 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
+import ar.uba.fi.ingsoft1.product_example.user.UserRepository;
+import ar.uba.fi.ingsoft1.product_example.user.User;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -22,10 +25,12 @@ import java.util.List;
 class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     @Autowired
-    JwtAuthFilter(JwtService jwtService) {
+    JwtAuthFilter(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -57,13 +62,15 @@ class JwtAuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(headerPrefix.length());
 
         jwtService.extractVerifiedUserDetails(token).ifPresent(userDetails -> {
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    List.of(new SimpleGrantedAuthority(userDetails.role()))
-            );
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+            userRepository.findByUsername(userDetails.username()).ifPresent(user -> {
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        user,
+                        null,
+                        user.getAuthorities()
+                );
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            });
         });
     }
 }
