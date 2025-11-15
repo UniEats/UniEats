@@ -1,7 +1,5 @@
 package ar.uba.fi.ingsoft1.product_example.Promotions;
 
-import ar.uba.fi.ingsoft1.product_example.Orders.Order;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.EntityGraph;

@@ -2,7 +2,6 @@ package ar.uba.fi.ingsoft1.product_example.Promotions;
 
 import ar.uba.fi.ingsoft1.product_example.Products.ProductDTO;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboDTO;
-import java.util.List;
 import java.math.BigDecimal;
 import java.util.Set;
 import java.time.DayOfWeek;

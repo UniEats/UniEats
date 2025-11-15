@@ -4,8 +4,6 @@ import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
-import ar.uba.fi.ingsoft1.product_example.Products.ProductDTO;
-import ar.uba.fi.ingsoft1.product_example.Combos.ComboDTO;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;

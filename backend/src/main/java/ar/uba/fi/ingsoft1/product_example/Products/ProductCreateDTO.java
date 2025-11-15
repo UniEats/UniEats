@@ -29,39 +29,4 @@ public record ProductCreateDTO(
         @NonNull List<IngredientQuantity> ingredientIds,
         @NonNull List<Long> tagIds,
         @NonNull @Size(min = 1) List<Long> menuSectionIds
-) {
-    public Product toProductWithIngredientsAndTags(
-            Function<Long, Ingredient> ingredientFetcher,
-            Function<Long, Tag> tagFetcher,
-            Function<Long, MenuSection> menuSectionFetcher
-    ) {
-        Product product = new Product(name, description, price);
-
-        List<ProductIngredient> productIngredients = ingredientIds.stream()
-                .map(entry -> {
-                    Long ingredientId = entry.ingredientId();
-                    Integer quantity = entry.quantity();
-
-                    Ingredient ingredient = ingredientFetcher.apply(ingredientId);
-                    ProductIngredient pi = new ProductIngredient();
-                    pi.setProduct(product);
-                    pi.setIngredient(ingredient);
-                    pi.setQuantity(quantity);
-                    return pi;
-                })
-                .collect(Collectors.toList());
-
-        List<Tag> tags = tagIds.stream()
-                .map(tagFetcher)
-                .collect(Collectors.toList());
-        product.setTags(tags);
-
-        List<MenuSection> menuSections = menuSectionIds.stream()
-                .map(menuSectionFetcher)
-                .collect(Collectors.toList());
-
-        product.setProductIngredients(productIngredients);
-
-        return product;
-    }
-}
+) {}

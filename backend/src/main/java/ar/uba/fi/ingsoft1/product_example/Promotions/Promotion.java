@@ -8,18 +8,14 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.NonNull;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.time.DayOfWeek;
 import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "promotion")

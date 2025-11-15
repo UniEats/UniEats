@@ -1,6 +1,5 @@
 package ar.uba.fi.ingsoft1.product_example.Promotions;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Set;
