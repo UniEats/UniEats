@@ -94,4 +94,13 @@ export class OrderService {
         });
         return response.data;
     }
+
+    static async payOrder(orderId: number, method: string): Promise<any> {
+        const response = await axios.post(
+            `${this.getBaseUrl()}/payments/${orderId}?method=${method}`,
+            {},
+            { headers: this.getAuthHeaders() }
+        );
+        return response.data;
+    }
 }
