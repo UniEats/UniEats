@@ -183,4 +183,33 @@ class MenuSectionRestControllerTest {
         mockMvc.perform(delete("/menu-sections/999"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void addCombosToMenuSection_success() throws Exception {
+        MenuSectionAddCombosDTO addCombosDTO = new MenuSectionAddCombosDTO(List.of(10L, 20L));
+
+        Mockito.when(menuSectionsService.addCombosToMenuSection(eq(1L), any()))
+                .thenReturn(Optional.of(menuSectionDTO));
+
+        mockMvc.perform(post("/menu-sections/1/combos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addCombosDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.label", is("Entradas")));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void addCombosToMenuSection_notFound() throws Exception {
+        MenuSectionAddCombosDTO addCombosDTO = new MenuSectionAddCombosDTO(List.of(10L, 20L));
+
+        Mockito.when(menuSectionsService.addCombosToMenuSection(eq(999L), any()))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/menu-sections/999/combos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addCombosDTO)))
+                .andExpect(status().isNotFound());
+    }
 }

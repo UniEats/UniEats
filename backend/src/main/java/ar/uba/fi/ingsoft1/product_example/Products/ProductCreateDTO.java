@@ -1,26 +1,12 @@
 package ar.uba.fi.ingsoft1.product_example.Products;
 
-import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
-import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
-
-import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
-import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
-import ar.uba.fi.ingsoft1.product_example.Products.IngredientQuantity;
-import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
-
-import org.springframework.validation.annotation.Validated;
-
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.DecimalMin;
-import java.util.function.LongFunction;
 import java.math.BigDecimal;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public record ProductCreateDTO(
         @NonNull @Size(min = 1, max = 100) String name,

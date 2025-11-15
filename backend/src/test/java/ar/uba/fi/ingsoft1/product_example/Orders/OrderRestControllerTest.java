@@ -309,4 +309,50 @@ class OrderRestControllerTest {
         mockMvc.perform(post("/orders/999/confirm"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void getOrdersByState_returnsFilteredList() throws Exception {
+        OrderDTO match = new OrderDTO(
+                1L, 1L, LocalDateTime.now(),
+                new BigDecimal("500.00"),
+                10L, List.of()
+        );
+        OrderDTO notMatch = new OrderDTO(
+                2L, 1L, LocalDateTime.now(),
+                new BigDecimal("600.00"),
+                20L, List.of()
+        );
+
+        Mockito.when(orderService.geAlltOrders())
+                .thenReturn(List.of(match, notMatch));
+
+        mockMvc.perform(get("/orders/state/10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)));
+    }
+
+    @Test
+    void getMyOrders_unauthenticated_returns403() throws Exception {
+        mockMvc.perform(get("/orders/my-orders"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void getAllStates_returnsList() throws Exception {
+        OrderStatus status1 = new OrderStatus(1L, "CONFIRMED");
+        OrderStatus status2 = new OrderStatus(2L, "PREPARING");
+
+        Mockito.when(orderService.getAllStatuses())
+                .thenReturn(List.of(status1, status2));
+
+        mockMvc.perform(get("/orders/states"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].name", is("CONFIRMED")))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].name", is("PREPARING")));
+    }
 }

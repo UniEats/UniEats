@@ -1,13 +1,11 @@
 package ar.uba.fi.ingsoft1.product_example.Combos;
 
-import ar.uba.fi.ingsoft1.product_example.Ingredients.Ingredient;
 import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSection;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import ar.uba.fi.ingsoft1.product_example.Tags.Tag;
 import ar.uba.fi.ingsoft1.product_example.Tags.TagRepository;
 import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
-import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientRepository;
 import ar.uba.fi.ingsoft1.product_example.MenuSections.MenuSectionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -193,5 +191,39 @@ class ProductServiceTest {
         assertEquals("Combo 1", result.get(0).name());
         assertEquals("Delicioso combo", result.get(0).description());
         assertEquals(new BigDecimal("300.0"), result.get(0).price());
+    }
+
+    @Test
+    void testGetAlltCombos_ReturnsList() {
+        Combo combo1 = new Combo("Combo 1", "Descripción 1", new BigDecimal("100.0"));
+        combo1.setId(1L);
+
+        Combo combo2 = new Combo("Combo 2", "Descripción 2", new BigDecimal("200.0"));
+        combo2.setId(2L);
+
+        when(comboRepository.findAll()).thenReturn(List.of(combo1, combo2));
+
+        List<ComboDTO> result = comboService.getAlltCombos();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        assertEquals("Combo 1", result.get(0).name());
+        assertEquals("Descripción 1", result.get(0).description());
+        assertEquals(new BigDecimal("100.0"), result.get(0).price());
+
+        assertEquals("Combo 2", result.get(1).name());
+        assertEquals("Descripción 2", result.get(1).description());
+        assertEquals(new BigDecimal("200.0"), result.get(1).price());
+    }
+
+    @Test
+    void testGetAlltCombos_EmptyList() {
+        when(comboRepository.findAll()).thenReturn(List.of());
+
+        List<ComboDTO> result = comboService.getAlltCombos();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }

@@ -11,6 +11,7 @@ import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredient;
 import ar.uba.fi.ingsoft1.product_example.ProductIngredient.ProductIngredientId;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProductId;
 import ar.uba.fi.ingsoft1.product_example.ComboProduct.ComboProduct;
+import ar.uba.fi.ingsoft1.product_example.Promotions.PromotionService;
 import ar.uba.fi.ingsoft1.product_example.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ class OrderServiceTest {
 
     @InjectMocks
     private OrderService orderService;
+
+    @Mock
+    private PromotionService promotionService;
 
     @BeforeEach
     void setUp() {
@@ -411,5 +415,64 @@ class OrderServiceTest {
         orderService.confirmOrder(1L);
 
         assertEquals(6, ingredient.getStock());
+    }
+
+    @Test
+    void testGetOrdersByUserId_ReturnsOrders() {
+        Order order1 = createValidOrder();
+        Order order2 = createValidOrder();
+        order2.setId(2L);
+
+        when(orderRepository.findByUser_Id(1L)).thenReturn(List.of(order1, order2));
+
+        List<OrderDTO> result = orderService.getOrdersByUserId(1L);
+
+        assertEquals(2, result.size());
+        assertEquals(1L, result.get(0).id());
+        assertEquals(2L, result.get(1).id());
+    }
+
+    @Test
+    void testCreateOrder_Success_WithUser() {
+        User user = new User();
+        user.setId(5L);
+
+        OrderCreateDTO dto = new OrderCreateDTO(
+                List.of(new OrderDetailCreateDTO(
+                        1L, null, 2, new BigDecimal("100.00"), BigDecimal.ZERO
+                ))
+        );
+
+        Product p = new Product("P1", "Desc", new BigDecimal("100.00"));
+        p.setId(1L);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(p));
+
+        when(promotionService.getPromotionsActiveNow()).thenReturn(List.of());
+
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
+            Order o = inv.getArgument(0);
+            o.setId(99L);
+            o.getDetails().forEach(d -> d.setId(1L));
+            return o;
+        });
+
+        Optional<OrderDTO> result = orderService.createOrder(dto, user);
+
+        assertTrue(result.isPresent());
+        assertEquals(99L, result.get().id());
+        assertEquals(5L, result.get().userId());
+        assertEquals(new BigDecimal("200.00"), result.get().totalPrice());
+    }
+
+    @Test
+    void testGetAllStatuses_ReturnsFiveStatuses() {
+        List<OrderStatus> statuses = orderService.getAllStatuses();
+
+        assertEquals(5, statuses.size());
+        assertEquals("confirmed", statuses.get(0).getName());
+        assertEquals("in preparation", statuses.get(1).getName());
+        assertEquals("ready", statuses.get(2).getName());
+        assertEquals("complete", statuses.get(3).getName());
+        assertEquals("canceled", statuses.get(4).getName());
     }
 }
