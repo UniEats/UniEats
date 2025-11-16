@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
 
 import { OrderService } from "../../services/OrderService";
 import { MenuItem, useProducts } from "../Product/ProductContext";
 import { CartItem, useCart } from "./Cart";
+import { PaymentModal, type PaymentMethod } from "./PaymentModal";
 import styles from "./CartView.module.css";
 
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/80";
@@ -39,6 +40,7 @@ const getImageUrl = (image: Uint8Array | undefined) => {
 export const CartView: React.FC = () => {
   const { validItems, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
   const { productsMap, combosMap } = useProducts();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
 
   const handleQuantityChange = (id: number, type: "product" | "combo", newQuantity: number) => {
     if (newQuantity < 1) {
@@ -62,7 +64,7 @@ export const CartView: React.FC = () => {
     return outOfStock;
   };
 
-  const handleCheckout = async (method: "credit" | "cash" | "qr") => {
+  const handleCheckout = async (method: PaymentMethod) => {
     try {
       const outOfStock = checkStock();
       if (outOfStock.length > 0) {
@@ -88,6 +90,7 @@ export const CartView: React.FC = () => {
       await OrderService.payOrder(order.id, method);
 
       clearCart();
+      setPaymentMethod(null);
       alert("Order Confirmed! The kitchen staff will start preparing it soon.");
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -187,13 +190,13 @@ export const CartView: React.FC = () => {
         <div className={styles.cartFooter}>
           <div className={styles.paymentButtons}>
             <h3>Payment Method</h3>
-            <button onClick={() => handleCheckout("credit")} className={styles.checkoutButton}>
+            <button onClick={() => setPaymentMethod("credit")} className={styles.checkoutButton}>
               Credit/Debit Card
             </button>
-            <button onClick={() => handleCheckout("cash")} className={styles.checkoutButton}>
+            <button onClick={() => setPaymentMethod("cash")} className={styles.checkoutButton}>
               Cash
             </button>
-            <button onClick={() => handleCheckout("qr")} className={styles.checkoutButton}>
+            <button onClick={() => setPaymentMethod("qr")} className={styles.checkoutButton}>
               QR Code
             </button>
           </div>
@@ -203,6 +206,13 @@ export const CartView: React.FC = () => {
           </div>
         </div>
       </div>
+      {paymentMethod && (
+        <PaymentModal
+          method={paymentMethod}
+          onClose={() => setPaymentMethod(null)}
+          onConfirm={handleCheckout}
+        />
+      )}
     </CommonLayout>
   );
 };
