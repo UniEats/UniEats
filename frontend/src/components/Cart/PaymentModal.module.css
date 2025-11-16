@@ -1,0 +1,101 @@
+.paymentView {
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.paymentView h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.5rem;
+}
+
+.paymentView p {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.paymentView img {
+  display: block;
+  margin: 1rem auto;
+  border-radius: 8px;
+  background-color: #f3f4f6;
+}
+
+.qrCodeImage {
+  display: block;
+  margin: 1rem auto;
+  border-radius: 8px;
+  background-color: #f3f4f6;
+
+  width: 250px;
+  height: 250px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.mockForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+  margin-top: 1.5rem;
+}
+
+.mockForm label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.mockForm input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  background-color: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-sizing: border-box;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancelButton,
+.confirmButton {
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+}
+
+.cancelButton {
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.cancelButton:hover {
+  background-color: #f9fafb;
+}
+
+.confirmButton {
+  background-color: #bf0c2b;
+  color: #ffffff;
+}
+
+.confirmButton:hover {
+  background-color: #a60b25;
+}
