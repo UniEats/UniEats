@@ -149,3 +149,100 @@
     justify-content: center;
   }
 }
+
+.cartItemList {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cartItemCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.cartItemImage {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+  background-color: #f0f0f0;
+}
+
+.cartItemDetails {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.cartItemName {
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cartItemPrice {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.cartItemControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.cartQuantityInput {
+  width: 3.5rem;
+  text-align: center;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.25rem;
+}
+
+.cartRemoveButton {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.cartRemoveButton:hover {
+  color: #ef4444;
+}
+
+.cartFooter {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cartTotal {
+  text-align: right;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.cartActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
