@@ -18,7 +18,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/users/password-reset")
 @Tag(name = "1 - Users")
-class PasswordResetController {
+public class PasswordResetController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
