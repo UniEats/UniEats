@@ -1,6 +1,6 @@
 import { useUserRole } from "@/services/TokenContext";
 import "./Product.css";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface ProductProps {
   id: number;
@@ -14,23 +14,42 @@ interface ProductProps {
   available?: boolean;
 }
 
-export default function Product({ id, image, title, description, price, tags, onDelete, onAddToCart, available }: ProductProps) {
-  const imageUrl = useMemo(() => {
-    if (!image) return undefined;
+const getImageUrl = (image?: Uint8Array) => {
+  if (!image) return undefined;
 
-    let buffer: ArrayBuffer;
+  let buffer: ArrayBuffer;
+  if (image instanceof Uint8Array) {
+    buffer = image.slice().buffer as unknown as ArrayBuffer;
+  } else if (typeof image === "object" && image !== null && "byteLength" in image) {
+    buffer = new Uint8Array(image as ArrayBufferLike).slice().buffer as unknown as ArrayBuffer;
+  } else {
+    return undefined;
+  }
 
-    if (image instanceof Uint8Array) {
-      buffer = image.slice().buffer as unknown as ArrayBuffer;
-    } else if (typeof image === "object" && image !== null && "byteLength" in image) {
-      buffer = new Uint8Array(image as ArrayBufferLike).slice().buffer as unknown as ArrayBuffer;
-    } else {
-      throw new Error("Tipo de imagen no soportado");
+  const view = new Uint8Array(buffer);
+  let mimeType = "image/jpeg";
+  if (view.length > 4) {
+    if (view[0] === 0x89 && view[1] === 0x50 && view[2] === 0x4e && view[3] === 0x47) {
+      mimeType = "image/png";
+    } else if (view[0] === 0x47 && view[1] === 0x49 && view[2] === 0x46 && view[3] === 0x38) {
+      mimeType = "image/gif";
     }
+  }
 
-    const blob = new Blob([buffer], { type: "image/png" });
-    return URL.createObjectURL(blob);
-  }, [image]);
+  const blob = new Blob([buffer], { type: mimeType });
+  return URL.createObjectURL(blob);
+};
+
+export default function Product({ id, image, title, description, price, tags, onDelete, onAddToCart, available }: ProductProps) {
+  const imageUrl = useMemo(() => getImageUrl(image), [image]);
+
+  useEffect(() => {
+    return () => {
+      if (imageUrl && imageUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [imageUrl]);
 
   const [showCartControls, setShowCartControls] = useState(false);
   const [quantity, setQuantity] = useState(1);
