@@ -22,7 +22,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-class OrderService {
+public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;

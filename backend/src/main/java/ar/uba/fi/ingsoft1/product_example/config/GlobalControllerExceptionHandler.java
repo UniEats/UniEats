@@ -1,5 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.config;
 
+import jakarta.persistence.EntityNotFoundException;
 import ar.uba.fi.ingsoft1.product_example.common.exception.ItemNotFoundException;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,27 +14,74 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalControllerExceptionHandler {
+    @ExceptionHandler(value = EntityNotFoundException.class, produces = "text/plain")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Entity not found in the database",
+            content = @Content(
+                    mediaType = "text/plain",
+                    schema = @Schema(implementation = String.class, example = "Order not found with id: 999")
+            )
+    )
+    public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
-    @ExceptionHandler(value = MethodArgumentNotValidException.class, produces = "text/plain")
+    @ExceptionHandler(
+            value = IllegalArgumentException.class,
+            produces = "text/plain"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid argument, such as an unknown payment method",
+            content = @Content(
+                    mediaType = "text/plain",
+                    schema = @Schema(
+                            implementation = String.class,
+                            example = "Unsupported payment method: bitcoin"
+                    )
+            )
+    )
+    public ResponseEntity<String> handleIllegalArgument(
+            IllegalArgumentException ex
+    ) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(
+            value = MethodArgumentNotValidException.class,
+            produces = "text/plain"
+    )
     @ApiResponse(
             responseCode = "400",
             description = "Invalid arguments supplied",
             content = @Content(
                     mediaType = "text/plain",
-                    schema = @Schema(implementation = String.class, example = "Validation failed because x, y, z")
+                    schema = @Schema(
+                            implementation = String.class,
+                            example = "Validation failed because x, y, z"
+                    )
             )
     )
-    public ResponseEntity<String> handleMethodArgumentInvalid(MethodArgumentNotValidException ex) {
+    public ResponseEntity<String> handleMethodArgumentInvalid(
+            MethodArgumentNotValidException ex
+    ) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = ItemNotFoundException.class, produces = "text/plain")
+    @ExceptionHandler(
+            value = ItemNotFoundException.class,
+            produces = "text/plain"
+    )
     @ApiResponse(
             responseCode = "404",
             description = "Referenced entity not found",
             content = @Content(
                     mediaType = "text/plain",
-                    schema = @Schema(implementation = String.class, example = "Failed to find foo with id 42")
+                    schema = @Schema(
+                            implementation = String.class,
+                            example = "Failed to find foo with id 42"
+                    )
             )
     )
     public ResponseEntity<String> handleItemNotFound(ItemNotFoundException ex) {
@@ -41,7 +89,11 @@ public class GlobalControllerExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    @ApiResponse(responseCode = "403", description = "Invalid jwt access token supplied", content = @Content)
+    @ApiResponse(
+            responseCode = "403",
+            description = "Invalid jwt access token supplied",
+            content = @Content
+    )
     public ResponseEntity<String> handleAccessDenied(AccessDeniedException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
