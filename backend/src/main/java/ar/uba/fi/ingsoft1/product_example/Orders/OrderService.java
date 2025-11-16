@@ -9,6 +9,8 @@ import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
 import ar.uba.fi.ingsoft1.product_example.Ingredients.IngredientRepository;
 import ar.uba.fi.ingsoft1.product_example.user.User;
+import ar.uba.fi.ingsoft1.product_example.Promotions.PromotionService;
+import ar.uba.fi.ingsoft1.product_example.Promotions.Promotion;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final ComboRepository comboRepository;
     private final IngredientRepository ingredientRepository;
+    private final PromotionService promotionService;
 
     private static final Long STATUS_CONFIRMED = 1L;
     private static final Long STATUS_IN_PREPARATION = 2L;
@@ -118,6 +121,12 @@ public class OrderService {
         }
 
         order.calculateTotal();
+        List<Promotion> promotions = promotionService.getPromotionsActiveNow();
+        for (Promotion promo : promotions) {
+            promo.apply(order);
+        }
+        order.calculateTotal();
+
         order = orderRepository.save(order);
         return Optional.of(order.toDTO());
     }

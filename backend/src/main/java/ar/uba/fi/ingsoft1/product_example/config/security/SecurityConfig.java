@@ -45,7 +45,8 @@ public class SecurityConfig {
             "/tags/**",
             "/ingredients/**",
             "/users/count",
-            "/users/change-role"
+            "/users/change-role",
+            "/promotions/**"
     };
 
     public static final String[] STAFF_ORDER_ENDPOINTS = {
@@ -76,8 +77,8 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(PUBLIC_POST_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/menus").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/promotions/active").permitAll()
 
-                       
                         .requestMatchers(HttpMethod.POST, "/orders").authenticated()
                         .requestMatchers(HttpMethod.POST, "/orders/*/confirm").authenticated()
 

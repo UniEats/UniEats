@@ -1,5 +1,7 @@
 package ar.uba.fi.ingsoft1.product_example.MenuSections;
 
+import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
+import ar.uba.fi.ingsoft1.product_example.Combos.ComboRepository;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,9 @@ class MenuSectionServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private ComboRepository comboRepository;
 
     @InjectMocks
     private MenuSectionService menuSectionService;
@@ -157,5 +162,68 @@ class MenuSectionServiceTest {
         Optional<MenuSectionDTO> result = menuSectionService.addProductsToMenuSection(999L, List.of(1L, 2L));
 
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    void testAddCombosToMenuSection_Success() {
+        MenuSection section = new MenuSection("Combos", "Sección de combos");
+        section.setId(1L);
+        section.setCombos(new ArrayList<>()); // vacío al inicio
+
+        Combo c1 = new Combo();
+        c1.setId(10L);
+
+        Combo c2 = new Combo();
+        c2.setId(20L);
+
+        when(menuSectionRepository.findById(1L)).thenReturn(Optional.of(section));
+        when(comboRepository.findAllById(List.of(10L, 20L))).thenReturn(List.of(c1, c2));
+        when(menuSectionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Optional<MenuSectionDTO> result =
+                menuSectionService.addCombosToMenuSection(1L, List.of(10L, 20L));
+
+        assertTrue(result.isPresent());
+        assertEquals(2, result.get().combos().size());
+    }
+
+    @Test
+    void testAddCombosToMenuSection_MenuSectionNotFound() {
+        when(menuSectionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        Optional<MenuSectionDTO> result =
+                menuSectionService.addCombosToMenuSection(999L, List.of(1L, 2L));
+
+        assertFalse(result.isPresent());
+
+        verify(comboRepository, never()).findAllById(any());
+        verify(menuSectionRepository, never()).save(any());
+    }
+
+    @Test
+    void testAddCombosToMenuSection_NoDuplicates() {
+        MenuSection section = new MenuSection("Combos", "Sección de combos");
+        section.setId(1L);
+
+        Combo existing = new Combo();
+        existing.setId(10L);
+
+        List<Combo> current = new ArrayList<>();
+        current.add(existing);
+        section.setCombos(current);
+
+        Combo newCombo = new Combo();
+        newCombo.setId(20L);
+
+        when(menuSectionRepository.findById(1L)).thenReturn(Optional.of(section));
+        when(comboRepository.findAllById(List.of(10L, 20L)))
+                .thenReturn(List.of(existing, newCombo));
+        when(menuSectionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Optional<MenuSectionDTO> result =
+                menuSectionService.addCombosToMenuSection(1L, List.of(10L, 20L));
+
+        assertTrue(result.isPresent());
+        assertEquals(2, result.get().combos().size());
     }
 }

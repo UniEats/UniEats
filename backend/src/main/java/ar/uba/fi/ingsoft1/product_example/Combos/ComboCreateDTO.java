@@ -29,40 +29,5 @@ public record ComboCreateDTO(
         @NonNull List<ProductQuantity> productIds,
         @NonNull List<Long> tagIds,
         @NonNull @Size(min = 1) List<Long> menuSectionIds
-) {
-    public Combo toComboWithProductsAndTags(
-            Function<Long, Product> productFetcher,
-            Function<Long, Tag> tagFetcher,
-            Function<Long, MenuSection> menuSectionFetcher
-    ) {
-        Combo combo = new Combo(name, description, price);
-
-        List<ComboProduct> comboProducts = productIds.stream()
-                .map(entry -> {
-                    Long productId = entry.productId();
-                    Integer quantity = entry.quantity();
-
-                    Product product = productFetcher.apply(productId);
-                    ComboProduct cp = new ComboProduct();
-                    cp.setCombo(combo);
-                    cp.setProduct(product);
-                    cp.setQuantity(quantity);
-                    return cp;
-                })
-                .collect(Collectors.toList());
-
-        List<Tag> tags = tagIds.stream()
-                .map(tagFetcher)
-                .collect(Collectors.toList());
-        combo.setTags(tags);
-
-        List<MenuSection> menuSections = menuSectionIds.stream()
-                .map(menuSectionFetcher)
-                .collect(Collectors.toList());
-
-        combo.setComboProducts(comboProducts);
-
-        return combo;
-    }
-}
+) {}
 

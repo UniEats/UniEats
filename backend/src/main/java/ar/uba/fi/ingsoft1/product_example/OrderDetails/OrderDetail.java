@@ -59,10 +59,6 @@ public class OrderDetail {
     @DecimalMin("0.00")
     private BigDecimal totalPrice;
 
-    public void setTotalPrice(BigDecimal price) {
-        this.totalPrice = price.setScale(2, RoundingMode.HALF_UP);
-    }
-
     public void calculateTotal() {
         this.totalPrice = price.multiply(BigDecimal.valueOf(quantity))
                 .subtract(discount)

@@ -234,4 +234,59 @@ class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("User not found"));
     }
+
+    @Test
+    void changeUserRole_validRole_returns200() throws Exception {
+        User user = new User();
+        user.setEmail("john.doe@example.com");
+        user.setRole("ROLE_USER");
+
+        ChangeRoleRequest request = new ChangeRoleRequest("john.doe@example.com", "ROLE_ADMIN");
+
+        Mockito.when(userRepository.findByUsername(request.email()))
+                .thenReturn(Optional.of(user));
+
+        Mockito.when(userRepository.save(any(User.class)))
+                .thenReturn(user);
+
+        mockMvc.perform(put("/users/change-role")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message")
+                        .value("Role updated successfully for user: " + user.getEmail()));
+    }
+
+    @Test
+    void changeUserRole_userNotFound_returns404() throws Exception {
+        ChangeRoleRequest request = new ChangeRoleRequest("missing@example.com", "ROLE_ADMIN");
+
+        Mockito.when(userRepository.findByUsername(request.email()))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/users/change-role")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("User not found"));
+    }
+
+    @Test
+    void changeUserRole_invalidRole_returns400() throws Exception {
+        User user = new User();
+        user.setEmail("john.doe@example.com");
+        user.setRole("ROLE_USER");
+
+        ChangeRoleRequest request = new ChangeRoleRequest("john.doe@example.com", "INVALID_ROLE");
+
+        Mockito.when(userRepository.findByUsername(request.email()))
+                .thenReturn(Optional.of(user));
+
+        mockMvc.perform(put("/users/change-role")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Invalid role: must be ROLE_ADMIN, ROLE_STAFF, or ROLE_USER"));
+    }
 }
