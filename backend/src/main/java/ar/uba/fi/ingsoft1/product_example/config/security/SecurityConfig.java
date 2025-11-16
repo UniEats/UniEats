@@ -34,6 +34,7 @@ public class SecurityConfig {
             "/users/verify",
             "/users/password-reset/request",
             "/users/password-reset/reset",
+            "/payments/**"
     };
 
     public static final String[] ADMIN_ENDPOINTS = {

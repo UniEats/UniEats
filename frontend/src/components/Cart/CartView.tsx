@@ -33,7 +33,7 @@ export const CartView: React.FC = () => {
     return outOfStock;
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (method: "credit" | "cash" | "qr") => {
     try {
       const outOfStock = checkStock();
       if (outOfStock.length > 0) {
@@ -56,6 +56,7 @@ export const CartView: React.FC = () => {
 
       const order = await OrderService.createOrder({ details: orderDetails });
       await OrderService.confirmOrder(order.id);
+      await OrderService.payOrder(order.id, method);
 
       clearCart();
       alert("Order Confirmed! The kitchen staff will start preparing it soon.");
@@ -89,27 +90,17 @@ export const CartView: React.FC = () => {
 
               return (
                 <div key={`${item.type}-${item.id}`} className={styles.cartItem}>
-                  <div className={styles.itemInfo}>
+                  <div className={styles.itemRow}>
                     <span className={styles.itemName}>{name}</span>
                     <span className={styles.itemPrice}>${price * item.quantity}</span>
                   </div>
-                  <div className={styles.itemControls}>
-                    <button
-                      onClick={() => handleQuantityChange(item.id, item.type, item.quantity - 1)}
-                      className={styles.quantityButton}
-                    >
-                      -
-                    </button>
+                              
+                  <div className={styles.controlsRow}>
+                    <button className={styles.quantityButton} onClick={() => handleQuantityChange(item.id, item.type, item.quantity - 1)}>-</button>
                     <span className={styles.quantity}>{item.quantity}</span>
-                    <button
-                      onClick={() => handleQuantityChange(item.id, item.type, item.quantity + 1)}
-                      className={styles.quantityButton}
-                    >
-                      +
-                    </button>
-                    <button onClick={() => removeFromCart(item.id, item.type)} className={styles.removeButton}>
-                      Eliminar
-                    </button>
+                    <button className={styles.quantityButton} onClick={() => handleQuantityChange(item.id, item.type, item.quantity + 1)}>+</button>
+                              
+                    <button className={styles.removeButton} onClick={() => removeFromCart(item.id, item.type)}>Delete</button>
                   </div>
                 </div>
               );
@@ -120,9 +111,19 @@ export const CartView: React.FC = () => {
               <span>Total:</span>
               <span>${totalPrice}</span>
             </div>
-            <button onClick={handleCheckout} className={styles.checkoutButton}>
-              Confirm and Pay
-            </button>
+            <div className={styles.paymentButtons}>
+              <button onClick={() => handleCheckout("credit")} className={styles.checkoutButton}>
+                Credit/Debit Card
+              </button>
+
+              <button onClick={() => handleCheckout("cash")} className={styles.checkoutButton}>
+                Cash
+              </button>
+
+              <button onClick={() => handleCheckout("qr")} className={styles.checkoutButton}>
+                QR Code
+              </button>
+            </div>
           </div>
         </div>
     </CommonLayout>
