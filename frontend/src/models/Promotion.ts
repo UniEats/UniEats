@@ -15,8 +15,8 @@ const BasePromotionSchema = z.object({
   name: z.string(),
   description: z.string(),
   active: z.boolean(),
-  productIds: z.array(z.number()),
-  comboIds: z.array(z.number()),
+  product: z.array(z.object({ id: z.number() })).default([]),
+  combo: z.array(z.object({ id: z.number() })).default([]),
   validDays: z.array(DayOfWeekSchema),
 });
 
@@ -46,6 +46,10 @@ export const PromotionSchema = z.discriminatedUnion("type", [
 export const PromotionListSchema = z.array(PromotionSchema)
 
 export type Promotion = z.infer<typeof PromotionSchema>;
+export type NormalizedPromotion = Promotion & {
+  productIds: number[];
+  comboIds: number[];
+};
 
 const BaseFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -108,3 +112,11 @@ export const PromotionUpdateSchema = z.discriminatedUnion("type", [
 ]);
 
 export type PromotionUpdateRequest = z.infer<typeof PromotionUpdateSchema>;
+
+export function normalizePromotion(p: Promotion): NormalizedPromotion {
+  return {
+    ...p,
+    productIds: p.product?.map(pr => pr.id) ?? [],
+    comboIds: p.combo?.map(co => co.id) ?? [],
+  };
+}

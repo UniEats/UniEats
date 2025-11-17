@@ -6,6 +6,8 @@ import {
   PromotionListSchema,
   PromotionSchema,
   PromotionUpdateRequest,
+  normalizePromotion,
+  NormalizedPromotion,
 } from "@/models/Promotion";
 import { useAccessTokenGetter, useHandleResponse } from "./TokenContext";
 
@@ -83,6 +85,29 @@ export function usePromotionList() {
       });
 
       return handleResponse(response, (json) => PromotionListSchema.parse(json));
+    },
+  });
+}
+
+export function useActivePromotionList() {
+  const getAccessToken = useAccessTokenGetter();
+  const handleResponse = useHandleResponse();
+
+  return useQuery<NormalizedPromotion[]>({
+    queryKey: ["promotions"],
+    queryFn: async () => {
+      const response = await fetch(`${BASE_API_URL}/promotions/active`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${await getAccessToken()}`,
+        },
+      });
+
+      return handleResponse(response, (json) => {
+        const parsed = PromotionListSchema.parse(json);
+        return parsed.map(normalizePromotion);
+      });
     },
   });
 }

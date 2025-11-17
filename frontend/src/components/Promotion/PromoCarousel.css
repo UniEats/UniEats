@@ -1,0 +1,142 @@
+.promo-carousel-container {
+  width: 100%;
+  margin: 0 auto 32px auto;
+  padding: 0 16px;
+}
+
+.promo-carousel-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #bf0c2b;
+  text-align: center;
+}
+
+.promo-carousel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.promo-slider-wrapper {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.promo-slider {
+  display: flex;
+  gap: 20px;
+  will-change: transform;
+  transition: transform 0.45s ease;
+}
+
+.promo-card {
+  flex: 0 0 70%;
+  max-width: 500px;
+  padding: 20px;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #eee;
+  transform-origin: center center;
+}
+
+.promo-card.active {
+  transform: scale(1) translateY(-8px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+  opacity: 1;
+}
+
+.promo-card.inactive {
+  transform: scale(0.82);
+  opacity: 0.6;
+  filter: blur(1px);
+}
+
+.promo-card h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.2rem;
+  color: #bf0c2b;
+}
+
+.promo-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.promo-type {
+  margin: 10px 0;
+  font-weight: 700;
+  color: #da0f33;
+}
+
+.promo-subtitle {
+  margin: 6px 0 2px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.promo-list {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.promo-list.none {
+  opacity: 0.5;
+}
+
+.promo-days {
+  margin-top: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.promo-arrow {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  z-index: 10;
+  border: none;
+  background: rgba(0,0,0,0.15);
+  color: white;
+  font-size: 2rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.promo-arrow.left {
+  left: 4px;
+}
+
+.promo-arrow.right {
+  right: 4px;
+}
+
+.promo-arrow:hover {
+  background: rgba(0,0,0,0.3);
+}
+
+.promo-dots {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: #ffb3c0;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+.dot.active {
+  background: #da0f33;
+}
