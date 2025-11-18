@@ -57,19 +57,17 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
   const renderPromoDetails = (promo: NormalizedPromotion) => {
     let details = "";
     if (promo.type === "PERCENTAGE") {
-      details = `Descuento: ${promo.percentage}%`;
+      details = `Discount: ${promo.percentage}%`;
     } else if (promo.type === "BUYX_PAYY") {
-      details = `Llevás ${promo.buyQuantity} y pagás ${promo.payQuantity}`;
+      details = `You buy ${promo.buyQuantity} and pay for ${promo.payQuantity}`;
     } else if (promo.type === "THRESHOLD") {
-      details = `Gasto mínimo: $${promo.threshold}, desc: $${promo.discountAmount}`;
+      details = `Minimum spend: $${promo.threshold}, discount: $${promo.discountAmount}`;
     }
     return details;
   };
 
   return (
     <div className="promo-carousel-container">
-      <h2 className="promo-carousel-title">Promociones</h2>
-
       <div className="promo-carousel">
         <button className="promo-arrow left" onClick={prev}>
           ‹
@@ -89,22 +87,22 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
 
                 <p className="promo-type">{renderPromoDetails(promo)}</p>
 
-                <p className="promo-subtitle">Productos aplicados:</p>
-                {promo.productIds.length > 0 ? (
-                  <p className="promo-list">{promo.productIds.join(", ")}</p>
-                ) : (
-                  <p className="promo-list none">Ninguno</p>
+                {Object.keys(promo.products).length > 0 && (
+                  <>
+                    <p className="promo-subtitle">Applied products:</p>
+                    <p className="promo-list">{Object.values(promo.products).join(", ")}</p>
+                  </>
                 )}
 
-                <p className="promo-subtitle">Combos aplicados:</p>
-                {promo.comboIds.length > 0 ? (
-                  <p className="promo-list">{promo.comboIds.join(", ")}</p>
-                ) : (
-                  <p className="promo-list none">Ninguno</p>
+                {Object.keys(promo.combos).length > 0 && (
+                  <>
+                    <p className="promo-subtitle">Applied combos:</p>
+                    <p className="promo-list">{Object.values(promo.combos).join(", ")}</p>
+                  </>
                 )}
 
                 <p className="promo-days">
-                  Válida: {promo.validDays.join(", ")}
+                  Valid: {promo.validDays.join(", ")}
                 </p>
               </article>
             ))}

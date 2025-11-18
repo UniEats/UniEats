@@ -1,7 +1,7 @@
 .promo-carousel-container {
   width: 100%;
   margin: 0 auto 32px auto;
-  padding: 0 16px;
+  padding: 20px 0;
 }
 
 .promo-carousel-title {
@@ -16,6 +16,8 @@
   position: relative;
   overflow: hidden;
   width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .promo-slider-wrapper {
@@ -32,13 +34,19 @@
 }
 
 .promo-card {
-  flex: 0 0 70%;
+  flex: 0 0 clamp(240px, 60vw, 380px);
   max-width: 500px;
-  padding: 20px;
-  background: white;
+  padding: clamp(16px, 3vw, 22px);
+  background: #ffffff;
   border-radius: 20px;
-  border: 1px solid #eee;
+  border: 1px solid #e9e9e9;
   transform-origin: center center;
+  justify-content: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.5vw, 14px);
+  text-align: center;
+  align-items: center;  
 }
 
 .promo-card.active {
@@ -55,70 +63,89 @@
 }
 
 .promo-card h3 {
-  margin: 0 0 6px 0;
-  font-size: 1.2rem;
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: #bf0c2b;
+  letter-spacing: -0.5px;
 }
 
 .promo-description {
   margin: 0;
-  font-size: 0.9rem;
-  color: #333;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.35;
 }
 
 .promo-type {
-  margin: 10px 0;
-  font-weight: 700;
-  color: #da0f33;
+  margin-top: 4px;
+  padding: 10px 14px;
+  background: #fff3f5;
+  border-left: 4px solid #bf0c2b;
+  border-radius: 8px;
+  
+  font-weight: 600;
+  color: #bf0c2b;
+  font-size: 0.95rem;
 }
 
 .promo-subtitle {
-  margin: 6px 0 2px;
+  margin-top: 6px;
+  margin-bottom: 2px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  color: #222;
 }
 
 .promo-list {
   margin: 0;
-  font-size: 0.85rem;
-  color: #444;
+  padding-left: 0;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.35;
 }
 
 .promo-list.none {
-  opacity: 0.5;
+  color: #777;
+  opacity: 0.7;
+  font-style: italic;
 }
 
 .promo-days {
-  margin-top: 12px;
+  margin-top: auto;
+  font-size: 0.88rem;
   font-weight: 600;
-  color: #444;
+  color: #333;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
 }
 
 .promo-arrow {
   position: absolute;
-  top: 40%;
+  top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
+  z-index: 20;
+  
   border: none;
-  background: rgba(0,0,0,0.15);
-  color: white;
-  font-size: 2rem;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  background: transparent;
+  color: #bf0c2b;                 
+  font-size: 2.5rem;
   cursor: pointer;
+  padding: 0 6px;
+  line-height: 1;
 }
 
 .promo-arrow.left {
-  left: 4px;
+  left: 16px;
 }
 
 .promo-arrow.right {
-  right: 4px;
+  right: 16px;
 }
 
 .promo-arrow:hover {
-  background: rgba(0,0,0,0.3);
+  color: #a50b25;
+  transform: translateY(-50%) scale(1.15);
 }
 
 .promo-dots {
