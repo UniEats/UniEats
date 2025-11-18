@@ -277,15 +277,19 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
 
           <formData.AppField name="name" children={(field) => <field.TextField label="Name" />}/>
           <formData.AppField name="description" children={(field) => <field.TextField label="Description" />}/>
-          <formData.AppField
-            name="active"
-            children={(field) => (
-             <field.CheckboxField
-               label="Active"
-               options={[{ id: 1, label: "Is Active?" }]}
-             />
-             )}
-          />
+          <formData.AppField name="active">
+            {(field) => (
+              <label className={styles.optionRow}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(field.state.value)}
+                  onChange={(e) => field.handleChange(e.target.checked)}
+                  onBlur={field.handleBlur}
+                />
+                <span>Active?</span>
+              </label>
+            )}
+          </formData.AppField>
 
           <formData.AppField
             name="type"
@@ -380,15 +384,19 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
                       )}
                     />
 
-                    <formData.AppField
-                      name="oneFreePerTrigger"
-                      children={(field) => (
-                         <field.CheckboxField
-                           label="One free per trigger"
-                           options={[{ id: 1, label: "Enable" }]}
-                         />
+                    <formData.AppField name="oneFreePerTrigger">
+                      {(field) => (
+                        <label className={styles.optionRow}>
+                          <input
+                            type="checkbox"
+                            checked={Boolean(field.state.value)}
+                            onChange={(e) => field.handleChange(e.target.checked)}
+                            onBlur={field.handleBlur}
+                          />
+                          <span>One free per trigger</span>
+                        </label>
                       )}
-                    />
+                    </formData.AppField>
                   </>
                 )}
               </>
