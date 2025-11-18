@@ -19,6 +19,13 @@ import { useProductList } from "@/services/ProductServices";
 
 import styles from "./AdminForms.module.css";
 
+type FieldError = { message: string };
+
+const normalizeErrors = (errors: Array<{ message?: string } | undefined>): FieldError[] =>
+  errors
+    .map((error) => (error && error.message ? { message: error.message } : null))
+    .filter((error): error is FieldError => error !== null);
+
 type PromotionUpdateFormState = {
   promotionId?: string;
   name?: string;
@@ -87,7 +94,7 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
       const id = Number(value.promotionId);
       if (!id) return;
 
-      const { promotionId, ...payload } = value;
+      const { promotionId: _, ...payload } = value;
       const updated = await updatePromotion.mutateAsync({
         id,
         payload: payload as PromotionUpdateRequest,
@@ -149,6 +156,13 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
     }
   }, [promotionIdToUpdate, promotions, formData]);
 
+  const submissionError = updatePromotion.error
+    ? updatePromotion.error instanceof Error
+      ? updatePromotion.error
+      : new Error(String(updatePromotion.error))
+    : null;
+
+
   if (promotionsQuery.isLoading || combosQuery.isLoading || productsQuery.isLoading) {
     return (
       <section className={styles.formSection} aria-live="polite">
@@ -181,7 +195,7 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
       </h2>
 
       <formData.AppForm>
-        <formData.FormContainer extraError={updatePromotion.error as any}>
+        <formData.FormContainer extraError={submissionError}>
           <formData.Field
             name="promotionId"
             children={(field) => (
@@ -254,7 +268,9 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
                   ))}
                 </select>
 
-                <ErrorContainer errors={field.state.meta.errors as any} />
+                <ErrorContainer
+                  errors={normalizeErrors(field.state.meta.errors as Array<{ message?: string } | undefined>)}
+                />
               </div>
             )}
           />
