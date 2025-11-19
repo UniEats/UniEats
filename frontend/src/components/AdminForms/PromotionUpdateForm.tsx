@@ -85,13 +85,21 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate }: PromotionU
         formData.setFieldValue("validDays", matchedPromotion.validDays ?? []);
 
         if (matchedPromotion.type === "BUY_GIVE_FREE") {
-          formData.setFieldValue("productIds", matchedPromotion.product.map((p) => p.id));
-          formData.setFieldValue("freeProductIds", matchedPromotion.freeProducts.map((p) => p.id));
+          formData.setFieldValue("productIds",
+            (matchedPromotion?.product || []).map((p) => (String(p.id))),
+          );
+          formData.setFieldValue("freeProductIds", 
+            (matchedPromotion?.freeProducts || []).map((p) => (String(p.id))),
+          );
         } else {
-          formData.setFieldValue("productIds", matchedPromotion.product.map((p) => p.id));
+          formData.setFieldValue("productIds",
+            (matchedPromotion?.product || []).map((p) => (String(p.id))),
+          );
         }
 
-        formData.setFieldValue("comboIds", matchedPromotion.combo.map((c) => c.id));
+        formData.setFieldValue("comboIds",
+          (matchedPromotion?.combo || []).map((c) => (String(c.id))),
+        );
 
         if (matchedPromotion.type === "BUYX_PAYY") {
           formData.setFieldValue("buyQuantity", matchedPromotion.buyQuantity);
@@ -134,12 +142,20 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate }: PromotionU
                     formData.setFieldValue("description", matchedPromotion?.description ?? "");
                     formData.setFieldValue("active", matchedPromotion?.active ?? false);
                     formData.setFieldValue("validDays", matchedPromotion?.validDays ?? []);
-                    formData.setFieldValue("productIds", matchedPromotion?.product.map((p) => p.id) ?? []);
-                    formData.setFieldValue("comboIds", matchedPromotion?.combo.map((c) => c.id) ?? []);
+                    formData.setFieldValue("productIds",
+                      (matchedPromotion?.product || []).map((p) => (String(p.id))),
+                    );
+                    formData.setFieldValue("comboIds", 
+                      (matchedPromotion?.combo || []).map((c) => (String(c.id))),
+                    );
 
                     if (matchedPromotion?.type === "BUY_GIVE_FREE") {
-                      formData.setFieldValue("freeProductIds", matchedPromotion.freeProducts.map((p) => p.id));
-                      formData.setFieldValue("freeComboIds", matchedPromotion.freeCombos.map((c) => c.id));
+                      formData.setFieldValue("freeProductIds", 
+                        (matchedPromotion?.product || []).map((p) => (String(p.id))),
+                      );
+                      formData.setFieldValue("freeComboIds", 
+                        (matchedPromotion?.product || []).map((p) => (String(p.id))),
+                      );
                       formData.setFieldValue("oneFreePerTrigger", matchedPromotion.oneFreePerTrigger);
                     } else {
                       formData.setFieldValue("freeProductIds", []);

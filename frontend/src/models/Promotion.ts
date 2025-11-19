@@ -213,56 +213,49 @@ export function normalizePromotion(p: Promotion): NormalizedPromotion {
 // Días válidos de la semana
 const validDaysSchema = z.array(DayOfWeekSchema);
 
-// Esquema para la promoción
-export const PromotionUpdateFormSchema = z.object({
-  promotionId: z.string().min(1, { message: "Promotion ID is required" }),
+export const PromotionUpdateFormSchema = z
+  .object({
+    promotionId: z.string().min(1, { message: "Promotion ID is required" }),
 
-  // Campos comunes
-  name: z.string().min(1, { message: "Name is required" }),
-  description: z.string().min(1, { message: "Description is required" }),
-  active: z.boolean(),
-  productIds: z.array(z.number()),
-  comboIds: z.array(z.number()),
-  validDays: validDaysSchema.optional(),
+    name: z.string().min(1, { message: "Name is required" }),
+    description: z.string().min(1, { message: "Description is required" }),
+    active: z.boolean(),
+    productIds: z.array(z.string()),
+    comboIds: z.array(z.string()),
+    validDays: validDaysSchema.optional(),
 
-  // Validaciones para promociones específicas
-  type: z.enum(["threshold", "percentage", "buyxpayy", "buygivefree"]), // Tipo de promoción
+    type: z.enum(["threshold", "percentage", "buyxpayy", "buygivefree"]), // Tipo de promoción
 
-  // BuyGiveFreePromotion
-  freeProductIds: z.array(z.number()).optional(),
-  freeComboIds: z.array(z.number()).optional(),
-  oneFreePerTrigger: z.boolean().optional(),
+    freeProductIds: z.array(z.string()).optional(),
+    freeComboIds: z.array(z.string()).optional(),
+    oneFreePerTrigger: z.boolean().optional(),
 
-  // BuyXPayYPromotion
-  buyQuantity: z.number().positive().optional(),
-  payQuantity: z.number().positive().optional(),
+    buyQuantity: z.number().positive().optional(),
+    payQuantity: z.number().positive().optional(),
 
-  // PercentagePromotion
-  percentage: z.number().min(0).max(100).optional(),
+    percentage: z.number().min(0).max(100).optional(),
 
-  // ThresholdPromotion
-  threshold: z.number().min(0).optional(),
-  discountAmount: z.number().min(0).optional(),
-}).refine(data => {
-  // Validación cruzada entre campos dependiendo del tipo de promoción
+    threshold: z.number().min(0).optional(),
+    discountAmount: z.number().min(0).optional(),
+  }).refine(data => {
   if (data.type === "buygivefree") {
     if (!data.freeProductIds || data.freeProductIds.length === 0) {
-      return false; // Si no hay productos gratuitos definidos, no es válido
+      return false;
     }
   }
   if (data.type === "buyxpayy") {
     if (data.buyQuantity === undefined || data.payQuantity === undefined) {
-      return false; // Si no hay cantidades de compra y pago definidas, no es válido
+      return false;
     }
   }
   if (data.type === "percentage" && data.percentage === undefined) {
-    return false; // Si no se define el porcentaje, no es válido
+    return false; 
   }
   if (data.type === "threshold" && (data.threshold === undefined || data.discountAmount === undefined)) {
-    return false; // Si no se definen el umbral o descuento, no es válido
+    return false; 
   }
   if (data.productIds.length === 0 && data.comboIds.length === 0) {
-    return false; // Debe aplicarse al menos a un producto o combo
+    return false; 
   }
 
   return true;
