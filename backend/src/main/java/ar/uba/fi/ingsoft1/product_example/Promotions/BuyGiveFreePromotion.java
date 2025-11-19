@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.EqualsAndHashCode;
 
 import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.time.DayOfWeek;
 
@@ -24,11 +25,11 @@ public class BuyGiveFreePromotion extends Promotion {
 
     @ManyToMany
     @JoinTable(name = "buy_give_free_products")
-    private Set<Product> freeProducts;
+    private Set<Product> freeProducts = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "buy_give_free_combos")
-    private Set<Combo> freeCombos;
+    private Set<Combo> freeCombos = new HashSet<>();
 
     private boolean oneFreePerTrigger;
 

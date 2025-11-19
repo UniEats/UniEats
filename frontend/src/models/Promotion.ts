@@ -194,47 +194,6 @@ export const PromotionUpdateSchema = z.discriminatedUnion("type", [
 
 export type PromotionUpdateRequest = z.infer<typeof PromotionUpdateSchema>;
 
-export const PromotionUpdateFormSchema = z.object({
-  promotionId: z.string().min(1, "Select a promotion"),
-  name: z.string().optional(),
-  description: z.string().optional(),
-  active: z.boolean().optional(),
-  type: z.enum(["buyxpayy", "percentage", "threshold", "buygivefree"]),
-  productIds: z.array(z.number()).optional(),
-  comboIds: z.array(z.number()).optional(),
-  validDays: z.array(DayOfWeekSchema).optional(),
-  buyQuantity: z.number().optional(),
-  payQuantity: z.number().optional(),
-  percentage: z.number().optional(),
-  threshold: z.number().optional(),
-  discountAmount: z.number().optional(),
-  freeProductIds: z.array(z.number()).optional(),
-  freeComboIds: z.array(z.number()).optional(),
-  oneFreePerTrigger: z.boolean().optional(),
-})
-.superRefine((data, ctx) => {
-  if (data.type === "buyxpayy") {
-    if (data.buyQuantity === undefined || data.buyQuantity < 1)
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["buyQuantity"], message: "Buy quantity required" });
-    if (data.payQuantity === undefined || data.payQuantity < 0)
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["payQuantity"], message: "Pay quantity required" });
-  }
-  if (data.type === "percentage") {
-    if (!data.percentage || data.percentage < 1 || data.percentage > 100)
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["percentage"], message: "Percentage invalid" });
-  }
-  if (data.type === "threshold") {
-    if (!data.threshold || data.threshold < 1)
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["threshold"], message: "Threshold invalid" });
-    if (!data.discountAmount || data.discountAmount < 1)
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["discountAmount"], message: "Discount invalid" });
-  }
-  if (data.type === "buygivefree") {
-    if (!data.freeProductIds?.length && !data.freeComboIds?.length)
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["freeProductIds"], message: "Specify at least one free item" });
-  }
-});
-
 export type PromotionUpdateFormValues = z.infer<typeof PromotionUpdateFormSchema>;
 
 export function normalizePromotion(p: Promotion): NormalizedPromotion {
@@ -250,3 +209,63 @@ export function normalizePromotion(p: Promotion): NormalizedPromotion {
     }, {} as Record<number, string>) ?? {},
   };
 }
+
+// Días válidos de la semana
+const validDaysSchema = z.array(DayOfWeekSchema);
+
+// Esquema para la promoción
+export const PromotionUpdateFormSchema = z.object({
+  promotionId: z.string().min(1, { message: "Promotion ID is required" }),
+
+  // Campos comunes
+  name: z.string().min(1, { message: "Name is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  active: z.boolean(),
+  productIds: z.array(z.number()),
+  comboIds: z.array(z.number()),
+  validDays: validDaysSchema.optional(),
+
+  // Validaciones para promociones específicas
+  type: z.enum(["threshold", "percentage", "buyxpayy", "buygivefree"]), // Tipo de promoción
+
+  // BuyGiveFreePromotion
+  freeProductIds: z.array(z.number()).optional(),
+  freeComboIds: z.array(z.number()).optional(),
+  oneFreePerTrigger: z.boolean().optional(),
+
+  // BuyXPayYPromotion
+  buyQuantity: z.number().positive().optional(),
+  payQuantity: z.number().positive().optional(),
+
+  // PercentagePromotion
+  percentage: z.number().min(0).max(100).optional(),
+
+  // ThresholdPromotion
+  threshold: z.number().min(0).optional(),
+  discountAmount: z.number().min(0).optional(),
+}).refine(data => {
+  // Validación cruzada entre campos dependiendo del tipo de promoción
+  if (data.type === "buygivefree") {
+    if (!data.freeProductIds || data.freeProductIds.length === 0) {
+      return false; // Si no hay productos gratuitos definidos, no es válido
+    }
+  }
+  if (data.type === "buyxpayy") {
+    if (data.buyQuantity === undefined || data.payQuantity === undefined) {
+      return false; // Si no hay cantidades de compra y pago definidas, no es válido
+    }
+  }
+  if (data.type === "percentage" && data.percentage === undefined) {
+    return false; // Si no se define el porcentaje, no es válido
+  }
+  if (data.type === "threshold" && (data.threshold === undefined || data.discountAmount === undefined)) {
+    return false; // Si no se definen el umbral o descuento, no es válido
+  }
+  if (data.productIds.length === 0 && data.comboIds.length === 0) {
+    return false; // Debe aplicarse al menos a un producto o combo
+  }
+
+  return true;
+}, {
+  message: "Invalid promotion data",
+});

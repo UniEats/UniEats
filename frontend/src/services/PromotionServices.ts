@@ -143,6 +143,17 @@ export function useCreatePromotion() {
   });
 }
 
+const weekDays = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+] as const;
+type WeekDay = typeof weekDays[number];
+
 export function useUpdatePromotion() {
   const getAccessToken = useAccessTokenGetter();
   const handleResponse = useHandleResponse();
@@ -162,9 +173,10 @@ export function useUpdatePromotion() {
         ...(values.name && { name: values.name.trim() }),
         ...(values.description && { description: values.description.trim() }),
         ...(values.active !== undefined && { active: values.active }),
-        ...(values.productIds && { productIds: values.productIds }),
-        ...(values.comboIds && { comboIds: values.comboIds }),
-        ...(values.validDays && { validDays: values.validDays }),
+        ...(values.productIds && { productIds: values.productIds.map((m) => Number(m)) }),
+        ...(values.comboIds && { comboIds: values.comboIds.map((m) => Number(m)) }),
+        ...(values.validDays && { validDays: values.validDays.map(d => Number(d)).filter(d => d >= 1 && d <= 7)
+                                                              .map(d => weekDays[d - 1]) as WeekDay[]} ),
       };
 
       switch (values.type) {
@@ -198,8 +210,8 @@ export function useUpdatePromotion() {
           payload = {
             ...basePayload,
             type: "buygivefree",
-            ...(values.freeProductIds && { freeProductIds: values.freeProductIds }),
-            ...(values.freeComboIds && { freeComboIds: values.freeComboIds }),
+            ...(values.freeProductIds && { freeProductIds: values.freeProductIds.map((m) => Number(m)) }),
+            ...(values.freeComboIds && { freeComboIds: values.freeComboIds.map((m) => Number(m)) }),
             ...(values.oneFreePerTrigger !== undefined && { oneFreePerTrigger: values.oneFreePerTrigger }),
           };
           break;
