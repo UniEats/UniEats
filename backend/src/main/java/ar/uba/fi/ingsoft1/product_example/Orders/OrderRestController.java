@@ -66,11 +66,15 @@ class OrderRestController {
     }
 
     @PostMapping("/{id}/start-preparation")
-    public ResponseEntity<OrderDTO> startPreparation(@PathVariable Long id) {
-        return orderService.startPreparation(id)
+    public ResponseEntity<OrderDTO> startPreparation(
+            @PathVariable Long id,
+            @RequestBody EstimatedDeliveryTimeDTO estimatedDTO
+    ) {
+        return orderService.startPreparation(id, estimatedDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
     @PostMapping("/{id}/mark-ready")
     public ResponseEntity<OrderDTO> markReady(@PathVariable Long id) {
         return orderService.markReady(id)

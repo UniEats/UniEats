@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Orders } from '@/components/Orders/Orders';
+import { DeliveryTimeModal } from '@/components/Orders/DeliveryTimeModal';
 import { BASE_API_URL } from '@/config/app-query-client';
 import { OrderDTO } from '@/models/Order';
 import { useAccessTokenGetter, useHandleResponse } from '@/services/TokenContext';
@@ -17,11 +18,14 @@ export const KitchenOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [preparingOrderId, setPreparingOrderId] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
   const getAccessToken = useAccessTokenGetter();
   const handleResponse = useHandleResponse();
 
   useEffect(() => {
-    console.log('Fetching states...');
     const fetchStates = async () => {
       try {
         const resp = await fetch(`${BASE_API_URL}/orders/states`, {
@@ -38,15 +42,9 @@ export const KitchenOrders = () => {
       }
     };
     fetchStates();
-  }, []);
+  }, [getAccessToken, handleResponse]);
 
-  useEffect(() => {
-    if (!selectedState) return;
-    console.log('Loading orders for state:', selectedState.id)
-    loadOrdersByState(selectedState.id);
-  }, [selectedState]);
-
-  const loadOrdersByState = async (stateId: number) => {
+  const loadOrdersByState = useCallback(async (stateId: number) => {
     setLoading(true);
     try {
       const response = await fetch(`${BASE_API_URL}/orders/state/${stateId}`, {
@@ -61,7 +59,12 @@ export const KitchenOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAccessToken, handleResponse]);
+  
+  useEffect(() => {
+    if (!selectedState) return;
+    loadOrdersByState(selectedState.id);
+  }, [selectedState, loadOrdersByState]);
 
   const handleStateChange = async (orderId: number, action: string) => {
     try {
@@ -79,8 +82,54 @@ export const KitchenOrders = () => {
     }
   };
 
+  const handleOpenPreparationModal = (orderId: number) => {
+    setPreparingOrderId(orderId);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmPreparation = async (isoDateTime: string) => {
+    if (!preparingOrderId) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${BASE_API_URL}/orders/${preparingOrderId}/start-preparation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await getAccessToken()}`
+        },
+        body: JSON.stringify({ estimatedDeliveryTime: isoDateTime })
+      });
+
+      await handleResponse(response, (json) => json);
+
+      setIsModalOpen(false);
+      setPreparingOrderId(null);
+      if (selectedState) {
+        await loadOrdersByState(selectedState.id);
+      }
+    } catch (err) {
+      const errorMessage = `Error updating order status: ${err instanceof Error ? err.message : String(err)}`;
+      setError(errorMessage);
+      console.error(`Error on start-preparation:`, err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
+      {isModalOpen && preparingOrderId && (
+        <DeliveryTimeModal
+          orderId={preparingOrderId}
+          onSubmit={handleConfirmPreparation}
+          onCancel={() => setIsModalOpen(false)}
+          isSubmitting={isSubmitting}
+        />
+      )}
+
       <div className={styles.stateButtons}>
         <ul>
           {orderStates.map((s) => (
@@ -103,7 +152,7 @@ export const KitchenOrders = () => {
         title={`Kitchen Orders: ${selectedState?.name ?? 'All'}`}
         emptyStateMessage={`No ${selectedState?.name ?? ''} orders`}
         showStatusChangers={true}
-        onStartPreparation={(id) => handleStateChange(id, 'start-preparation')}
+        onStartPreparation={handleOpenPreparationModal}
         onMarkReady={(id) => handleStateChange(id, 'mark-ready')}
         onMarkComplete={(id) => handleStateChange(id, 'pickup')}
         onCancelOrder={(id) => handleStateChange(id, 'cancel')}

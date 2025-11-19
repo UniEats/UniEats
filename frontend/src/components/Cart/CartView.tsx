@@ -1,15 +1,46 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
 
 import { OrderService } from "../../services/OrderService";
 import { MenuItem, useProducts } from "../Product/ProductContext";
 import { CartItem, useCart } from "./Cart";
-import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
-
+import { PaymentModal, type PaymentMethod } from "./PaymentModal";
 import styles from "./CartView.module.css";
+
+const PLACEHOLDER_IMAGE = "https://via.placeholder.com/80";
+
+// Helper function to get image URL
+const getImageUrl = (image: Uint8Array | undefined) => {
+  if (!image) return PLACEHOLDER_IMAGE; // Placeholder
+
+  let buffer: ArrayBuffer;
+  if (image instanceof Uint8Array) {
+    buffer = image.slice().buffer as unknown as ArrayBuffer;
+  } else if (typeof image === "object" && image !== null && "byteLength" in image) {
+    buffer = new Uint8Array(image as ArrayBufferLike).slice().buffer as unknown as ArrayBuffer;
+  } else {
+    return PLACEHOLDER_IMAGE; // Fallback
+  }
+
+  const view = new Uint8Array(buffer);
+  let mimeType = "image/jpeg";
+  if (view.length > 4) {
+    if (view[0] === 0x89 && view[1] === 0x50 && view[2] === 0x4e && view[3] === 0x47) {
+      mimeType = "image/png";
+    } else if (view[0] === 0x47 && view[1] === 0x49 && view[2] === 0x46 && view[3] === 0x38) {
+      mimeType = "image/gif";
+    }
+  }
+
+  const blob = new Blob([buffer], { type: mimeType });
+  return URL.createObjectURL(blob);
+};
 
 export const CartView: React.FC = () => {
   const { validItems, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
   const { productsMap, combosMap } = useProducts();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
 
   const handleQuantityChange = (id: number, type: "product" | "combo", newQuantity: number) => {
     if (newQuantity < 1) {
@@ -33,7 +64,7 @@ export const CartView: React.FC = () => {
     return outOfStock;
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (method: PaymentMethod) => {
     try {
       const outOfStock = checkStock();
       if (outOfStock.length > 0) {
@@ -56,8 +87,10 @@ export const CartView: React.FC = () => {
 
       const order = await OrderService.createOrder({ details: orderDetails });
       await OrderService.confirmOrder(order.id);
+      await OrderService.payOrder(order.id, method);
 
       clearCart();
+      setPaymentMethod(null);
       alert("Order Confirmed! The kitchen staff will start preparing it soon.");
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -66,65 +99,120 @@ export const CartView: React.FC = () => {
     }
   };
 
-    if (validItems.length === 0) {
-      return (
-        <CommonLayout>
-            <div className={styles.emptyCart}>
-              <p>Your cart is empty</p>
-            </div>
-        </CommonLayout>
-      );
-    }
+  const cartItems = useMemo(() => {
+    return validItems
+      .map((item: CartItem) => {
+        const data =
+          item.type === "product"
+            ? (productsMap[item.id] as MenuItem | undefined)
+            : (combosMap[item.id] as MenuItem | undefined);
+
+        if (!data) return null;
+
+        const imageUrl = getImageUrl(data.image);
+        const subtotal = data.price * item.quantity;
+
+        return {
+          key: `${item.type}-${item.id}`,
+          data,
+          imageUrl,
+          subtotal,
+          cartItem: item,
+        };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+  }, [validItems, productsMap, combosMap]);
+
+  useEffect(() => {
+    return () => {
+      cartItems.forEach(({ imageUrl }) => {
+        if (imageUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(imageUrl);
+        }
+      });
+    };
+  }, [cartItems]);
+
+  if (cartItems.length === 0) {
+    return (
+      <CommonLayout>
+        <div className={styles.emptyCart}>
+          <p>Your cart is empty</p>
+        </div>
+      </CommonLayout>
+    );
+  }
 
   return (
     <CommonLayout>
-        <div className={styles.cartContainer}>
-          <h2>Your order</h2>
-          <div className={styles.cartItems}>
-            {validItems.map((item: CartItem) => {
-              const product = item.type === "product" ? (productsMap[item.id] as MenuItem | undefined) : undefined;
-              const combo = item.type === "combo" ? (combosMap[item.id] as MenuItem | undefined) : undefined;
-              const name = product ? product.name : combo ? combo.name : "";
-              const price = product ? product.price : combo ? combo.price : 0;
+      <div className={styles.cartContainer}>
+        <h2>Your order</h2>
 
-              return (
-                <div key={`${item.type}-${item.id}`} className={styles.cartItem}>
-                  <div className={styles.itemInfo}>
-                    <span className={styles.itemName}>{name}</span>
-                    <span className={styles.itemPrice}>${price * item.quantity}</span>
-                  </div>
-                  <div className={styles.itemControls}>
-                    <button
-                      onClick={() => handleQuantityChange(item.id, item.type, item.quantity - 1)}
-                      className={styles.quantityButton}
-                    >
-                      -
-                    </button>
-                    <span className={styles.quantity}>{item.quantity}</span>
-                    <button
-                      onClick={() => handleQuantityChange(item.id, item.type, item.quantity + 1)}
-                      className={styles.quantityButton}
-                    >
-                      +
-                    </button>
-                    <button onClick={() => removeFromCart(item.id, item.type)} className={styles.removeButton}>
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className={styles.cartFooter}>
-            <div className={styles.total}>
-              <span>Total:</span>
-              <span>${totalPrice}</span>
+        <div className={styles.cartItems}>
+          {cartItems.map(({ key, data, imageUrl, subtotal, cartItem }) => (
+            <div key={key} className={styles.cartItem}>
+              <img src={imageUrl} alt={data.name} className={styles.cartItemImage} />
+
+              <div className={styles.cartItemInfo}>
+                <span className={styles.itemName}>{data.name}</span>
+                <span className={styles.itemPrice}>${data.price.toFixed(2)} each</span>
+              </div>
+
+              <div className={styles.quantityControls}>
+                <button
+                  className={styles.quantityButton}
+                  onClick={() => handleQuantityChange(cartItem.id, cartItem.type, cartItem.quantity - 1)}
+                >
+                  -
+                </button>
+                <span className={styles.quantity}>{cartItem.quantity}</span>
+                <button
+                  className={styles.quantityButton}
+                  onClick={() => handleQuantityChange(cartItem.id, cartItem.type, cartItem.quantity + 1)}
+                >
+                  +
+                </button>
+              </div>
+
+              <span className={styles.itemSubtotal}>${subtotal.toFixed(2)}</span>
+
+              <button
+                className={styles.removeButton}
+                onClick={() => removeFromCart(cartItem.id, cartItem.type)}
+                aria-label="Remove item"
+              >
+                ✕
+              </button>
             </div>
-            <button onClick={handleCheckout} className={styles.checkoutButton}>
-              Confirm and Pay
+          ))}
+        </div>
+
+        <div className={styles.cartFooter}>
+          <div className={styles.paymentButtons}>
+            <h3>Payment Method</h3>
+            <button onClick={() => setPaymentMethod("credit")} className={styles.checkoutButton}>
+              Credit/Debit Card
+            </button>
+            <button onClick={() => setPaymentMethod("cash")} className={styles.checkoutButton}>
+              Cash
+            </button>
+            <button onClick={() => setPaymentMethod("qr")} className={styles.checkoutButton}>
+              QR Code
             </button>
           </div>
+          <div className={styles.total}>
+            <span>Total:</span>
+            <span>${totalPrice.toFixed(2)}</span>
+          </div>
         </div>
+      </div>
+      {paymentMethod && (
+        <PaymentModal
+          method={paymentMethod}
+          onClose={() => setPaymentMethod(null)}
+          onConfirm={handleCheckout}
+        />
+      )}
     </CommonLayout>
   );
 };

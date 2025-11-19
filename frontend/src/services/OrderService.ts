@@ -11,6 +11,11 @@ interface OrderCreateDTO {
     }[];
 }
 
+interface PaymentResponse {
+    success: boolean;
+    message: string;
+}
+
 export class OrderService {
     private static getBaseUrl() {
         const w = (window as unknown) as { _env_?: Record<string, unknown> } | undefined;
@@ -64,8 +69,11 @@ export class OrderService {
         return [];
     }
 
-    static async startPreparation(orderId: number): Promise<Order> {
-        const response = await axios.post<Order>(`${this.BASE_URL}/${orderId}/start-preparation`, {}, {
+    static async startPreparation(orderId: number, estimatedDeliveryTime: string): Promise<Order> {
+        const payload = {
+            estimatedDeliveryTime: estimatedDeliveryTime
+        };
+        const response = await axios.post<Order>(`${this.BASE_URL}/${orderId}/start-preparation`, payload, {
             headers: this.getAuthHeaders(),
         });
         return response.data;
@@ -89,6 +97,15 @@ export class OrderService {
         const response = await axios.post<Order>(`${this.BASE_URL}/${orderId}/cancel`, {}, {
             headers: this.getAuthHeaders(),
         });
+        return response.data;
+    }
+
+    static async payOrder(orderId: number, method: string): Promise<PaymentResponse> {
+        const response = await axios.post<PaymentResponse>(
+            `${this.getBaseUrl()}/payments/${orderId}?method=${method}`,
+            {},
+            { headers: this.getAuthHeaders() }
+        );
         return response.data;
     }
 }

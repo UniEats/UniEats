@@ -180,17 +180,22 @@ class OrderServiceTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
-        Optional<OrderDTO> result = orderService.startPreparation(1L);
+        EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now().plusHours(1));
+
+        // CHANGE HERE: Pass the new DTO to the method
+        Optional<OrderDTO> result = orderService.startPreparation(1L, estimatedDto);
 
         assertTrue(result.isPresent());
-        assertEquals(2L, order.getState().getId()); 
+        assertEquals(2L, order.getState().getId());
     }
 
     @Test
     void testStartPreparation_NotFound() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(Exception.class, () -> orderService.startPreparation(1L));
+        EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now());
+
+        assertThrows(Exception.class, () -> orderService.startPreparation(1L, estimatedDto));
     }
 
     @Test
@@ -435,7 +440,10 @@ class OrderServiceTest {
         order.setState(new OrderStatus(3L, "ready"));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        assertThrows(IllegalStateException.class, () -> orderService.startPreparation(1L));
+
+        EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now());
+
+        assertThrows(IllegalStateException.class, () -> orderService.startPreparation(1L, estimatedDto));
     }
 
     @Test
@@ -495,7 +503,9 @@ class OrderServiceTest {
         when(orderRepository.save(order)).thenReturn(order);
         when(ingredientRepository.save(any())).thenReturn(ingredient);
 
-        orderService.startPreparation(1L);
+        EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now());
+
+        orderService.startPreparation(1L, estimatedDto);
         orderService.confirmOrder(1L);
 
         assertEquals(6, ingredient.getStock());
