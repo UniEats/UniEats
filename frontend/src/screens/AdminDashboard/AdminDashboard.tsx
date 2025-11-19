@@ -104,13 +104,13 @@ export const AdminDashboard = () => {
   const totalIngredients = ingredientList.length;
   const totalSections = menuSectionList.length;
   const totalCombos = comboList.length;
-  const totalPromotions = promotionList.length;
+  const activePromotions = promotionList.filter(p => p.active).length;
 
   const statCards: StatCard[] = useMemo(
     () => [
       { id: "products", label: "Total Products", icon: "🍽️", value: totalProducts, isLoading: productsPending },
       { id: "combos", label: "Total Combos", icon: "🍔🍟🥤", value: totalCombos, isLoading: combosPending },
-      { id: "promotions", label: "Active Promotions", icon: "🎉", value: totalPromotions, isLoading: promotionsPending },
+      { id: "promotions", label: "Active Promotions", icon: "🎉", value: activePromotions, isLoading: promotionsPending },
       { id: "ingredients", label: "Total Ingredients", icon: "🥦", value: totalIngredients, isLoading: ingredientsPending },
       { id: "sections", label: "Menu Sections", icon: "📁", value: totalSections, isLoading: menuSectionsPending },
       { id: "users", label: "Registered Users", icon: "👥", value: totalUsers, isLoading: usersPending },
@@ -120,7 +120,7 @@ export const AdminDashboard = () => {
       productsPending,
       totalCombos,
       combosPending,
-      totalPromotions,
+      activePromotions,
       promotionsPending,
       totalIngredients,
       ingredientsPending,
@@ -611,6 +611,7 @@ export const AdminDashboard = () => {
               <th scope="col">Name</th>
               <th scope="col">Type</th>
               <th scope="col">Description</th>
+              <th scope="col">Active</th>
               <th scope="col">Actions</th>
             </tr>
           </thead>
@@ -621,6 +622,7 @@ export const AdminDashboard = () => {
                   <td>{promo.name}</td>
                   <td>{formatPromotionType(promo.type)}</td>
                   <td className={styles.descriptionCell}>{promo.description}</td>
+                  <td>{promo.active ? "✅" : "❌"}</td>
                   <td>
                     <button
                       className={styles.secondaryButton}
@@ -644,7 +646,7 @@ export const AdminDashboard = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={4} className={styles.emptyCell}>
+                <td colSpan={5} className={styles.emptyCell}>
                   No promotions created yet. Add one to attract more customers.
                 </td>
               </tr>

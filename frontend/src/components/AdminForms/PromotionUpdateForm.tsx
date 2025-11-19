@@ -2,18 +2,8 @@ import { useEffect, useId, useMemo, useState } from "react";
 
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
-
-import {
-  PromotionUpdateSchema,
-  PromotionUpdateRequest,
-  DayOfWeekSchema,
-} from "@/models/Promotion";
-
-import {
-  usePromotionList,
-  useUpdatePromotion,
-} from "@/services/PromotionServices";
-
+import { DayOfWeekSchema, PromotionUpdateFormSchema, PromotionUpdateFormValues } from "@/models/Promotion";
+import { usePromotionList, useUpdatePromotion } from "@/services/PromotionServices";
 import { useComboList } from "@/services/ComboServices";
 import { useProductList } from "@/services/ProductServices";
 
@@ -26,27 +16,7 @@ const normalizeErrors = (errors: Array<{ message?: string } | undefined>): Field
     .map((error) => (error && error.message ? { message: error.message } : null))
     .filter((error): error is FieldError => error !== null);
 
-type PromotionUpdateFormState = {
-  promotionId?: string;
-  name?: string;
-  description?: string;
-  active?: boolean;
-  productIds?: number[];
-  comboIds?: number[];
-  validDays?: ("MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY")[];
-  type: "buyxpayy" | "percentage" | "threshold" | "buygivefree";
-
-  buyQuantity?: number;
-  payQuantity?: number;
-  percentage?: number;
-  threshold?: number;
-  discountAmount?: number;
-  freeProductIds?: number[];
-  freeComboIds?: number[];
-  oneFreePerTrigger?: boolean;
-};
-
-const PROMOTION_UPDATE_DEFAULT_VALUES: PromotionUpdateFormState = {
+const PROMOTION_UPDATE_DEFAULT_VALUES: PromotionUpdateFormValues = {
   promotionId: "",
   name: "",
   description: "",
@@ -65,6 +35,8 @@ const PROMOTION_UPDATE_DEFAULT_VALUES: PromotionUpdateFormState = {
   oneFreePerTrigger: false,
 };
 
+const daysOfWeek = DayOfWeekSchema.options;
+
 type PromotionUpdateFormProps = {
   onClose: () => void;
   promotionIdToUpdate?: number | null;
@@ -72,11 +44,9 @@ type PromotionUpdateFormProps = {
 
 export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUpdateFormProps) => {
   const updatePromotion = useUpdatePromotion();
-
   const promotionsQuery = usePromotionList();
   const combosQuery = useComboList();
   const productsQuery = useProductList();
-
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const promotionSelectId = useId();
 
@@ -87,19 +57,12 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
   const formData = useAppForm({
     defaultValues: PROMOTION_UPDATE_DEFAULT_VALUES,
     validators: {
-      onChange: PromotionUpdateSchema,
+      onChange: PromotionUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
       setSuccessMessage(null);
-      const id = Number(value.promotionId);
-      if (!id) return;
-
-      const { promotionId: _, ...payload } = value;
-      const updated = await updatePromotion.mutateAsync({
-        id,
-        payload: payload as PromotionUpdateRequest,
-      });
-      setSuccessMessage(`Promotion "${updated.name}" updated successfully.`);
+      const updatedPromotion = await updatePromotion.mutateAsync(value);
+      setSuccessMessage(`Promotion "${updatedPromotion.name}" updated successfully.`);
     },
   });
 
@@ -113,18 +76,12 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
       formData.setFieldValue("description", promo.description ?? "");
       formData.setFieldValue("active", promo.active ?? false);
 
-    const promotionType = promo.type.toLowerCase().replace(/_/g, "") as "buyxpayy" | "percentage" | "threshold" | "buygivefree";
-    formData.setFieldValue("type", promotionType);
+      const promotionType = promo.type.toLowerCase().replace(/_/g, "") as "buyxpayy" | "percentage" | "threshold" | "buygivefree";
+      formData.setFieldValue("type", promotionType);
 
-      formData.setFieldValue(
-        "productIds",
-        promo.product?.map((p) => p.id) ?? []
-      );
+      formData.setFieldValue("productIds", promo.product?.map((p) => p.id) ?? []);
 
-      formData.setFieldValue(
-        "comboIds",
-        promo.combo?.map((c) => c.id) ?? []
-      );
+      formData.setFieldValue("comboIds", promo.combo?.map((c) => c.id) ?? []);
 
       formData.setFieldValue("validDays", promo.validDays ?? []);
 
@@ -143,14 +100,8 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
       }
 
       if (promo.type === "BUY_GIVE_FREE") {
-        formData.setFieldValue(
-          "freeProductIds",
-          promo.freeProducts?.map((f) => f.id) ?? []
-        );
-        formData.setFieldValue(
-          "freeComboIds",
-          promo.freeCombos?.map((f) => f.id) ?? []
-        );
+        formData.setFieldValue("freeProductIds", promo.freeProducts?.map((f) => f.id) ?? []);
+        formData.setFieldValue("freeComboIds", promo.freeCombos?.map((f) => f.id) ?? []);
         formData.setFieldValue("oneFreePerTrigger", promo.oneFreePerTrigger ?? false);
       }
     }
@@ -223,14 +174,8 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
                     const promotionType = promo.type.toLowerCase().replace(/_/g, "") as "buyxpayy" | "percentage" | "threshold" | "buygivefree";
                     formData.setFieldValue("type", promotionType);
 
-                    formData.setFieldValue(
-                      "productIds",
-                      promo.product?.map((p) => p.id) ?? []
-                    );
-                    formData.setFieldValue(
-                      "comboIds",
-                      promo.combo?.map((c) => c.id) ?? []
-                    );
+                    formData.setFieldValue("productIds", promo.product?.map((p) => p.id) ?? []);
+                    formData.setFieldValue("comboIds", promo.combo?.map((c) => c.id) ?? []);
                     formData.setFieldValue("validDays", promo.validDays ?? []);
 
                     if (promo.type === "BUYX_PAYY") {
@@ -248,14 +193,8 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
                     }
 
                     if (promo.type === "BUY_GIVE_FREE") {
-                        formData.setFieldValue(
-                          "freeProductIds",
-                          promo.freeProducts?.map((f) => f.id) ?? []
-                        );
-                        formData.setFieldValue(
-                          "freeComboIds",
-                          promo.freeCombos?.map((f) => f.id) ?? []
-                        );
+                        formData.setFieldValue("freeProductIds", promo.freeProducts?.map((f) => f.id) ?? []);
+                        formData.setFieldValue("freeComboIds", promo.freeCombos?.map((f) => f.id) ?? []);
                         formData.setFieldValue("oneFreePerTrigger", promo.oneFreePerTrigger ?? false);
                     }
                   }}
@@ -438,11 +377,11 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate}: PromotionUp
             children={(field) => (
               <field.CheckboxField
                 label="Valid Days"
-                options={DayOfWeekSchema.options.map((d, index) => ({
-                  id: index,
-                  value: index,
-                  label: d[0] + d.slice(1).toLowerCase(),
-                }))}
+                  options={daysOfWeek.map((day, index) => ({
+                    id: index,
+                    value: index,
+                    label: day[0] + day.slice(1).toLowerCase(),
+                  }))}
               />
             )}
           />

@@ -42,6 +42,11 @@ export const PromotionForm = ({ onClose }: PromotionFormProps) => {
     onSubmit: async ({ value }) => {
         const submissionData = {
           ...value,
+         freeProductIds: value.freeProductIds?.map(Number) ?? [],
+         freeComboIds: value.freeComboIds?.map(Number) ?? [],
+         validDays: value.validDays?.map(Number) ?? [],
+         productIds: value.productIds?.map(Number) ?? [],
+         comboIds: value.comboIds?.map(Number) ?? [],
           active: !!value.active,
           oneFreePerTrigger: !!value.oneFreePerTrigger,
         };
