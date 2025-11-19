@@ -5,9 +5,6 @@ import java.time.DayOfWeek;
 
 public class BuyGiveFreePromotionCreateDTO extends PromotionCreateDTO {
 
-    private Set<Long> triggerProductIds;
-    private Set<Long> triggerComboIds;
-
     private Set<Long> freeProductIds;
     private Set<Long> freeComboIds;
 
@@ -19,9 +16,6 @@ public class BuyGiveFreePromotionCreateDTO extends PromotionCreateDTO {
                                          boolean oneFreePerTrigger,
                                          Set<DayOfWeek> validDays) {
         super(name, description, active, triggerProductIds, triggerComboIds, validDays);
-
-        this.triggerProductIds = triggerProductIds;
-        this.triggerComboIds = triggerComboIds;
         this.freeProductIds = freeProductIds;
         this.freeComboIds = freeComboIds;
         this.oneFreePerTrigger = oneFreePerTrigger;
@@ -35,11 +29,8 @@ public class BuyGiveFreePromotionCreateDTO extends PromotionCreateDTO {
         promo.setActive(isActive());
         promo.setValidDays(getValidDays());
 
-        var triggerProducts = promotionService.findProducts(triggerProductIds);
-        var triggerCombos   = promotionService.findCombos(triggerComboIds);
-        
-        promo.setProducts(triggerProducts);
-        promo.setCombos(triggerCombos);
+        promo.setProducts(promotionService.findProducts(getProductIds()));
+        promo.setCombos(promotionService.findCombos(getComboIds()));
 
         if (freeProductIds != null)
             promo.setFreeProducts(promotionService.findProducts(freeProductIds));
