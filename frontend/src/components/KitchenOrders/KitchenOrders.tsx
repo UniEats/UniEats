@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Orders } from '@/components/Orders/Orders';
 import { DeliveryTimeModal } from '@/components/Orders/DeliveryTimeModal';
 import { BASE_API_URL } from '@/config/app-query-client';
@@ -26,7 +26,6 @@ export const KitchenOrders = () => {
   const handleResponse = useHandleResponse();
 
   useEffect(() => {
-    console.log('Fetching states...');
     const fetchStates = async () => {
       try {
         const resp = await fetch(`${BASE_API_URL}/orders/states`, {
@@ -43,15 +42,9 @@ export const KitchenOrders = () => {
       }
     };
     fetchStates();
-  }, []);
+  }, [getAccessToken, handleResponse]);
 
-  useEffect(() => {
-    if (!selectedState) return;
-    console.log('Loading orders for state:', selectedState.id)
-    loadOrdersByState(selectedState.id);
-  }, [selectedState]);
-
-  const loadOrdersByState = async (stateId: number) => {
+  const loadOrdersByState = useCallback(async (stateId: number) => {
     setLoading(true);
     try {
       const response = await fetch(`${BASE_API_URL}/orders/state/${stateId}`, {
@@ -66,7 +59,12 @@ export const KitchenOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAccessToken, handleResponse]);
+  
+  useEffect(() => {
+    if (!selectedState) return;
+    loadOrdersByState(selectedState.id);
+  }, [selectedState, loadOrdersByState]);
 
   const handleStateChange = async (orderId: number, action: string) => {
     try {

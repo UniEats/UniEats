@@ -11,6 +11,11 @@ interface OrderCreateDTO {
     }[];
 }
 
+interface PaymentResponse {
+    success: boolean;
+    message: string;
+}
+
 export class OrderService {
     private static getBaseUrl() {
         const w = (window as unknown) as { _env_?: Record<string, unknown> } | undefined;
@@ -95,8 +100,8 @@ export class OrderService {
         return response.data;
     }
 
-    static async payOrder(orderId: number, method: string): Promise<any> {
-        const response = await axios.post(
+    static async payOrder(orderId: number, method: string): Promise<PaymentResponse> {
+        const response = await axios.post<PaymentResponse>(
             `${this.getBaseUrl()}/payments/${orderId}?method=${method}`,
             {},
             { headers: this.getAuthHeaders() }
