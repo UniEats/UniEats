@@ -9,10 +9,13 @@ import { IngredientIncreaseStockForm } from "@/components/AdminForms/IngredientI
 import { MenuSectionForm } from "@/components/AdminForms/MenuSectionForm";
 import { ProductForm } from "@/components/AdminForms/ProductForm";
 import { ProductUpdateForm } from "@/components/AdminForms/ProductUpdateForm";
+import { PromotionForm } from "@/components/AdminForms/PromotionForm";
+import { PromotionUpdateForm } from "@/components/AdminForms/PromotionUpdateForm";
 import { TagForm } from "@/components/AdminForms/TagForm";
 import { ChangeRoleForm } from "@/components/AdminForms/ChangeRoleForm";
 import { Modal } from "@/components/Modal/Modal";
 import { useComboList, useDeleteCombo } from "@/services/ComboServices";
+import { usePromotionList, useDeletePromotion } from "@/services/PromotionServices";
 import { useIngredientList } from "@/services/IngredientServices";
 import { useMenuSectionList } from "@/services/MenuSectionServices";
 import { useDeleteProduct, useProductList } from "@/services/ProductServices";
@@ -32,6 +35,8 @@ type ModalType =
   | "menu-section"
   | "combo-create"
   | "combo-update"
+  | "promotion-create"
+  | "promotion-update"
   | "user-role"
   | null;
 
@@ -48,11 +53,12 @@ type StatCard = {
 const SIDEBAR_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "📊" },
   { id: "products", label: "Products", icon: "🍽️" },
+  { id: "combos", label: "Combos", icon: "🍔🍟🥤" },
+  { id: "promotions", label: "Promotions", icon: "🎉" },
   { id: "menu-sections", label: "Menu Sections", icon: "📂" },
   { id: "ingredients", label: "Ingredients", icon: "🥕" },
   { id: "tags", label: "Tags", icon: "🏷️" },
   { id: "users", label: "Users", icon: "👥" },
-  { id: "combos", label: "Combos", icon: "🍔🍟🥤" },
 ] as const;
 
 const LOW_STOCK_THRESHOLD = 10;
@@ -62,7 +68,8 @@ export const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState<SectionId>("dashboard");
   const [openModal, setOpenModal] = useState<ModalType>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [selectedComboId, setSelectedComboId] = useState<number | null>(null); // ADD THIS LINE
+  const [selectedComboId, setSelectedComboId] = useState<number | null>(null);
+  const [selectedPromotionId, setSelectedPromotionId] = useState<number | null>(null);
   const [selectedIngredientId, setSelectedIngredientId] = useState<number | null>(null);
 
   const { data: products, isPending: productsPending } = useProductList();
@@ -71,13 +78,17 @@ export const AdminDashboard = () => {
   const { data: tags, isPending: tagsPending } = useTagList();
   const { data: userCount, isPending: usersPending } = useUserCount();
   const { data: combos, isPending: combosPending } = useComboList();
+  const { data: promotions, isPending: promotionsPending } = usePromotionList();
   const deleteProductMutation = useDeleteProduct();
   const deleteComboMutation = useDeleteCombo();
+  const deletePromotionMutation = useDeletePromotion();
 
   const closeModal = () => {
     setOpenModal(null);
     setSelectedProductId(null);
     setSelectedComboId(null);
+    setSelectedPromotionId(null);
+    setSelectedIngredientId(null);
   };
   const handleLogout = () => setTokenState({ state: "LOGGED_OUT" });
 
@@ -86,37 +97,37 @@ export const AdminDashboard = () => {
   const menuSectionList = useMemo(() => menuSections ?? [], [menuSections]);
   const tagList = useMemo(() => tags ?? [], [tags]);
   const comboList = useMemo(() => combos ?? [], [combos]);
+  const promotionList = useMemo(() => promotions ?? [], [promotions]);
+
   const totalUsers = userCount?.total ?? null;
   const totalProducts = productList.length;
   const totalIngredients = ingredientList.length;
   const totalSections = menuSectionList.length;
   const totalCombos = comboList.length;
+  const totalPromotions = promotionList.length;
 
   const statCards: StatCard[] = useMemo(
     () => [
       { id: "products", label: "Total Products", icon: "🍽️", value: totalProducts, isLoading: productsPending },
-      {
-        id: "ingredients",
-        label: "Total Ingredients",
-        icon: "🥦",
-        value: totalIngredients,
-        isLoading: ingredientsPending,
-      },
+      { id: "combos", label: "Total Combos", icon: "🍔🍟🥤", value: totalCombos, isLoading: combosPending },
+      { id: "promotions", label: "Active Promotions", icon: "🎉", value: totalPromotions, isLoading: promotionsPending },
+      { id: "ingredients", label: "Total Ingredients", icon: "🥦", value: totalIngredients, isLoading: ingredientsPending },
       { id: "sections", label: "Menu Sections", icon: "📁", value: totalSections, isLoading: menuSectionsPending },
       { id: "users", label: "Registered Users", icon: "👥", value: totalUsers, isLoading: usersPending },
-      { id: "combos", label: "Total Combos", icon: "🍔🍟🥤", value: totalCombos, isLoading: combosPending },
     ],
     [
       totalProducts,
       productsPending,
+      totalCombos,
+      combosPending,
+      totalPromotions,
+      promotionsPending,
       totalIngredients,
       ingredientsPending,
       totalSections,
       menuSectionsPending,
       totalUsers,
       usersPending,
-      totalCombos,
-      combosPending,
     ],
   );
 
@@ -130,7 +141,7 @@ export const AdminDashboard = () => {
     [ingredientList],
   );
 
-  const isAnyLoading = productsPending || ingredientsPending || menuSectionsPending || tagsPending || usersPending;
+  const isAnyLoading = productsPending || ingredientsPending || menuSectionsPending || tagsPending || usersPending || combosPending || promotionsPending;
 
   const setSection = (section: SectionId) => {
     setActiveSection(section);
@@ -138,6 +149,16 @@ export const AdminDashboard = () => {
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+
+  const formatPromotionType = (type: string) => {
+    switch (type) {
+      case "BUYX_PAYY": return "Buy X, Pay Y";
+      case "PERCENTAGE": return "Percentage";
+      case "THRESHOLD": return "Threshold";
+      case "BUY_GIVE_FREE": return "Buy X, Get Y Free";
+      default: return type;
+    }
+  };
 
   const handleDeleteProduct = async (id: number) => {
     const target = productList.find((product) => product.id === id)?.name ?? "this product";
@@ -166,6 +187,21 @@ export const AdminDashboard = () => {
     } catch (err) {
       console.error(err);
       alert("Unable to delete the combo. Please try again.");
+    }
+  };
+
+  const handleDeletePromotion = async (id: number) => {
+    const target = promotionList.find((promo) => promo.id === id)?.name ?? "this promotion";
+    const confirmed = window.confirm(`Delete ${target}? This action cannot be undone.`);
+    if (!confirmed) {
+      return
+    };
+
+    try {
+      await deletePromotionMutation.mutateAsync(id);
+    } catch (err) {
+      console.error(err);
+      alert("Unable to delete the promotion. Please try again.");
     }
   };
 
@@ -550,6 +586,75 @@ export const AdminDashboard = () => {
     </section>
   );
 
+  const renderPromotions = () => (
+    <section className={styles.section}>
+      <header className={styles.sectionHeader}>
+        <div>
+          <p className={styles.sectionEyebrow}>Marketing</p>
+          <h2 className={styles.sectionTitle}>Promotions</h2>
+          <p className={styles.sectionSubtitle}>Manage discounts and special offers like 2x1.</p>
+        </div>
+        <div className={styles.sectionActions}>
+          <button className={styles.primaryButton} onClick={() => setOpenModal("promotion-create")}>
+            Add promotion
+          </button>
+          <button className={styles.secondaryButton} onClick={() => setOpenModal("promotion-update")}>
+            Update promotion
+          </button>
+        </div>
+      </header>
+
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Type</th>
+              <th scope="col">Description</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {promotionList.length > 0 ? (
+              promotionList.map((promo) => (
+                <tr key={promo.id}>
+                  <td>{promo.name}</td>
+                  <td>{formatPromotionType(promo.type)}</td>
+                  <td className={styles.descriptionCell}>{promo.description}</td>
+                  <td>
+                    <button
+                      className={styles.secondaryButton}
+                      style={{ marginRight: "0.5rem" }}
+                      onClick={() => {
+                        setSelectedPromotionId(promo.id);
+                        setOpenModal("promotion-update");
+                      }}
+                    >
+                      Update
+                    </button>
+                    <button
+                      className={styles.dangerButton}
+                      onClick={() => handleDeletePromotion(promo.id)}
+                      disabled={deletePromotionMutation.isPending}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className={styles.emptyCell}>
+                  No promotions created yet. Add one to attract more customers.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+
   const renderActiveSection = () => {
     switch (activeSection) {
       case "dashboard":
@@ -566,6 +671,8 @@ export const AdminDashboard = () => {
         return renderUsers();
       case "combos":
         return renderCombos();
+      case "promotions":
+        return renderPromotions();
       default:
         return null;
     }
@@ -665,6 +772,16 @@ export const AdminDashboard = () => {
       {openModal === "combo-update" && (
         <Modal onClose={closeModal}>
           <ComboUpdateForm onClose={closeModal} comboIdToUpdate={selectedComboId} />
+        </Modal>
+      )}
+      {openModal === "promotion-create" && (
+        <Modal onClose={closeModal}>
+          <PromotionForm onClose={closeModal} />
+        </Modal>
+      )}
+      {openModal === "promotion-update" && (
+        <Modal onClose={closeModal}>
+          <PromotionUpdateForm onClose={closeModal} promotionIdToUpdate={selectedPromotionId} />
         </Modal>
       )}
       {openModal === "user-role" && (

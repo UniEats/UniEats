@@ -5,6 +5,8 @@ import { useProducts } from "@/components/Product/ProductContext";
 import { ComboItem, MenuItem, MenuSection } from "@/models/Menu";
 import { useDeleteCombo } from "@/services/ComboServices";
 import { useDeleteProduct } from "@/services/ProductServices";
+import PromoCarousel from "@/components/Promotion/PromoCarousel";
+import { useActivePromotionList } from "@/services/PromotionServices";
 
 import Product from "../Product/Product";
 import "./Menu.css";
@@ -110,8 +112,14 @@ export const Menu = ({ menuSections }: MenuProps) => {
     return [...products, ...combos];
   }, [activeSection]);
 
+  const { data: promotions } = useActivePromotionList();
+
   return (
     <div className="menu-page">
+      {promotions && promotions.length > 0 && (
+        <PromoCarousel promotions={promotions} />
+      )}
+
       <nav className="menu-categories" aria-label="Menu sections">
         <ul role="tablist">
           {menuSections.map((section) => {
