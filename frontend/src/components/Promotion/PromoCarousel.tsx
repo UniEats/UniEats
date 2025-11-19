@@ -87,14 +87,14 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
 
                 <p className="promo-type">{renderPromoDetails(promo)}</p>
 
-                {Object.keys(promo.products).length > 0 && (
+                {promo.products && Object.keys(promo.products).length > 0 && (
                   <>
                     <p className="promo-subtitle">Applied products:</p>
                     <p className="promo-list">{Object.values(promo.products).join(", ")}</p>
                   </>
                 )}
 
-                {Object.keys(promo.combos).length > 0 && (
+                {promo.combos && Object.keys(promo.combos).length > 0 && (
                   <>
                     <p className="promo-subtitle">Applied combos:</p>
                     <p className="promo-list">{Object.values(promo.combos).join(", ")}</p>
