@@ -13,7 +13,8 @@ import java.time.DayOfWeek;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = ThresholdPromotionUpdateDTO.class, name = "threshold"),
     @JsonSubTypes.Type(value = PercentagePromotionUpdateDTO.class, name = "percentage"),
-    @JsonSubTypes.Type(value = BuyXPayYPromotionUpdateDTO.class, name = "buyxpayy")
+    @JsonSubTypes.Type(value = BuyXPayYPromotionUpdateDTO.class, name = "buyxpayy"),
+    @JsonSubTypes.Type(value = BuyGiveFreePromotionUpdateDTO.class, name = "buygivefree")
 })
 public abstract class PromotionUpdateDTO {
     private String name;

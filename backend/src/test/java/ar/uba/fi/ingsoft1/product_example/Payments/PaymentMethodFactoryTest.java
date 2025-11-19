@@ -2,7 +2,6 @@ package ar.uba.fi.ingsoft1.product_example.Payments;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,21 +24,17 @@ class PaymentMethodFactoryTest {
     private PaymentMethodFactory paymentMethodFactory;
 
     @Test
-    void testGet_CreditCard() {
-        PaymentMethod method = paymentMethodFactory.get("credit");
-        assertSame(creditCardPayment, method);
+    void testGet_AllSupportedMethods() {
+        assertSame(creditCardPayment, paymentMethodFactory.get("credit"));
+        assertSame(cashPayment, paymentMethodFactory.get("cash"));
+        assertSame(qrPayment, paymentMethodFactory.get("qr"));
     }
 
     @Test
-    void testGet_Cash() {
-        PaymentMethod method = paymentMethodFactory.get("cash");
-        assertSame(cashPayment, method);
-    }
-
-    @Test
-    void testGet_QR() {
-        PaymentMethod method = paymentMethodFactory.get("qr");
-        assertSame(qrPayment, method);
+    void testGet_CaseSensitivity() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            paymentMethodFactory.get("CASH");
+        });
     }
 
     @Test

@@ -1,6 +1,10 @@
 package ar.uba.fi.ingsoft1.product_example.Payments;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -61,13 +65,48 @@ class PaymentRestControllerTest {
     @Test
     void testPay_Success() throws Exception {
         when(orderService.getOrderById(1L)).thenReturn(Optional.of(testOrder));
-        when(paymentMethodFactory.get("cash")).thenReturn(new CashPayment());
+
+        PaymentMethod mockPaymentStrategy = mock(PaymentMethod.class);
+        PaymentResult expectedResult = PaymentResult.success(
+            "Mocked Transaction Successful"
+        );
+        when(mockPaymentStrategy.processPayment(any(OrderDTO.class)))
+            .thenReturn(expectedResult);
+        when(paymentMethodFactory.get("cash"))
+            .thenReturn(mockPaymentStrategy);
 
         mockMvc
             .perform(post("/payments/1?method=cash"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success", is(true)))
-            .andExpect(jsonPath("$.message", is("Pago grabado como efectivo")));
+            .andExpect(
+                jsonPath(
+                    "$.message",
+                    is("Mocked Transaction Successful")
+                )
+            );
+
+        verify(mockPaymentStrategy, times(1)).processPayment(any(OrderDTO.class));
+    }
+
+    @Test
+    void testPay_PaymentRejected() throws Exception {
+        when(orderService.getOrderById(1L)).thenReturn(Optional.of(testOrder));
+
+        PaymentMethod mockPaymentStrategy = mock(PaymentMethod.class);
+        PaymentResult failureResult = PaymentResult.failure("Insufficient funds");
+        when(mockPaymentStrategy.processPayment(any(OrderDTO.class)))
+            .thenReturn(failureResult);
+        when(paymentMethodFactory.get("credit"))
+            .thenReturn(mockPaymentStrategy);
+
+        mockMvc
+            .perform(post("/payments/1?method=credit"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success", is(false)))
+            .andExpect(jsonPath("$.message", is("Insufficient funds")));
+
+        verify(mockPaymentStrategy).processPayment(any(OrderDTO.class));
     }
 
     @Test
