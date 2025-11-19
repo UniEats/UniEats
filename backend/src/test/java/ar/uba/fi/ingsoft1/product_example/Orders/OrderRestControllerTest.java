@@ -13,7 +13,7 @@ import ar.uba.fi.ingsoft1.product_example.user.User;
 import ar.uba.fi.ingsoft1.product_example.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.math.BigDecimal
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
