@@ -126,7 +126,7 @@ class PromotionServiceTest {
         Optional<PromotionDTO> result = promotionService.togglePromotionActive(1L);
 
         assertTrue(result.isPresent());
-        //assertFalse(((PercentagePromotionDTO) result.get()).isActive());
+        assertFalse(((PercentagePromotionDTO) result.get()).isActive());
     }
 
     @Test
@@ -277,7 +277,7 @@ class PromotionServiceTest {
         Optional<PromotionDTO> result = promotionService.togglePromotionActive(1L);
 
         assertTrue(result.isPresent());
-        //assertFalse(((BuyXPayYPromotionDTO) result.get()).isActive());
+        assertFalse(((BuyXPayYPromotionDTO) result.get()).isActive());
     }
 
     @Test
@@ -429,7 +429,7 @@ class PromotionServiceTest {
         Optional<PromotionDTO> result = promotionService.togglePromotionActive(1L);
 
         assertTrue(result.isPresent());
-        //assertFalse(((ThresholdPromotionDTO) result.get()).isActive());
+        assertFalse(((ThresholdPromotionDTO) result.get()).isActive());
     }
 
     @Test

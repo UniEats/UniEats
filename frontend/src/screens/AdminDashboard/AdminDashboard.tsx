@@ -717,12 +717,6 @@ export const AdminDashboard = () => {
             <Link href="/menu" className={styles.primaryButton}>
               View Live Menu
             </Link>
-            <input
-              className={styles.searchField}
-              type="search"
-              placeholder="Search products, tags, ingredients"
-              aria-label="Search"
-            />
           </div>
         </header>
         <main className={styles.mainContent}>

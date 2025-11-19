@@ -27,7 +27,7 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
           University Cafeteria
         </Link>
         <nav className={styles.siteNav} aria-label="Primary navigation">
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <>
               {userRole === "ROLE_ADMIN" && (
               <>
@@ -48,24 +48,6 @@ export const CommonLayout = ({ children }: React.PropsWithChildren) => {
                   </Link>
                 </>
               )}
-            </>
-          ) : (
-            <>
-              <a href="#" className={styles.siteNavLink}>
-                Find a restaurant
-              </a>
-              <Link href="/menu" className={styles.siteNavLink}>
-                Menu
-              </Link>
-              <a href="#" className={styles.siteNavLink}>
-                Stories
-              </a>
-              <a href="#" className={styles.siteNavLink}>
-                About
-              </a>
-              <a href="#" className={styles.siteNavLink}>
-                Careers
-              </a>
             </>
           )}
         </nav>
