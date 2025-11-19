@@ -60,11 +60,9 @@ export const ComboUpdateForm = ({ onClose, comboIdToUpdate }: ComboUpdateFormPro
   });
 
   useEffect(() => {
-    // Check if we have the ID prop and the combo list is ready
     if (comboIdToUpdate && combos.length > 0) {
       const matchedCombo = combos.find((combo) => combo.id === comboIdToUpdate);
 
-      // If we found the combo, set all the form fields
       if (matchedCombo) {
         formData.setFieldValue("comboId", matchedCombo.id);
         formData.setFieldValue("name", matchedCombo?.name ?? "");
@@ -78,7 +76,7 @@ export const ComboUpdateForm = ({ onClose, comboIdToUpdate }: ComboUpdateFormPro
         formData.setFieldValue("menuSectionIds", Object.keys(matchedCombo?.menuSections || {}));
       }
     }
-  }, [comboIdToUpdate, combos, formData]); // Dependencies
+  }, [comboIdToUpdate, combos, formData]);
 
   const submissionError = updateCombo.error
     ? updateCombo.error instanceof Error

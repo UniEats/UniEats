@@ -72,7 +72,6 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public routes
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(PUBLIC_POST_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/menus").permitAll()
@@ -81,9 +80,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/orders").authenticated()
                         .requestMatchers(HttpMethod.POST, "/orders/*/confirm").authenticated()
 
-                        // Order access rules
                         .requestMatchers(HttpMethod.GET, STAFF_ORDER_ENDPOINTS)
-                        .authenticated() // anyone logged in can view orders
+                        .authenticated()
                         .requestMatchers(HttpMethod.POST, STAFF_ORDER_ENDPOINTS)
                         .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
                         .requestMatchers(HttpMethod.PUT, STAFF_ORDER_ENDPOINTS)
@@ -93,13 +91,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, STAFF_ORDER_ENDPOINTS)
                         .hasAnyRole("STAFF", "ADMIN", "KITCHEN")
 
-                        // Read-only access for staff to view products/combos
                         .requestMatchers(HttpMethod.GET, "/products/**", "/combos/**").hasAnyRole("STAFF", "ADMIN", "KITCHEN")
 
-                        // Admin-only sections (create/update/delete)
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN")
 
-                        // Default deny
                         .anyRequest().denyAll()
                 )
                 .sessionManagement(sessionManager ->

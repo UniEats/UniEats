@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useId } from "react";
 import { ErrorContainer } from "@/components/form-components/ErrorContainer/ErrorContainer";
 import { useAppForm } from "@/config/use-app-form";
-import { /*PromotionUpdateFormSchema,*/ PromotionUpdateFormValues } from "@/models/Promotion";
+import { PromotionUpdateFormValues } from "@/models/Promotion";
 import { useProductList } from "@/services/ProductServices";
 import { useComboList } from "@/services/ComboServices";
 import { usePromotionList, useUpdatePromotion } from "@/services/PromotionServices"; 
@@ -54,9 +54,6 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate }: PromotionU
 
   const formData = useAppForm({
     defaultValues: PROMOTION_UPDATE_DEFAULT_VALUES,
-    // validators: {
-    //   onChange: PromotionUpdateFormSchema,
-    // },
     onSubmit: async ({ value }) => {
       setSuccessMessage(null);
       console.log(value);
