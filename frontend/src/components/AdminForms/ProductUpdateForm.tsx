@@ -61,11 +61,9 @@ export const ProductUpdateForm = ({ onClose, productIdToUpdate }: ProductUpdateF
   });
 
   useEffect(() => {
-    // Wait for the prop and for the products to be loaded
     if (productIdToUpdate && products.length > 0) {
       const matchedProduct = products.find((p) => p.id === productIdToUpdate);
 
-      // If we found the product, set all the form fields
       if (matchedProduct) {
         formData.setFieldValue("productId", matchedProduct.id.toString());
         formData.setFieldValue("name", matchedProduct.name ?? "");
@@ -77,10 +75,9 @@ export const ProductUpdateForm = ({ onClose, productIdToUpdate }: ProductUpdateF
         );
         formData.setFieldValue("tagIds", Object.keys(matchedProduct.tags || {}));
         formData.setFieldValue("menuSectionIds", Object.keys(matchedProduct.menuSections || {}));
-        // We don't set the image, as it's a file upload
       }
     }
-  }, [productIdToUpdate, products, formData]); // Dependencies
+  }, [productIdToUpdate, products, formData]);
 
   const submissionError = updateProduct.error
     ? updateProduct.error instanceof Error

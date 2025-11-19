@@ -71,8 +71,8 @@ export type NormalizedPromotion = Promotion & {
 const BaseFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  productIds: z.array(z.number()).optional(),
-  comboIds: z.array(z.number()).optional(),
+  productIds: z.array(z.coerce.number()).optional(),
+  comboIds: z.array(z.coerce.number()).optional(),
   validDays: z.array(DayOfWeekSchema).optional(),
   active: z.boolean().optional(),
 });
@@ -96,10 +96,8 @@ export const ThresholdFormSchema = BaseFormSchema.extend({
 
 export const BuyGiveFreeFormSchema = BaseFormSchema.extend({
   type: z.literal("buygivefree"),
-
-  freeProductIds: z.array(z.number()).optional(),
-  freeComboIds: z.array(z.number()).optional(),
-
+  freeProductIds: z.array(z.coerce.number()).optional(),
+  freeComboIds: z.array(z.coerce.number()).optional(),
   oneFreePerTrigger: z.boolean().default(false),
 });
 
@@ -107,8 +105,8 @@ export const PromotionFormSchema = z.object({
  name: z.string().min(1, "Name is required"),
  description: z.string().optional(),
  type: z.enum(["buyxpayy", "percentage", "threshold", "buygivefree"]),
- productIds: z.array(z.string()).optional(),
- comboIds: z.array(z.string()).optional(),
+ productIds: z.array(z.coerce.number()).optional(),
+ comboIds: z.array(z.coerce.number()).optional(),
 validDays: z.array(z.coerce.number())
   .transform((vals) => vals.map(i => daysOptions[i]))
   .optional(),
@@ -117,8 +115,8 @@ validDays: z.array(z.coerce.number())
  percentage: z.coerce.number().optional(),
  threshold: z.coerce.number().optional(),
  discountAmount: z.coerce.number().optional(),
- freeProductIds: z.array(z.number()).optional(),
- freeComboIds: z.array(z.number()).optional(),
+ freeProductIds: z.array(z.coerce.number()).optional(),
+ freeComboIds: z.array(z.coerce.number()).optional(),
  oneFreePerTrigger: z.boolean().optional(),
  active: z.boolean().optional(),
 })
@@ -181,8 +179,8 @@ const ThresholdUpdateSchema = BaseUpdateSchema.extend({
 const BuyGiveFreeUpdateSchema = BaseUpdateSchema.extend({
   type: z.literal("buygivefree"),
 
-  freeProductIds: z.array(z.number()).optional(),
-  freeComboIds: z.array(z.number()).optional(),
+  freeProductIds: z.array(z.coerce.number()).optional(),
+  freeComboIds: z.array(z.coerce.number()).optional(),
 
   oneFreePerTrigger: z.boolean().optional(),
 });
@@ -195,6 +193,8 @@ export const PromotionUpdateSchema = z.discriminatedUnion("type", [
 ]);
 
 export type PromotionUpdateRequest = z.infer<typeof PromotionUpdateSchema>;
+
+export type PromotionUpdateFormValues = z.infer<typeof PromotionUpdateFormSchema>;
 
 export function normalizePromotion(p: Promotion): NormalizedPromotion {
   return {
@@ -209,3 +209,56 @@ export function normalizePromotion(p: Promotion): NormalizedPromotion {
     }, {} as Record<number, string>) ?? {},
   };
 }
+
+// Días válidos de la semana
+const validDaysSchema = z.array(DayOfWeekSchema);
+
+export const PromotionUpdateFormSchema = z
+  .object({
+    promotionId: z.string().min(1, { message: "Promotion ID is required" }),
+
+    name: z.string().min(1, { message: "Name is required" }),
+    description: z.string().min(1, { message: "Description is required" }),
+    active: z.boolean(),
+    productIds: z.array(z.string()),
+    comboIds: z.array(z.string()),
+    validDays: validDaysSchema.optional(),
+
+    type: z.enum(["threshold", "percentage", "buyxpayy", "buygivefree"]), // Tipo de promoción
+
+    freeProductIds: z.array(z.string()).optional(),
+    freeComboIds: z.array(z.string()).optional(),
+    oneFreePerTrigger: z.boolean().optional(),
+
+    buyQuantity: z.number().positive().optional(),
+    payQuantity: z.number().positive().optional(),
+
+    percentage: z.number().min(0).max(100).optional(),
+
+    threshold: z.number().min(0).optional(),
+    discountAmount: z.number().min(0).optional(),
+  }).refine(data => {
+  if (data.type === "buygivefree") {
+    if (!data.freeProductIds || data.freeProductIds.length === 0) {
+      return false;
+    }
+  }
+  if (data.type === "buyxpayy") {
+    if (data.buyQuantity === undefined || data.payQuantity === undefined) {
+      return false;
+    }
+  }
+  if (data.type === "percentage" && data.percentage === undefined) {
+    return false; 
+  }
+  if (data.type === "threshold" && (data.threshold === undefined || data.discountAmount === undefined)) {
+    return false; 
+  }
+  if (data.productIds.length === 0 && data.comboIds.length === 0) {
+    return false; 
+  }
+
+  return true;
+}, {
+  message: "Invalid promotion data",
+});

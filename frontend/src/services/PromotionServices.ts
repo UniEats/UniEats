@@ -8,6 +8,7 @@ import {
   PromotionUpdateRequest,
   normalizePromotion,
   NormalizedPromotion,
+  PromotionUpdateFormValues
 } from "@/models/Promotion";
 import { useAccessTokenGetter, useHandleResponse } from "./TokenContext";
 
@@ -42,6 +43,7 @@ export async function patchPromotion(
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
   });
@@ -141,17 +143,88 @@ export function useCreatePromotion() {
   });
 }
 
+const weekDays = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+] as const;
+type WeekDay = typeof weekDays[number];
+
 export function useUpdatePromotion() {
   const getAccessToken = useAccessTokenGetter();
   const handleResponse = useHandleResponse();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: { id: number; payload: PromotionUpdateRequest }) => {
-      if (!variables.id) {
-        throw new Error("Invalid promotion ID");
+    mutationFn: async (values: PromotionUpdateFormValues) => {
+      const promotionId = Number(values.promotionId);
+
+      if (Number.isNaN(promotionId) || promotionId <= 0) {
+        throw new Error("Invalid promotion selected");
       }
-      return patchPromotion(variables.id, variables.payload, getAccessToken, handleResponse);
+
+      let payload: PromotionUpdateRequest;
+
+      const basePayload = {
+        ...(values.name && { name: values.name.trim() }),
+        ...(values.description && { description: values.description.trim() }),
+        ...(values.active !== undefined && { active: values.active }),
+        ...(values.productIds && { productIds: values.productIds.map((m) => Number(m)) }),
+        ...(values.comboIds && { comboIds: values.comboIds.map((m) => Number(m)) }),
+        ...(values.validDays && { validDays: values.validDays.map(d => Number(d)).filter(d => d >= 1 && d <= 7)
+                                                              .map(d => weekDays[d - 1]) as WeekDay[]} ),
+      };
+
+      switch (values.type) {
+        case "buyxpayy":
+          payload = {
+            ...basePayload,
+            type: "buyxpayy",
+            ...(values.buyQuantity !== undefined && { buyQuantity: Number(values.buyQuantity) }),
+            ...(values.payQuantity !== undefined && { payQuantity: Number(values.payQuantity) }),
+          };
+          break;
+
+        case "percentage":
+          payload = {
+            ...basePayload,
+            type: "percentage",
+            ...(values.percentage !== undefined && { percentage: Number(values.percentage) }),
+          };
+          break;
+
+        case "threshold":
+          payload = {
+            ...basePayload,
+            type: "threshold",
+            ...(values.threshold !== undefined && { threshold: Number(values.threshold) }),
+            ...(values.discountAmount !== undefined && { discountAmount: Number(values.discountAmount) }),
+          };
+          break;
+
+        case "buygivefree":
+          payload = {
+            ...basePayload,
+            type: "buygivefree",
+            ...(values.freeProductIds && { freeProductIds: values.freeProductIds.map((m) => Number(m)) }),
+            ...(values.freeComboIds && { freeComboIds: values.freeComboIds.map((m) => Number(m)) }),
+            ...(values.oneFreePerTrigger !== undefined && { oneFreePerTrigger: values.oneFreePerTrigger }),
+          };
+          break;
+
+        default:
+          throw new Error("Invalid promotion type");
+      }
+
+      if (Object.keys(payload).length <= 1) {
+          throw new Error("Nothing to update");
+      }
+
+      return patchPromotion(promotionId, payload, getAccessToken, handleResponse);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promotions"] });

@@ -89,7 +89,7 @@ public class PromotionService {
     }
 
     public Set<Product> findProducts(Set<Long> ids) {
-        if (ids == null || ids.isEmpty()) return Set.of();
+        if (ids == null || ids.isEmpty()) return new HashSet<>();
 
         List<Product> products = productRepository.findAllById(ids);
 
@@ -105,7 +105,7 @@ public class PromotionService {
     }
 
     public Set<Combo> findCombos(Set<Long> ids) {
-        if (ids == null || ids.isEmpty()) return Set.of();
+        if (ids == null || ids.isEmpty()) return new HashSet<>();
 
         List<Combo> combos = comboRepository.findAllById(ids);
 

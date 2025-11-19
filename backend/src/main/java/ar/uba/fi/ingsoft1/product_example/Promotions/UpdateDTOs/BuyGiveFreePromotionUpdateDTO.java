@@ -45,7 +45,7 @@ public class BuyGiveFreePromotionUpdateDTO extends PromotionUpdateDTO {
         if (getFreeComboIds() != null)
             p.setFreeCombos(promotionService.findCombos(getFreeComboIds()));
 
-        if (oneFreePerTrigger != null)
+        if (getOneFreePerTrigger() != null)
             p.setOneFreePerTrigger(getOneFreePerTrigger());
     }
 

@@ -35,7 +35,6 @@ public class OpenApiConfiguration {
         return openApi -> {
             var tags = new HashSet<String>();
 
-            // Iterate over what spring calls controllers (OpenAPI paths) and paths (OpenAPI operations)
             for (var entry: openApi.getPaths().entrySet()) {
                 var operations = entry.getValue().readOperationsMap();
                 for (var methodEntry : operations.entrySet()) {
