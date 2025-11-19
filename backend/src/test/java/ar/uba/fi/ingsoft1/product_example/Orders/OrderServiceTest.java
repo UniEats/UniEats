@@ -206,6 +206,32 @@ class OrderServiceTest {
     }
 
     @Test
+    void testConfirmOrder_NotEnoughStock_Throws() {
+        Order order = createValidOrder();
+
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(99L);
+        ingredient.setName("Tomate");
+        ingredient.setDescription("desc");
+        ingredient.setStock(5);
+
+        Product product = new Product("Burger", "Desc", new BigDecimal("10.00"));
+        product.setId(1L);
+        ProductIngredient pi = createProductIngredient(product, ingredient, 5);
+        product.setProductIngredients(List.of(pi));
+
+        OrderDetail detail = new OrderDetail(2, new BigDecimal("10.00"), BigDecimal.ZERO, BigDecimal.ZERO);
+        detail.setOrder(order);
+        detail.setProduct(product);
+        detail.calculateTotal();
+        order.setDetails(List.of(detail));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        assertThrows(IllegalStateException.class, () -> orderService.confirmOrder(1L));
+    }
+
+    @Test
     void testMarkReady_Success() {
         Order order = createValidOrder();
         order.setState(new OrderStatus(2L, "in preparation"));
@@ -297,6 +323,55 @@ class OrderServiceTest {
     }
 
     @Test
+    void testGetOrdersWithAllMenuItemsInStock_MixedResults() {
+        Order withStock = createValidOrder();
+        withStock.setId(10L);
+        Order withoutStock = createValidOrder();
+        withoutStock.setId(20L);
+
+        Ingredient available = new Ingredient();
+        available.setId(100L);
+        available.setName("Tomate");
+        available.setDescription("desc");
+        available.setStock(5);
+
+        Ingredient missing = new Ingredient();
+        missing.setId(200L);
+        missing.setName("Lechuga");
+        missing.setDescription("desc");
+        missing.setStock(0);
+
+        Product availableProduct = new Product("Burger", "desc", BigDecimal.ONE);
+        availableProduct.setId(1L);
+        availableProduct.setProductIngredients(List.of(createProductIngredient(availableProduct, available, 1)));
+
+        Product missingProduct = new Product("Fries", "desc", BigDecimal.ONE);
+        missingProduct.setId(2L);
+        missingProduct.setProductIngredients(List.of(createProductIngredient(missingProduct, missing, 1)));
+
+        OrderDetail availableDetail = new OrderDetail(1, BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO);
+        availableDetail.setId(1000L);
+        availableDetail.setProduct(availableProduct);
+        availableDetail.setOrder(withStock);
+        availableDetail.calculateTotal();
+        withStock.setDetails(List.of(availableDetail));
+
+        OrderDetail missingDetail = new OrderDetail(1, BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO);
+        missingDetail.setId(2000L);
+        missingDetail.setProduct(missingProduct);
+        missingDetail.setOrder(withoutStock);
+        missingDetail.calculateTotal();
+        withoutStock.setDetails(List.of(missingDetail));
+
+        when(orderRepository.findAll()).thenReturn(List.of(withStock, withoutStock));
+
+        List<OrderDTO> result = orderService.getOrdersWithAllMenuItemsInStock();
+
+        assertEquals(1, result.size());
+        assertEquals(withStock.getId(), result.get(0).id());
+    }
+
+    @Test
     void testIsProductInStock_True() {
         Ingredient ingredient = new Ingredient();
         ingredient.setStock(5);
@@ -355,7 +430,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void testStartPreparation_NotConfirmed_Throws() {
+    void testStartPreparation_WhenReadyState_Throws() {
         Order order = createValidOrder();
         order.setState(new OrderStatus(3L, "ready"));
 
@@ -383,6 +458,15 @@ class OrderServiceTest {
     void testCancelOrder_ForbiddenState_Throws() {
         Order order = createValidOrder();
         order.setState(new OrderStatus(3L,"ready"));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        assertThrows(IllegalStateException.class, () -> orderService.cancelOrder(1L));
+    }
+
+    @Test
+    void testCancelOrder_InPreparationState_Throws() {
+        Order order = createValidOrder();
+        order.setState(new OrderStatus(2L, "in preparation"));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         assertThrows(IllegalStateException.class, () -> orderService.cancelOrder(1L));
