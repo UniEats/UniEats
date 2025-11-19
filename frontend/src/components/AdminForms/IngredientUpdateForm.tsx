@@ -103,7 +103,6 @@ export const IngredientUpdateForm = ({ onClose, ingredientIdToUpdate }: Ingredie
       </h2>
       <formData.AppForm>
         <formData.FormContainer extraError={submissionError}>
-          {/* Select Ingredient */}
           <formData.Field
             name="ingredientId"
             children={(field) => (
@@ -142,11 +141,9 @@ export const IngredientUpdateForm = ({ onClose, ingredientIdToUpdate }: Ingredie
             )}
           />
 
-          {/* Editable fields */}
           <formData.AppField name="name" children={(field) => <field.TextField label="New name" />} />
           <formData.AppField name="description" children={(field) => <field.TextField label="New description" />} />
 
-          {/* Buttons */}
           <div className={styles.formActions}>
             <formData.Button label="Cancel" type="button" onClick={onClose} />
             <formData.Button label="Update Ingredient" />

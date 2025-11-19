@@ -43,9 +43,8 @@ class IngredientService {
     public boolean deleteIngredient(long id) {
         if (ingredientRepository.existsById(id)) {
             try {
-                // First remove any ProductIngredient references to this ingredient
                 productIngredientRepository.deleteById_IngredientId(id);
-                // flush deletions to DB to ensure FK constraints are evaluated here
+
                 productIngredientRepository.flush();
 
                 ingredientRepository.deleteById(id);

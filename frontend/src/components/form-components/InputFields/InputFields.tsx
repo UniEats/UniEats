@@ -174,6 +174,33 @@ export const CheckboxField = ({ label, options, emptyMessage, searchable = false
   );
 };
 
+
+type BoolFieldProps = {
+  label: string;
+};
+
+export const BoolField = ({ label }: BoolFieldProps) => {
+  const field = useFieldContext<boolean>();
+
+  return (
+    <>
+      <div className={styles.boolField}>
+        <span className={styles.fieldLabel}>{label}</span>
+        <label className={styles.checkboxContainer}>
+          <input
+            type="checkbox"
+            checked={field.state.value}
+            onChange={(event) => field.handleChange(event.target.checked)}
+            onBlur={field.handleBlur}
+          />
+          <span>{label}</span>
+        </label>
+        <ErrorContainer errors={field.state.meta.errors} />
+      </div>
+    </>
+  );
+};
+
 type Item = {
   id: number;
   name: string;
@@ -301,6 +328,34 @@ export const SelectField = ({ label, options, placeholder }: SelectFieldProps) =
       </select>
 
       <ErrorContainer errors={field.state.meta.errors} />
+    </>
+  );
+};
+
+type NumberFieldProps = { label: string; placeholder?: string; min?: number; max?: number; step?: number; };
+
+export const NumberField = ({ label, placeholder = '', min, max, step = 1, }: NumberFieldProps) => {
+  const field = useFieldContext<number>();
+
+  return (
+    <>
+      <div className={styles.numberField}>
+        <span className={styles.fieldLabel}>{label}</span>
+        
+        <input
+          type="number"
+          value={field.state.value ?? ''}
+          onChange={(event) => field.handleChange(Number(event.target.value))}
+          onBlur={field.handleBlur}
+          placeholder={placeholder}
+          min={min}
+          max={max}
+          step={step}
+          className={styles.input} 
+        />
+        
+        <ErrorContainer errors={field.state.meta.errors} />
+      </div>
     </>
   );
 };

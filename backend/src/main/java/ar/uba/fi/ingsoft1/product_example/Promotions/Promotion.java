@@ -62,7 +62,7 @@ public abstract class Promotion {
     @Column(name = "day")
     @Enumerated(EnumType.STRING)
     @NonNull
-    private Set<DayOfWeek> validDays;
+    private Set<DayOfWeek> validDays = new HashSet<>();
 
     public boolean isValidToday() {
         if (validDays == null || validDays.isEmpty()) return true;

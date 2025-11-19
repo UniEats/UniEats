@@ -80,7 +80,6 @@ export const TagList = () => {
                 <button
                   className={styles.cancelButton}
                   onClick={async () => {
-                    // confirmation and feedback
                     setActionMessage(null);
                     setActionError(null);
                     const ok = window.confirm(`Delete tag "${t.tag}"?`);

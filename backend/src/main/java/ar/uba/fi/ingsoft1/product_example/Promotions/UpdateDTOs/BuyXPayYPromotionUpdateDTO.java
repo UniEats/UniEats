@@ -25,8 +25,8 @@ public class BuyXPayYPromotionUpdateDTO extends PromotionUpdateDTO {
             throw new IllegalArgumentException("Promotion must be BuyXPayYPromotion");
         }
 
-        if (buyQuantity != null) p.setBuyQuantity(buyQuantity);
-        if (payQuantity != null) p.setPayQuantity(payQuantity);
+        if (getBuyQuantity() != null) p.setBuyQuantity(getBuyQuantity());
+        if (getPayQuantity() != null) p.setPayQuantity(getPayQuantity());
         if (getName() != null) p.setName(getName());
         if (getDescription() != null) p.setDescription(getDescription());
         if (getActive() != null) p.setActive(getActive());
