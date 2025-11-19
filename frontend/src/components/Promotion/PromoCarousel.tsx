@@ -62,6 +62,26 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
       details = `You buy ${promo.buyQuantity} and pay for ${promo.payQuantity}`;
     } else if (promo.type === "THRESHOLD") {
       details = `Minimum spend: $${promo.threshold}, discount: $${promo.discountAmount}`;
+    } else if (promo.type === "BUY_GIVE_FREE") {
+      let bought = "";
+      if (promo.product?.length) {
+        bought = promo.product.map(p => p.name).join(", ");
+      } else if (promo.combo?.length) {
+        bought = promo.combo.map(c => c.name).join(", ");
+      }
+    
+      let free = "";
+      if (promo.freeProducts?.length) {
+        free = promo.freeProducts.map(p => p.name).join(", ");
+      } else if (promo.freeCombos?.length) {
+        free = promo.freeCombos.map(c => c.name).join(", ");
+      }
+    
+      details = `Buy ${promo.oneFreePerTrigger ? "one" : "trigger"} (${bought}), get free (${free})`;
+    
+      if (promo.oneFreePerTrigger) {
+        details += " (one free per trigger)";
+      }
     }
     return details;
   };
