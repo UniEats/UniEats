@@ -68,9 +68,7 @@ class OrderRestControllerTest {
         return new OrderDetailCreateDTO(
             1L,
             null,
-            1,
-            new BigDecimal("500.00"),
-            null
+            1
         );
     }
 
@@ -344,31 +342,6 @@ class OrderRestControllerTest {
 
         mockMvc
             .perform(post("/orders/999/cancel"))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(roles = { "ADMIN" })
-    void confirmOrder_success() throws Exception {
-        Mockito.when(orderService.confirmOrder(1L)).thenReturn(
-            Optional.of(orderDTO)
-        );
-
-        mockMvc
-            .perform(post("/orders/1/confirm"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id", is(1)));
-    }
-
-    @Test
-    @WithMockUser(roles = { "ADMIN" })
-    void confirmOrder_notFound() throws Exception {
-        Mockito.when(orderService.confirmOrder(999L)).thenReturn(
-            Optional.empty()
-        );
-
-        mockMvc
-            .perform(post("/orders/999/confirm"))
             .andExpect(status().isNotFound());
     }
 

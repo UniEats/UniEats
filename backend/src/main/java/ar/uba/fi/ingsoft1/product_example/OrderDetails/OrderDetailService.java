@@ -31,32 +31,6 @@ public class OrderDetailService {
                 .toList();
     }
 
-    public Optional<OrderDetailDTO> createOrderDetail(OrderDetailCreateDTO dto, Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
-
-        OrderDetail detail = new OrderDetail();
-        detail.setOrder(order);
-
-        if (dto.productId() != null) {
-            productRepository.findById(dto.productId())
-                    .ifPresent(detail::setProduct);
-        }
-
-        if (dto.comboId() != null) {
-            comboRepository.findById(dto.comboId())
-                    .ifPresent(detail::setCombo);
-        }
-
-        detail.setQuantity(dto.quantity());
-        detail.setPrice(dto.price());
-        detail.setDiscount(dto.discount() != null ? dto.discount() : BigDecimal.ZERO);
-        detail.calculateTotal();
-
-        OrderDetail saved = orderDetailRepository.save(detail);
-        return Optional.of(saved.toDTO());
-    }
-
     public Optional<OrderDetailDTO> updateOrderDetail(Long id, OrderDetailUpdateDTO dto) {
         OrderDetail detail = orderDetailRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order detail not found with id: " + id));

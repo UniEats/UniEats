@@ -80,48 +80,6 @@ class OrderDetailServiceTest {
     }
 
     @Test
-    void testCreateOrderDetail_success() {
-        Order order = createOrder();
-
-        OrderDetailCreateDTO dto = new OrderDetailCreateDTO(
-                1L, null, 2,
-                new BigDecimal("100.00"),
-                null
-        );
-
-        Product product = new Product("Pizza", "desc", new BigDecimal("100.00"));
-        product.setId(1L);
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(orderDetailRepository.save(any(OrderDetail.class))).thenAnswer(inv -> {
-            OrderDetail saved = inv.getArgument(0);
-            saved.setId(5L);
-            return saved;
-        });
-
-        Optional<OrderDetailDTO> result = orderDetailService.createOrderDetail(dto, 1L);
-
-        assertTrue(result.isPresent());
-        assertEquals(5L, result.get().id());
-        verify(orderDetailRepository).save(any(OrderDetail.class));
-    }
-
-    @Test
-    void testCreateOrderDetail_orderNotFound_throws() {
-        OrderDetailCreateDTO dto = new OrderDetailCreateDTO(
-                1L, null, 1,
-                new BigDecimal("100.00"),
-                null
-        );
-
-        when(orderRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class,
-                () -> orderDetailService.createOrderDetail(dto, 99L));
-    }
-
-    @Test
     void testUpdateOrderDetail_success() {
         Order order = createOrder();
         OrderDetail detail = createDetail(order);

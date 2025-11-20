@@ -75,20 +75,14 @@ export const CartView: React.FC = () => {
       }
 
       const orderDetails = validItems.map((item: CartItem) => {
-        const product = item.type === "product" ? productsMap[item.id] : undefined;
-        const combo = item.type === "combo" ? combosMap[item.id] : undefined;
-        const price = product ? product.price : combo ? combo.price : 0;
         return {
           productId: item.type === "product" ? item.id : null,
           comboId: item.type === "combo" ? item.id : null,
           quantity: item.quantity,
-          price,
-          discount: 0,
         };
       });
 
       const order = await OrderService.createOrder({ details: orderDetails });
-      await OrderService.confirmOrder(order.id);
       await OrderService.payOrder(order.id, method);
 
       clearCart();
