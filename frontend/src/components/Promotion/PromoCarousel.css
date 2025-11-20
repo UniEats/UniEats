@@ -1,41 +1,42 @@
 .promo-carousel-container {
   width: 100%;
-  background: linear-gradient(135deg, #fff0f2 0%, #fff 100%); /* Subtle branding background */
+  background: linear-gradient(135deg, #fff0f2 0%, #fff 100%);
   border-bottom: 1px solid #f2f3f6;
   padding: 32px 0;
-  margin-bottom: 0; /* Remove bottom margin to sit flush with categories */
+  margin-bottom: 0;
 }
 
 .promo-carousel {
   position: relative;
-  max-width: 1200px; /* Constrain width */
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 48px; /* Make room for arrows */
+  padding: 0 48px;
   box-sizing: border-box;
 }
 
 .promo-slider-wrapper {
   overflow: hidden;
   width: 100%;
-  padding: 10px 0 20px 0; /* Space for shadow */
+  padding: 10px 0 20px 0;
 }
 
 .promo-slider {
   display: flex;
   gap: 24px;
-  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.6s ease-in-out;
   align-items: center;
 }
 
 .promo-card {
-  flex: 0 0 100%; /* Default to full width of container */
-  max-width: 600px; /* Wider card style */
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 600px;
   background: #ffffff;
   border-radius: 24px;
   padding: 32px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
   border: 1px solid rgba(0, 0, 0, 0.04);
-  text-align: left; /* Left align looks more premium for banners */
+  text-align: left;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -46,7 +47,6 @@
   transition: all 0.3s ease;
 }
 
-/* Decoration for the card */
 .promo-card::after {
   content: "%";
   position: absolute;
@@ -66,7 +66,6 @@
   box-shadow: 0 16px 40px rgba(218, 15, 51, 0.15);
 }
 
-/* Content styling z-index to sit above the decorative '%' */
 .promo-card > * {
   position: relative;
   z-index: 1;
@@ -115,7 +114,6 @@
   border-top: 1px solid #f3f4f6;
 }
 
-/* Improved Arrows */
 .promo-arrow {
   position: absolute;
   top: 50%;
@@ -155,12 +153,12 @@
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: -10px; /* Pull closer to cards */
+  margin-top: -10px;
   padding-bottom: 10px;
 }
 
 .dot {
-  width: 32px; /* Bars instead of dots looks more modern */
+  width: 32px;
   height: 4px;
   border-radius: 2px;
   background: #e5e7eb;
@@ -178,7 +176,7 @@
     padding: 0 16px;
   }
   .promo-arrow {
-    display: none; /* Hide arrows on mobile, rely on swipe/dots */
+    display: none;
   }
   .promo-card {
     padding: 24px;

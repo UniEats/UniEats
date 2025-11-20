@@ -13,7 +13,7 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const autoplayInterval = 5000; // Increased slightly for better readability
+  const autoplayInterval = 500;
 
   const next = () => {
     setCurrentIndex((prev) => (prev + 1 >= promotions.length ? 0 : prev + 1));
@@ -23,13 +23,14 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
     setCurrentIndex((prev) => (prev - 1 < 0 ? promotions.length - 1 : prev - 1));
   };
 
-  // Autoplay logic
-  useEffect(() => {
-    const timer = setInterval(() => next(), autoplayInterval);
-    return () => clearInterval(timer);
-  });
+  const [paused] = useState(false);
 
-  // Slider centering logic
+  useEffect(() => {
+    if (paused || promotions.length <= 1) return;
+    const timer = setTimeout(() => next(), autoplayInterval);
+    return () => clearTimeout(timer);
+  }, [currentIndex, paused, promotions.length]);
+
   useEffect(() => {
     if (!sliderRef.current || !wrapperRef.current) return;
 
@@ -39,12 +40,9 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
 
     if (!cards.length) return;
 
-    // Get dimensions of the currently active card
     const activeCard = cards[currentIndex] as HTMLElement;
     const cardWidth = activeCard.offsetWidth;
 
-    // Calculate the position to center the active card
-    // We assume a standard gap (24px from CSS) but calculating position dynamically is safer
     const cardLeft = activeCard.offsetLeft;
     const wrapperCenter = wrapper.offsetWidth / 2;
     const cardCenter = cardLeft + cardWidth / 2;
@@ -52,9 +50,8 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
     const translateX = wrapperCenter - cardCenter;
 
     slider.style.transform = `translateX(${translateX}px)`;
-  }, [currentIndex, promotions]);
+  }, [currentIndex, promotions.length]);
 
-  // Helper to format the "Hero" text based on promotion type
   const renderPromoDetails = (promo: NormalizedPromotion) => {
     if (promo.type === "PERCENTAGE") {
       return `Get ${promo.percentage}% OFF your order!`;
@@ -66,14 +63,13 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
       return `Save $${promo.discountAmount} on orders over $${promo.threshold}`;
     }
     if (promo.type === "BUY_GIVE_FREE") {
-      // Simplified text for the header, details are below
       return "Buy specific items, get one free!";
     }
     return "Special Offer";
   };
 
   if (!promotions || promotions.length === 0) return null;
-
+  
   return (
     <div className="promo-carousel-container">
       <div className="promo-carousel">
@@ -89,18 +85,14 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
               <article
                 className={`promo-card ${i === currentIndex ? "active" : "inactive"}`}
                 key={promo.id}
-                onClick={() => setCurrentIndex(i)} // Click to center
+                onClick={() => setCurrentIndex(i)}
               >
-                {/* The Badge (e.g., "Summer Sale") using the name */}
                 <span className="promo-type">{promo.name}</span>
 
-                {/* The Main Offer Text */}
                 <h3>{renderPromoDetails(promo)}</h3>
 
-                {/* The Description */}
                 <p className="promo-description">{promo.description}</p>
 
-                {/* Specific details (included items/combos) */}
                 <div className="promo-details-container">
                   {promo.products && Object.keys(promo.products).length > 0 && (
                     <small>
@@ -114,7 +106,6 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
                   )}
                 </div>
 
-                {/* Availability Days */}
                 <p className="promo-days">Available: {promo.validDays.map((d) => d.substring(0, 3)).join(", ")}</p>
               </article>
             ))}
