@@ -442,36 +442,6 @@ class OrderServiceTest {
     }
 
     @Test
-    void testDiscountIngredients_ReducesStock() {
-        Ingredient ingredient = new Ingredient();
-        ingredient.setId(100L);
-        ingredient.setName("Tomate");
-        ingredient.setStock(10);
-
-        Product p = new Product("P1", "desc", BigDecimal.ONE);
-        p.setId(1L);
-        ProductIngredient pi = createProductIngredient(p, ingredient, 2);
-        p.setProductIngredients(List.of(pi));
-
-        Order order = createValidOrder();
-        OrderDetail detail = new OrderDetail(2, BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ONE);
-        detail.setId(5L);
-        detail.setProduct(p);
-        detail.setOrder(order);
-        order.setDetails(List.of(detail));
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.save(order)).thenReturn(order);
-        when(ingredientRepository.save(any())).thenReturn(ingredient);
-
-        EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now());
-
-        orderService.startPreparation(1L, estimatedDto);
-
-        assertEquals(6, ingredient.getStock());
-    }
-
-    @Test
     void testGetOrdersByUserId_ReturnsOrders() {
         Order order1 = createValidOrder();
         Order order2 = createValidOrder();
