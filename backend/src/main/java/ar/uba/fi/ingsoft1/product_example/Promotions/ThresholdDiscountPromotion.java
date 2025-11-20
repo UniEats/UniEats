@@ -1,5 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.Promotions;
 
+import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetail;
 import ar.uba.fi.ingsoft1.product_example.Orders.Order;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductDTO;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboDTO;
@@ -31,10 +32,20 @@ public class ThresholdDiscountPromotion extends Promotion {
     @Override
     public void apply(Order order) {
         if (!isCurrentlyActive() || !isValidToday()) return;
+        System.out.println("Total antes de aplicar promoción: " + order.getTotalPrice());
 
         if (order.getTotalPrice().compareTo(threshold) >= 0) {
-            order.setTotalPrice(order.getTotalPrice().subtract(discount));
+            OrderDetail detail = order.getDetails().get(0);
+            System.out.println("Detalle antes de aplicar descuento: " + detail.getTotalPrice());
+
+            detail.setDiscount(detail.getDiscount().add(discount));
+            detail.calculateTotal();
+            System.out.println("Detalle después de aplicar descuento: " + detail.getTotalPrice());
+
         }
+        order.calculateTotal();
+        System.out.println("Total después de aplicar promoción: " + order.getTotalPrice());
+
     }
 
     @Override
