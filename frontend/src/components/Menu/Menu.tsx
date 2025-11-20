@@ -7,6 +7,7 @@ import { useDeleteCombo } from "@/services/ComboServices";
 import { useDeleteProduct } from "@/services/ProductServices";
 import PromoCarousel from "@/components/Promotion/PromoCarousel";
 import { useActivePromotionList } from "@/services/PromotionServices";
+import { NormalizedPromotion } from "@/models/Promotion";
 
 import Product from "../Product/Product";
 import "./Menu.css";
@@ -114,6 +115,13 @@ export const Menu = ({ menuSections }: MenuProps) => {
 
   const { data: promotions } = useActivePromotionList();
 
+  const getPromotionForProduct = (productId: number): NormalizedPromotion | undefined => {
+    if (!promotions) {
+      return undefined;
+    }
+    return promotions.find((promotion) => Boolean(promotion.products?.[productId]));
+  };
+
   return (
     <div className="menu-page">
       {promotions && promotions.length > 0 && (
@@ -165,6 +173,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
                       onDelete={() => handleDeleteItem(item.id, item.type)}
                       onAddToCart={(id, quantity) => handleAddToCart(id, item.type, quantity)}
                       available={item.available}
+                      promotion={item.type === "product" ? getPromotionForProduct(item.id) : undefined}
                     />
                   ))}
                 </div>

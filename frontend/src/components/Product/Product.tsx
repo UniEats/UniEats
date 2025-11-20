@@ -1,6 +1,7 @@
 import { useUserRole } from "@/services/TokenContext";
 import "./Product.css";
 import { useEffect, useMemo, useState } from "react";
+import { NormalizedPromotion } from "@/models/Promotion";
 
 interface ProductProps {
   id: number;
@@ -12,6 +13,7 @@ interface ProductProps {
   onDelete: (id: number) => void;
   onAddToCart?: (id: number, quantity: number) => void;
   available?: boolean;
+  promotion?: NormalizedPromotion;
 }
 
 const getImageUrl = (image?: Uint8Array) => {
@@ -40,7 +42,7 @@ const getImageUrl = (image?: Uint8Array) => {
   return URL.createObjectURL(blob);
 };
 
-export default function Product({ id, image, title, description, price, tags, onDelete, onAddToCart, available }: ProductProps) {
+export default function Product({ id, image, title, description, price, tags, onDelete, onAddToCart, available, promotion }: ProductProps) {
   const imageUrl = useMemo(() => getImageUrl(image), [image]);
 
   useEffect(() => {
@@ -54,6 +56,23 @@ export default function Product({ id, image, title, description, price, tags, on
   const [showCartControls, setShowCartControls] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const userRole = useUserRole();
+
+  const displayPrice = useMemo(() => {
+    if (promotion?.type === "PERCENTAGE" && promotion.percentage) {
+      const discount = (price * promotion.percentage) / 100;
+      return price - discount;
+    }
+    return price;
+  }, [price, promotion]);
+
+  const promoLabel = useMemo(() => {
+    if (!promotion) return null;
+    if (promotion.type === "PERCENTAGE") return `-${promotion.percentage}% OFF`;
+    if (promotion.type === "BUYX_PAYY") return `${promotion.buyQuantity}x${promotion.payQuantity}`;
+    if (promotion.type === "BUY_GIVE_FREE") return "SPECIAL OFFER";
+    if (promotion.type === "THRESHOLD") return "PROMO";
+    return "PROMO";
+  }, [promotion]);
 
   const handleAddClick = () => {
     setShowCartControls((prev) => !prev);
@@ -71,6 +90,7 @@ export default function Product({ id, image, title, description, price, tags, on
 
   return (
     <article className="product-card">
+      {promotion && promoLabel && <div className="promo-badge">{promoLabel}</div>}
       <div className="product-media">
         <img className="product-image" src={imageUrl} alt={title} loading="lazy" />
       </div>
@@ -78,7 +98,16 @@ export default function Product({ id, image, title, description, price, tags, on
         <div className="product-content">
           <h3 className="product-title">{title}</h3>
           <p className="product-description">{description}</p>
-          <span className="product-price">${price}</span>
+          <div className="product-price-container">
+            {promotion && promotion.type === "PERCENTAGE" ? (
+              <>
+                <span className="original-price">${price.toFixed(2)}</span>
+                <span className="discounted-price">${displayPrice.toFixed(2)}</span>
+              </>
+            ) : (
+              <span className="product-price">${price.toFixed(2)}</span>
+            )}
+          </div>
           {tags.length > 0 ? (
             <ul className="product-tags" aria-label="Dietary tags">
               {tags.map((tag) => (
@@ -146,7 +175,7 @@ export default function Product({ id, image, title, description, price, tags, on
               />
             </label>
             <p className="cart-total">
-              Total: <strong>${(quantity * price).toFixed(2)}</strong>
+              Total: <strong>${(quantity * displayPrice).toFixed(2)}</strong>
             </p>
             <button
               className="product-cta product-cta--confirm"
