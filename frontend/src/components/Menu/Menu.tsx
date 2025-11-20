@@ -115,11 +115,11 @@ export const Menu = ({ menuSections }: MenuProps) => {
 
   const { data: promotions } = useActivePromotionList();
 
-  const getPromotionForProduct = (productId: number): NormalizedPromotion | undefined => {
+  const getPromotionsForProduct = (productId: number): NormalizedPromotion[] => {
     if (!promotions) {
-      return undefined;
+      return [];
     }
-    return promotions.find((promotion) => Boolean(promotion.products?.[productId]));
+    return promotions.filter((promotion) => Boolean(promotion.products?.[productId]));
   };
 
   return (
@@ -173,7 +173,7 @@ export const Menu = ({ menuSections }: MenuProps) => {
                       onDelete={() => handleDeleteItem(item.id, item.type)}
                       onAddToCart={(id, quantity) => handleAddToCart(id, item.type, quantity)}
                       available={item.available}
-                      promotion={item.type === "product" ? getPromotionForProduct(item.id) : undefined}
+                      promotions={item.type === "product" ? getPromotionsForProduct(item.id) : []}
                     />
                   ))}
                 </div>

@@ -13,7 +13,7 @@ interface ProductProps {
   onDelete: (id: number) => void;
   onAddToCart?: (id: number, quantity: number) => void;
   available?: boolean;
-  promotion?: NormalizedPromotion;
+  promotions?: NormalizedPromotion[];
 }
 
 const getImageUrl = (image?: Uint8Array) => {
@@ -42,7 +42,18 @@ const getImageUrl = (image?: Uint8Array) => {
   return URL.createObjectURL(blob);
 };
 
-export default function Product({ id, image, title, description, price, tags, onDelete, onAddToCart, available, promotion }: ProductProps) {
+export default function Product({
+  id,
+  image,
+  title,
+  description,
+  price,
+  tags,
+  onDelete,
+  onAddToCart,
+  available,
+  promotions = [],
+}: ProductProps) {
   const imageUrl = useMemo(() => getImageUrl(image), [image]);
 
   useEffect(() => {
@@ -58,21 +69,28 @@ export default function Product({ id, image, title, description, price, tags, on
   const userRole = useUserRole();
 
   const displayPrice = useMemo(() => {
-    if (promotion?.type === "PERCENTAGE" && promotion.percentage) {
-      const discount = (price * promotion.percentage) / 100;
-      return price - discount;
-    }
-    return price;
-  }, [price, promotion]);
+    let calculatedPrice = price;
 
-  const promoLabel = useMemo(() => {
-    if (!promotion) return null;
-    if (promotion.type === "PERCENTAGE") return `-${promotion.percentage}% OFF`;
-    if (promotion.type === "BUYX_PAYY") return `${promotion.buyQuantity}x${promotion.payQuantity}`;
-    if (promotion.type === "BUY_GIVE_FREE") return "SPECIAL OFFER";
-    if (promotion.type === "THRESHOLD") return "PROMO";
-    return "PROMO";
-  }, [promotion]);
+    promotions.forEach((promotion) => {
+      if (promotion.type === "PERCENTAGE" && promotion.percentage) {
+        calculatedPrice -= (calculatedPrice * promotion.percentage) / 100;
+      }
+    });
+
+    return calculatedPrice;
+  }, [price, promotions]);
+
+  const promoLabels = useMemo(() => {
+    if (!promotions || promotions.length === 0) return [];
+
+    return promotions.map((promotion) => {
+      if (promotion.type === "PERCENTAGE") return `-${promotion.percentage}%`;
+      if (promotion.type === "BUYX_PAYY") return `${promotion.buyQuantity}x${promotion.payQuantity}`;
+      if (promotion.type === "BUY_GIVE_FREE") return "GIFT";
+      if (promotion.type === "THRESHOLD") return "DEAL";
+      return "PROMO";
+    });
+  }, [promotions]);
 
   const handleAddClick = () => {
     setShowCartControls((prev) => !prev);
@@ -90,7 +108,24 @@ export default function Product({ id, image, title, description, price, tags, on
 
   return (
     <article className="product-card">
-      {promotion && promoLabel && <div className="promo-badge">{promoLabel}</div>}
+      <div
+        className="product-badges-container"
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+          zIndex: 2,
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
+        }}
+      >
+        {promoLabels.map((label, index) => (
+          <div key={`${id}-promo-${index}`} className="promo-badge" style={{ position: "static", marginBottom: 0 }}>
+            {label}
+          </div>
+        ))}
+      </div>
       <div className="product-media">
         <img className="product-image" src={imageUrl} alt={title} loading="lazy" />
       </div>
@@ -99,7 +134,7 @@ export default function Product({ id, image, title, description, price, tags, on
           <h3 className="product-title">{title}</h3>
           <p className="product-description">{description}</p>
           <div className="product-price-container">
-            {promotion && promotion.type === "PERCENTAGE" ? (
+            {displayPrice < price ? (
               <>
                 <span className="original-price">${price.toFixed(2)}</span>
                 <span className="discounted-price">${displayPrice.toFixed(2)}</span>

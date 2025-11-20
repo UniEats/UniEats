@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from "react";
 import { useToken } from "@/services/TokenContext";
 import { useProducts } from "@/components/Product/ProductContext";
 import { useActivePromotionList } from "@/services/PromotionServices";
@@ -57,33 +57,38 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [validItems, cart, productsMap, setCart]);
 
-  const findPromotionForItem = (item: CartItem): NormalizedPromotion | undefined => {
-    return promotions.find((promotion) => {
+  const findPromotionsForItem = useCallback((item: CartItem): NormalizedPromotion[] => {
+    return promotions.filter((promotion) => {
       const collection = item.type === "product" ? promotion.products : promotion.combos;
       return collection ? Object.prototype.hasOwnProperty.call(collection, item.id) : false;
     });
-  };
+  }, [promotions]);
 
-  const calculateItemTotal = (item: CartItem): number => {
+  const calculateItemTotal = useCallback((item: CartItem): number => {
     const entity = item.type === "product" ? productsMap[item.id] : combosMap[item.id];
     if (!entity) return 0;
 
-    let finalPrice = entity.price * item.quantity;
-    const promo = findPromotionForItem(item);
+    const itemPromos = findPromotionsForItem(item);
+    let payableQuantity = item.quantity;
 
-    if (promo) {
+    itemPromos.forEach((promo) => {
+      if (promo.type === "BUYX_PAYY") {
+        const groups = Math.floor(payableQuantity / promo.buyQuantity);
+        const remainder = payableQuantity % promo.buyQuantity;
+        payableQuantity = groups * promo.payQuantity + remainder;
+      }
+    });
+
+    let finalPrice = entity.price * payableQuantity;
+
+    itemPromos.forEach((promo) => {
       if (promo.type === "PERCENTAGE") {
         finalPrice -= (finalPrice * promo.percentage) / 100;
-      } else if (promo.type === "BUYX_PAYY") {
-        const groups = Math.floor(item.quantity / promo.buyQuantity);
-        const remainder = item.quantity % promo.buyQuantity;
-        const paidQuantity = groups * promo.payQuantity + remainder;
-        finalPrice = paidQuantity * entity.price;
       }
-    }
+    });
 
     return finalPrice;
-  };
+  }, [productsMap, combosMap, findPromotionsForItem]);
 
   const isThresholdPromotion = (
     promotion: NormalizedPromotion,
@@ -94,14 +99,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const totalPrice = useMemo(() => {
     const subtotal = validItems.reduce((acc, item) => acc + calculateItemTotal(item), 0);
 
-    const thresholdPromo = promotions.find(isThresholdPromotion);
+    let finalTotal = subtotal;
 
-    if (thresholdPromo && subtotal >= thresholdPromo.threshold) {
-      return Math.max(0, subtotal - thresholdPromo.discountAmount);
-    }
+    promotions
+      .filter(isThresholdPromotion)
+      .forEach((promotion) => {
+        if (subtotal >= promotion.threshold) {
+          finalTotal -= promotion.discountAmount;
+        }
+      });
 
-    return Math.max(0, subtotal);
-  }, [validItems, productsMap, combosMap, promotions]);
+    return Math.max(0, finalTotal);
+  }, [validItems, calculateItemTotal, promotions]);
 
   const addToCart = (id: number, type: "product" | "combo", quantity: number = 1) => {
     setCart((prevItems: CartItem[]) => {

@@ -107,28 +107,34 @@ export const CartView: React.FC = () => {
 
         const imageUrl = getImageUrl(data.image);
         const originalSubtotal = data.price * item.quantity;
-        let finalSubtotal = originalSubtotal;
-        let promoLabel: string | null = null;
 
-        const promo = promotions.find((promotion) => {
+        const itemPromos = promotions.filter((promotion) => {
           const collection = item.type === "product" ? promotion.products : promotion.combos;
           return collection ? Object.prototype.hasOwnProperty.call(collection, item.id) : false;
         });
 
-        if (promo) {
-          if (promo.type === "PERCENTAGE") {
-            finalSubtotal = originalSubtotal * (1 - promo.percentage / 100);
-            promoLabel = `-${promo.percentage}%`;
-          } else if (promo.type === "BUYX_PAYY") {
-            const groups = Math.floor(item.quantity / promo.buyQuantity);
-            const remainder = item.quantity % promo.buyQuantity;
-            const paidQty = groups * promo.payQuantity + remainder;
-            finalSubtotal = paidQty * data.price;
+        let payableQuantity = item.quantity;
+        const activeLabels: string[] = [];
+
+        itemPromos.forEach((promo) => {
+          if (promo.type === "BUYX_PAYY") {
+            const groups = Math.floor(payableQuantity / promo.buyQuantity);
+            const remainder = payableQuantity % promo.buyQuantity;
+            payableQuantity = groups * promo.payQuantity + remainder;
             if (item.quantity >= promo.buyQuantity) {
-              promoLabel = `${promo.buyQuantity}x${promo.payQuantity}`;
+              activeLabels.push(`${promo.buyQuantity}x${promo.payQuantity}`);
             }
           }
-        }
+        });
+
+        let finalSubtotal = payableQuantity * data.price;
+
+        itemPromos.forEach((promo) => {
+          if (promo.type === "PERCENTAGE") {
+            finalSubtotal -= (finalSubtotal * promo.percentage) / 100;
+            activeLabels.push(`-${promo.percentage}%`);
+          }
+        });
 
         return {
           key: `${item.type}-${item.id}`,
@@ -136,7 +142,7 @@ export const CartView: React.FC = () => {
           imageUrl,
           originalSubtotal,
           finalSubtotal,
-          promoLabel,
+          activeLabels,
           cartItem: item,
         };
       })
@@ -171,30 +177,31 @@ export const CartView: React.FC = () => {
         <h2>Your order</h2>
 
         <div className={styles.cartItems}>
-          {cartItems.map(({ key, data, imageUrl, originalSubtotal, finalSubtotal, promoLabel, cartItem }) => (
+          {cartItems.map(({ key, data, imageUrl, originalSubtotal, finalSubtotal, activeLabels, cartItem }) => (
             <div key={key} className={styles.cartItem}>
               <img src={imageUrl} alt={data.name} className={styles.cartItemImage} />
 
               <div className={styles.cartItemInfo}>
                 <span className={styles.itemName}>{data.name}</span>
                 <span className={styles.itemPrice}>${data.price.toFixed(2)} each</span>
-                {promoLabel && (
-                  <span
-                    style={{
-                      backgroundColor: "#bf0c2b",
-                      color: "#ffffff",
-                      fontSize: "0.75rem",
-                      padding: "2px 6px",
-                      borderRadius: "4px",
-                      width: "fit-content",
-                      fontWeight: 600,
-                      textTransform: "uppercase",
-                      marginTop: "4px",
-                    }}
-                  >
-                    {promoLabel}
-                  </span>
-                )}
+                <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginTop: "4px" }}>
+                  {activeLabels.map((label, idx) => (
+                    <span
+                      key={idx}
+                      style={{
+                        backgroundColor: "#bf0c2b",
+                        color: "#ffffff",
+                        fontSize: "0.75rem",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div className={styles.quantityControls}>
@@ -214,7 +221,7 @@ export const CartView: React.FC = () => {
               </div>
 
               <div className={styles.itemSubtotal}>
-                {promoLabel ? (
+                {activeLabels.length > 0 ? (
                   <>
                     <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: "0.9rem" }}>
                       ${originalSubtotal.toFixed(2)}
