@@ -13,7 +13,7 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const autoplayInterval = 500;
+  const autoplayInterval = 5000;
 
   const next = () => {
     setCurrentIndex((prev) => (prev + 1 >= promotions.length ? 0 : prev + 1));
