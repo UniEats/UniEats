@@ -149,6 +149,74 @@ export const CartView: React.FC = () => {
       .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
   }, [validItems, productsMap, combosMap, promotions]);
 
+  const earnedGifts = useMemo(() => {
+    const gifts: { id: number; name: string; image?: Uint8Array; quantity: number }[] = [];
+
+    const pushGift = (
+      rawId: unknown,
+      fallbackName: string | undefined,
+      quantity: number,
+      sourceMap: Record<number, MenuItem>,
+    ) => {
+      const id = typeof rawId === "number" ? rawId : Number(rawId);
+      if (!Number.isFinite(id)) return;
+
+      const entity = sourceMap[id];
+      gifts.push({
+        id,
+        name: entity?.name ?? fallbackName ?? `Gift Item #${id}`,
+        image: entity?.image,
+        quantity,
+      });
+    };
+
+    const addFromCollection = (collection: unknown, map: Record<number, MenuItem>, quantity: number) => {
+      if (!collection) return;
+
+      if (Array.isArray(collection)) {
+        collection.forEach((entry) => {
+          if (typeof entry === "number" || typeof entry === "string") {
+            pushGift(entry, undefined, quantity, map);
+          } else if (entry && typeof entry === "object" && "id" in entry) {
+            const fallbackName = "name" in entry ? (entry as { name?: string }).name : undefined;
+            pushGift((entry as { id: number }).id, fallbackName, quantity, map);
+          }
+        });
+        return;
+      }
+
+      if (typeof collection === "object") {
+        Object.entries(collection as Record<string, string>).forEach(([key, value]) => {
+          pushGift(key, value, quantity, map);
+        });
+        return;
+      }
+
+      if (typeof collection === "number" || typeof collection === "string") {
+        pushGift(collection, undefined, quantity, map);
+      }
+    };
+
+    validItems.forEach((item) => {
+      const itemPromos = promotions.filter((promotion) => {
+        if (promotion.type !== "BUY_GIVE_FREE") return false;
+
+        const collection = item.type === "product" ? promotion.products : promotion.combos;
+        return collection ? Object.prototype.hasOwnProperty.call(collection, item.id) : false;
+      });
+
+      itemPromos.forEach((promo) => {
+        if (promo.type !== "BUY_GIVE_FREE") return;
+
+        const giftQty = item.quantity;
+        addFromCollection(promo.freeProducts, productsMap, giftQty);
+        addFromCollection(promo.freeCombos, combosMap, giftQty);
+      });
+    });
+
+    return gifts;
+  }, [validItems, promotions, productsMap, combosMap]);
+
   useEffect(() => {
     return () => {
       cartItems.forEach(({ imageUrl }) => {
@@ -244,6 +312,30 @@ export const CartView: React.FC = () => {
               </button>
             </div>
           ))}
+
+          {earnedGifts.length > 0 && (
+            <>
+              <div style={{ padding: "1.5rem 0 0.5rem", fontWeight: 700, color: "#10b981" }}>🎁 Free Gifts</div>
+              {earnedGifts.map((gift, index) => (
+                <div key={`gift-${index}`} className={styles.cartItem} style={{ background: "#f0fdf4" }}>
+                  <img src={getImageUrl(gift.image)} alt={gift.name} className={styles.cartItemImage} />
+                  <div className={styles.cartItemInfo}>
+                    <span className={styles.itemName}>{gift.name}</span>
+                    <span className={styles.itemPrice} style={{ color: "#10b981" }}>
+                      FREE
+                    </span>
+                    <div className={styles.quantityControls} style={{ border: "none", background: "transparent" }}>
+                      <span className={styles.quantity}>Qty: {gift.quantity}</span>
+                    </div>
+                  </div>
+                  <div className={styles.itemSubtotal}>
+                    <span style={{ fontWeight: 700, fontSize: "1.1rem", color: "#10b981" }}>$0.00</span>
+                  </div>
+                  <div style={{ width: "40px" }} />
+                </div>
+              ))}
+            </>
+          )}
         </div>
 
         <div className={styles.cartFooter}>

@@ -80,6 +80,46 @@ export default function Product({
     return calculatedPrice;
   }, [price, promotions]);
 
+  const giftNames = useMemo(() => {
+    if (!promotions || promotions.length === 0) return [];
+
+    const names: string[] = [];
+    const appendNames = (items?: unknown) => {
+      if (!items) return;
+
+      if (Array.isArray(items)) {
+        items.forEach((entry) => {
+          if (typeof entry === "string") {
+            names.push(entry);
+          } else if (entry && typeof entry === "object" && "name" in entry) {
+            const value = (entry as { name?: string }).name;
+            if (value) names.push(value);
+          }
+        });
+        return;
+      }
+
+      if (typeof items === "string") {
+        names.push(items);
+        return;
+      }
+
+      if (typeof items === "object") {
+        Object.values(items as Record<string, string>).forEach((value) => {
+          if (value) names.push(value);
+        });
+      }
+    };
+
+    promotions.forEach((promotion) => {
+      if (promotion.type !== "BUY_GIVE_FREE") return;
+      appendNames(promotion.freeProducts);
+      appendNames(promotion.freeCombos);
+    });
+
+    return names;
+  }, [promotions]);
+
   const promoLabels = useMemo(() => {
     if (!promotions || promotions.length === 0) return [];
 
@@ -132,6 +172,21 @@ export default function Product({
       <div className="product-body">
         <div className="product-content">
           <h3 className="product-title">{title}</h3>
+          {giftNames.length > 0 && (
+            <div
+              style={{
+                fontSize: "0.8rem",
+                color: "#10b981",
+                fontWeight: "bold",
+                marginTop: "4px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <span>🎁 Includes: {giftNames.join(", ")}</span>
+            </div>
+          )}
           <p className="product-description">{description}</p>
           <div className="product-price-container">
             {displayPrice < price ? (
