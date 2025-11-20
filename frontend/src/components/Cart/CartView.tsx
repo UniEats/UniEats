@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
+import { useActivePromotionList } from "@/services/PromotionServices";
 
 import { OrderService } from "../../services/OrderService";
-import { useActivePromotionList } from "@/services/PromotionServices";
 import { MenuItem, useProducts } from "../Product/ProductContext";
 import { CartItem, useCart } from "./Cart";
-import { PaymentModal, type PaymentMethod } from "./PaymentModal";
 import styles from "./CartView.module.css";
+import { type PaymentMethod, PaymentModal } from "./PaymentModal";
 
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/80";
 
@@ -162,8 +162,10 @@ export const CartView: React.FC = () => {
   if (cartItems.length === 0) {
     return (
       <CommonLayout>
-        <div className={styles.emptyCart}>
-          <p>Your cart is empty</p>
+        <div className={styles.cartContainer}>
+          <div className={styles.emptyCart}>
+            <p>Your cart is empty</p>
+          </div>
         </div>
       </CommonLayout>
     );
@@ -193,6 +195,7 @@ export const CartView: React.FC = () => {
                       width: "fit-content",
                       fontWeight: 600,
                       textTransform: "uppercase",
+                      marginTop: "4px",
                     }}
                   >
                     {promoLabel}
@@ -216,21 +219,18 @@ export const CartView: React.FC = () => {
                 </button>
               </div>
 
-              <div
-                className={styles.itemSubtotal}
-                style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}
-              >
+              <div className={styles.itemSubtotal}>
                 {promoLabel ? (
                   <>
                     <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: "0.9rem" }}>
                       ${originalSubtotal.toFixed(2)}
                     </span>
-                    <span style={{ color: "#bf0c2b", fontWeight: 700 }}>
+                    <span style={{ color: "#bf0c2b", fontWeight: 700, fontSize: "1.1rem" }}>
                       ${finalSubtotal.toFixed(2)}
                     </span>
                   </>
                 ) : (
-                  <span>${finalSubtotal.toFixed(2)}</span>
+                  <span style={{ fontWeight: 700, fontSize: "1.1rem" }}>${finalSubtotal.toFixed(2)}</span>
                 )}
               </div>
 
@@ -246,30 +246,33 @@ export const CartView: React.FC = () => {
         </div>
 
         <div className={styles.cartFooter}>
-          <div className={styles.paymentButtons}>
-            <h3>Payment Method</h3>
-            <button onClick={() => setPaymentMethod("credit")} className={styles.checkoutButton}>
-              Credit/Debit Card
-            </button>
-            <button onClick={() => setPaymentMethod("cash")} className={styles.checkoutButton}>
-              Cash
-            </button>
-            <button onClick={() => setPaymentMethod("qr")} className={styles.checkoutButton}>
-              QR Code
-            </button>
-          </div>
           <div className={styles.total}>
-            <span>Total:</span>
+            <span>Total Amount</span>
             <span>${totalPrice.toFixed(2)}</span>
+          </div>
+
+          <div className={styles.paymentButtons}>
+            <h3>Select Payment Method</h3>
+            <div className={styles.paymentOptionsGrid}>
+              <button onClick={() => setPaymentMethod("credit")} className={styles.checkoutButton}>
+                <span>💳</span>
+                Credit / Debit
+              </button>
+              <button onClick={() => setPaymentMethod("cash")} className={styles.checkoutButton}>
+                <span>💵</span>
+                Cash
+              </button>
+              <button onClick={() => setPaymentMethod("qr")} className={styles.checkoutButton}>
+                <span>📱</span>
+                QR Code
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
       {paymentMethod && (
-        <PaymentModal
-          method={paymentMethod}
-          onClose={() => setPaymentMethod(null)}
-          onConfirm={handleCheckout}
-        />
+        <PaymentModal method={paymentMethod} onClose={() => setPaymentMethod(null)} onConfirm={handleCheckout} />
       )}
     </CommonLayout>
   );
