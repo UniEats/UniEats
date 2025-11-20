@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { CommonLayout } from "@/components/CommonLayout/CommonLayout";
 
 import { OrderService } from "../../services/OrderService";
+import { useActivePromotionList } from "@/services/PromotionServices";
 import { MenuItem, useProducts } from "../Product/ProductContext";
 import { CartItem, useCart } from "./Cart";
 import { PaymentModal, type PaymentMethod } from "./PaymentModal";
@@ -41,6 +42,7 @@ export const CartView: React.FC = () => {
   const { validItems, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
   const { productsMap, combosMap } = useProducts();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const { data: promotions = [] } = useActivePromotionList();
 
   const handleQuantityChange = (id: number, type: "product" | "combo", newQuantity: number) => {
     if (newQuantity < 1) {
@@ -110,18 +112,42 @@ export const CartView: React.FC = () => {
         if (!data) return null;
 
         const imageUrl = getImageUrl(data.image);
-        const subtotal = data.price * item.quantity;
+        const originalSubtotal = data.price * item.quantity;
+        let finalSubtotal = originalSubtotal;
+        let promoLabel: string | null = null;
+
+        const promo = promotions.find((promotion) => {
+          const collection = item.type === "product" ? promotion.products : promotion.combos;
+          return collection ? Object.prototype.hasOwnProperty.call(collection, item.id) : false;
+        });
+
+        if (promo) {
+          if (promo.type === "PERCENTAGE") {
+            finalSubtotal = originalSubtotal * (1 - promo.percentage / 100);
+            promoLabel = `-${promo.percentage}%`;
+          } else if (promo.type === "BUYX_PAYY") {
+            const groups = Math.floor(item.quantity / promo.buyQuantity);
+            const remainder = item.quantity % promo.buyQuantity;
+            const paidQty = groups * promo.payQuantity + remainder;
+            finalSubtotal = paidQty * data.price;
+            if (item.quantity >= promo.buyQuantity) {
+              promoLabel = `${promo.buyQuantity}x${promo.payQuantity}`;
+            }
+          }
+        }
 
         return {
           key: `${item.type}-${item.id}`,
           data,
           imageUrl,
-          subtotal,
+          originalSubtotal,
+          finalSubtotal,
+          promoLabel,
           cartItem: item,
         };
       })
       .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-  }, [validItems, productsMap, combosMap]);
+  }, [validItems, productsMap, combosMap, promotions]);
 
   useEffect(() => {
     return () => {
@@ -149,13 +175,29 @@ export const CartView: React.FC = () => {
         <h2>Your order</h2>
 
         <div className={styles.cartItems}>
-          {cartItems.map(({ key, data, imageUrl, subtotal, cartItem }) => (
+          {cartItems.map(({ key, data, imageUrl, originalSubtotal, finalSubtotal, promoLabel, cartItem }) => (
             <div key={key} className={styles.cartItem}>
               <img src={imageUrl} alt={data.name} className={styles.cartItemImage} />
 
               <div className={styles.cartItemInfo}>
                 <span className={styles.itemName}>{data.name}</span>
                 <span className={styles.itemPrice}>${data.price.toFixed(2)} each</span>
+                {promoLabel && (
+                  <span
+                    style={{
+                      backgroundColor: "#bf0c2b",
+                      color: "#ffffff",
+                      fontSize: "0.75rem",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      width: "fit-content",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {promoLabel}
+                  </span>
+                )}
               </div>
 
               <div className={styles.quantityControls}>
@@ -174,7 +216,23 @@ export const CartView: React.FC = () => {
                 </button>
               </div>
 
-              <span className={styles.itemSubtotal}>${subtotal.toFixed(2)}</span>
+              <div
+                className={styles.itemSubtotal}
+                style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}
+              >
+                {promoLabel ? (
+                  <>
+                    <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: "0.9rem" }}>
+                      ${originalSubtotal.toFixed(2)}
+                    </span>
+                    <span style={{ color: "#bf0c2b", fontWeight: 700 }}>
+                      ${finalSubtotal.toFixed(2)}
+                    </span>
+                  </>
+                ) : (
+                  <span>${finalSubtotal.toFixed(2)}</span>
+                )}
+              </div>
 
               <button
                 className={styles.removeButton}

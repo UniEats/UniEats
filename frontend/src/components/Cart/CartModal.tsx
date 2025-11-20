@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { Modal } from "@/components/Modal/Modal";
 import { useProducts } from "@/components/Product/ProductContext";
 import styles from "@/components/CommonLayout/CommonLayout.module.css";
+import { useActivePromotionList } from "@/services/PromotionServices";
 import { useCart } from "./Cart";
 
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/64";
@@ -52,6 +53,7 @@ type CartModalProps = {
 export const CartModal = ({ show, onClose }: CartModalProps) => {
   const { validItems, clearCart, totalPrice, removeFromCart, updateQuantity } = useCart();
   const { productsMap, combosMap } = useProducts();
+  const { data: promotions = [] } = useActivePromotionList();
 
   const cartItems = useMemo(() => {
     return validItems
@@ -59,19 +61,43 @@ export const CartModal = ({ show, onClose }: CartModalProps) => {
         const data = item.type === "product" ? productsMap[item.id] : combosMap[item.id];
         if (!data) return null;
 
-        const subtotal = data.price * item.quantity;
+        const originalSubtotal = data.price * item.quantity;
+        let finalSubtotal = originalSubtotal;
+        let promoLabel: string | null = null;
+
+        const promo = promotions.find((promotion) => {
+          const collection = item.type === "product" ? promotion.products : promotion.combos;
+          return collection ? Object.prototype.hasOwnProperty.call(collection, item.id) : false;
+        });
+
+        if (promo) {
+          if (promo.type === "PERCENTAGE") {
+            finalSubtotal = originalSubtotal * (1 - promo.percentage / 100);
+            promoLabel = `-${promo.percentage}%`;
+          } else if (promo.type === "BUYX_PAYY") {
+            const groups = Math.floor(item.quantity / promo.buyQuantity);
+            const remainder = item.quantity % promo.buyQuantity;
+            const paidQty = groups * promo.payQuantity + remainder;
+            finalSubtotal = paidQty * data.price;
+            if (item.quantity >= promo.buyQuantity) {
+              promoLabel = `${promo.buyQuantity}x${promo.payQuantity}`;
+            }
+          }
+        }
         const imageUrl = getImageUrl(data.image);
 
         return {
           key: `${item.type}-${item.id}`,
           item,
           data,
-          subtotal,
+          originalSubtotal,
+          finalSubtotal,
+          promoLabel,
           imageUrl,
         };
       })
       .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-  }, [validItems, productsMap, combosMap]);
+  }, [validItems, productsMap, combosMap, promotions]);
 
   if (!show) {
     return null;
@@ -85,12 +111,44 @@ export const CartModal = ({ show, onClose }: CartModalProps) => {
       ) : (
         <>
           <ul className={styles.cartItemList}>
-            {cartItems.map(({ key, item, data, subtotal, imageUrl }) => (
+            {cartItems.map(({ key, item, data, originalSubtotal, finalSubtotal, promoLabel, imageUrl }) => (
               <li key={key} className={styles.cartItemCard}>
                 <img src={imageUrl} alt={data.name} className={styles.cartItemImage} />
                 <div className={styles.cartItemDetails}>
                   <span className={styles.cartItemName}>{data.name}</span>
-                  <span className={styles.cartItemPrice}>${subtotal.toFixed(2)}</span>
+                  {promoLabel && (
+                    <span
+                      style={{
+                        backgroundColor: "#bf0c2b",
+                        color: "#ffffff",
+                        fontSize: "0.7rem",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        width: "fit-content",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {promoLabel}
+                    </span>
+                  )}
+                  <div
+                    className={styles.cartItemPrice}
+                    style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}
+                  >
+                    {promoLabel ? (
+                      <>
+                        <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: "0.85rem" }}>
+                          ${originalSubtotal.toFixed(2)}
+                        </span>
+                        <span style={{ color: "#bf0c2b", fontWeight: 700 }}>
+                          ${finalSubtotal.toFixed(2)}
+                        </span>
+                      </>
+                    ) : (
+                      <span>${finalSubtotal.toFixed(2)}</span>
+                    )}
+                  </div>
                 </div>
                 <div className={styles.cartItemControls}>
                   <input
