@@ -208,7 +208,7 @@ export const CartView: React.FC = () => {
       itemPromos.forEach((promo) => {
         if (promo.type !== "BUY_GIVE_FREE") return;
 
-        const giftQty = item.quantity;
+        const giftQty = promo.oneFreePerTrigger ? item.quantity : 1;
         addFromCollection(promo.freeProducts, productsMap, giftQty);
         addFromCollection(promo.freeCombos, combosMap, giftQty);
       });

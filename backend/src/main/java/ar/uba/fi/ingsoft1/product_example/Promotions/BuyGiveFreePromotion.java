@@ -5,6 +5,7 @@ import ar.uba.fi.ingsoft1.product_example.Products.ProductDTO;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboDTO;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
+import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetail;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -49,20 +50,41 @@ public class BuyGiveFreePromotion extends Promotion {
 
         long freebies = oneFreePerTrigger ? triggerCount : 1;
 
-        for (var detail : order.getDetails()) {
-            boolean isFreebie =
-                (detail.getProduct() != null && freeProducts.contains(detail.getProduct())) ||
-                (detail.getCombo() != null && freeCombos.contains(detail.getCombo()));
+        boolean alreadyApplied = order.getDetails().stream().anyMatch(
+                d -> (d.getProduct() != null && freeProducts.contains(d.getProduct())) ||
+                        (d.getCombo()  != null && freeCombos.contains(d.getCombo()))
+        );
 
-            if (isFreebie) {
-                long discountUnits = Math.min(detail.getQuantity(), freebies);
-                BigDecimal unitPrice = detail.getPrice();
-                BigDecimal discount = unitPrice.multiply(BigDecimal.valueOf(discountUnits));
-                detail.setDiscount(detail.getDiscount().add(discount));
-                detail.calculateTotal();
-                freebies -= discountUnits;
-                if (freebies <= 0) break;
-            }
+        if (!oneFreePerTrigger && alreadyApplied) {
+            return;
+        }
+
+        for (Combo freeCombo : freeCombos) {
+            if (freebies <= 0) break;
+
+            OrderDetail gift = new OrderDetail();
+            gift.setCombo(freeCombo);
+            gift.setQuantity((int) freebies);
+            gift.setPrice(BigDecimal.ZERO);
+            gift.setDiscount(BigDecimal.ZERO);
+            gift.calculateTotal();
+            gift.setOrder(order);
+
+            order.addDetail(gift);
+        }
+
+        for (Product freeProduct : freeProducts) {
+            if (freebies <= 0) break;
+
+            OrderDetail gift = new OrderDetail();
+            gift.setProduct(freeProduct);
+            gift.setQuantity((int) freebies);
+            gift.setPrice(BigDecimal.ZERO);
+            gift.setDiscount(BigDecimal.ZERO);
+            gift.calculateTotal();
+            gift.setOrder(order);
+
+            order.addDetail(gift);
         }
 
         order.calculateTotal();
