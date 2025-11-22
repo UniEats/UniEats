@@ -46,8 +46,6 @@ public class BuyXPayYPromotion extends Promotion {
                 }
             }
         }
-
-        order.calculateTotal();
     }
 
     @Override

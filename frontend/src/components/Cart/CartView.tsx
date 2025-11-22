@@ -12,9 +12,11 @@ import { NormalizedPromotion } from "@/models/Promotion";
 
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/80";
 
-// Helper function to get image URL
+type PotentialGift = { id: number; type: "product" | "combo"; quantity: number };
+type DisplayGift = { id: number; name: string; image?: Uint8Array; quantity: number; isCompensated: boolean; type: "product" | "combo" };
+
 const getImageUrl = (image: Uint8Array | undefined) => {
-  if (!image) return PLACEHOLDER_IMAGE; // Placeholder
+  if (!image) return PLACEHOLDER_IMAGE;
 
   let buffer: ArrayBuffer;
   if (image instanceof Uint8Array) {
@@ -22,7 +24,7 @@ const getImageUrl = (image: Uint8Array | undefined) => {
   } else if (typeof image === "object" && image !== null && "byteLength" in image) {
     buffer = new Uint8Array(image as ArrayBufferLike).slice().buffer as unknown as ArrayBuffer;
   } else {
-    return PLACEHOLDER_IMAGE; // Fallback
+    return PLACEHOLDER_IMAGE;
   }
 
   const view = new Uint8Array(buffer);
@@ -40,14 +42,17 @@ const getImageUrl = (image: Uint8Array | undefined) => {
 };
 
 export const CartView: React.FC = () => {
-  const { validItems, totalPrice, updateQuantity, removeFromCart, clearCart, appliedThresholdPromotions } = useCart();
+  const { validItems, updateQuantity, removeFromCart, clearCart, appliedThresholdPromotions } = useCart();
   const { productsMap, combosMap } = useProducts();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const { data: promotions = [] } = useActivePromotionList();
 
   const handleQuantityChange = (id: number, type: "product" | "combo", newQuantity: number) => {
     if (newQuantity < 1) {
-      removeFromCart(id, type);
+      const originalItem = validItems.find(item => item.id === id && item.type === type);
+      if (originalItem && originalItem.quantity > 0) {
+        removeFromCart(id, type);
+      }
     } else {
       updateQuantity(id, type, newQuantity);
     }
@@ -67,6 +72,36 @@ export const CartView: React.FC = () => {
     return outOfStock;
   };
 
+  const totalEarnedGifts = useMemo(() => {
+    const giftsMap = new Map<string, PotentialGift>();
+
+    const addGift = (id: number, type: "product" | "combo", quantity: number) => {
+      const key = `${type}-${id}`;
+      const existing = giftsMap.get(key) || { id, type, quantity: 0 };
+      existing.quantity += quantity;
+      giftsMap.set(key, existing);
+    };
+
+    validItems.forEach((item) => {
+      const itemPromos = promotions.filter((promotion) => {
+        if (promotion.type !== "BUY_GIVE_FREE") return false;
+
+        const collection = item.type === "product" ? promotion.product : promotion.combo;
+        return collection ? collection.some((c) => c.id === item.id) : false;
+      });
+
+      itemPromos.forEach((promo) => {
+        if (promo.type !== "BUY_GIVE_FREE") return;
+
+        const giftQty = promo.oneFreePerTrigger ? item.quantity : 1;
+        promo.freeProducts?.forEach((gift) => addGift(gift.id, "product", giftQty));
+        promo.freeCombos?.forEach((gift) => addGift(gift.id, "combo", giftQty));
+      });
+    });
+
+    return giftsMap;
+  }, [validItems, promotions]);
+
   const handleCheckout = async (method: PaymentMethod) => {
     try {
       const outOfStock = checkStock();
@@ -74,50 +109,39 @@ export const CartView: React.FC = () => {
         alert(`There is not stock enough for: ${outOfStock.join(", ")}`);
         return;
       }
+      
+      const consolidatedItems = new Map<string, number>();
+      
+      const isItemInCart = (id: number, type: "product" | "combo"): boolean => {
+          return validItems.some(item => item.id === id && item.type === type);
+      };
 
-      const orderDetails = validItems.map((item: CartItem) => {
-        return {
-          productId: item.type === "product" ? item.id : null,
-          comboId: item.type === "combo" ? item.id : null,
-          quantity: item.quantity,
-        };
+      const addConsolidatedItem = (id: number, type: "product" | "combo", quantity: number) => {
+          const key = `${type}-${id}`;
+          const currentQuantity = consolidatedItems.get(key) || 0;
+          consolidatedItems.set(key, currentQuantity + quantity);
+      };
+
+      validItems.forEach(item => {
+          addConsolidatedItem(item.id, item.type, item.quantity);
       });
 
-      promotions
-        .filter((p) => p.type === "BUY_GIVE_FREE")
-        .forEach((promo) => {
-          validItems.forEach((item) => {
-            const collection =
-              item.type === "product" ? promo.product : promo.combo;
+      totalEarnedGifts.forEach((gift) => {
+          if (!isItemInCart(gift.id, gift.type)) {
+              addConsolidatedItem(gift.id, gift.type, gift.quantity);
+          }
+      });
 
-            const isTrigger =
-              collection &&
-              collection.some((c) => c.id === item.id);
-            if (!isTrigger) return;
+      const orderDetails = Array.from(consolidatedItems.entries()).map(([key, quantity]) => {
+          const [type, idStr] = key.split('-');
+          const id = parseInt(idStr);
 
-            const giftQty = promo.oneFreePerTrigger ? item.quantity : 1;
-
-            if (promo.freeProducts) {
-              promo.freeProducts.forEach((gift) => {
-                orderDetails.push({
-                  productId: gift.id,
-                  comboId: null,
-                  quantity: giftQty,
-                });
-              });
-            }
-
-            if (promo.freeCombos) {
-              promo.freeCombos.forEach((gift) => {
-                orderDetails.push({
-                  productId: null,
-                  comboId: gift.id,
-                  quantity: giftQty,
-                });
-              });
-            }
-          });
-        });
+          return {
+              productId: type === 'product' ? id : null,
+              comboId: type === 'combo' ? id : null,
+              quantity: quantity,
+          };
+      });
 
       const order = await OrderService.createOrder({ details: orderDetails });
       await OrderService.payOrder(order.id, method);
@@ -132,25 +156,64 @@ export const CartView: React.FC = () => {
     }
   };
 
-  const cartItems = useMemo(() => {
-    return validItems
-      .map((item: CartItem) => {
+  const { displayCartItems, displayEarnedGifts, calculatedTotalPrice } = useMemo(() => {
+    const giftsToCompensate = new Map(totalEarnedGifts);
+    const itemsForDisplay: CartItem[] = [];
+    const compensatedGifts: PotentialGift[] = [];
+    let runningTotal = 0;
+
+    for (const item of validItems) {
+      const key = `${item.type}-${item.id}`;
+      const giftEntry = giftsToCompensate.get(key);
+      
+      let compensatedQty = 0;
+      const originalPurchaseQty = item.quantity;
+      let finalPurchaseQty = item.quantity;
+
+      if (giftEntry) {
+        compensatedQty = Math.min(originalPurchaseQty, giftEntry.quantity);
+        
+        finalPurchaseQty = originalPurchaseQty - compensatedQty; 
+        const remainingGiftQty = giftEntry.quantity - compensatedQty;
+        
+        if (compensatedQty > 0) {
+          compensatedGifts.push({ ...item, quantity: compensatedQty });
+        }
+
+        if (remainingGiftQty > 0) {
+          giftsToCompensate.set(key, { ...giftEntry, quantity: remainingGiftQty });
+        } else {
+          giftsToCompensate.delete(key);
+        }
+      }
+
+      if (finalPurchaseQty > 0) {
+        itemsForDisplay.push({ ...item, quantity: finalPurchaseQty }); 
+      }
+    }
+
+    const displayCartItems = itemsForDisplay
+      .map((compensatedItem: CartItem) => {
+        const originalItem = validItems.find(i => i.id === compensatedItem.id && i.type === compensatedItem.type);
+        if (!originalItem) return null;
+        
         const data =
-          item.type === "product"
-            ? (productsMap[item.id] as MenuItem | undefined)
-            : (combosMap[item.id] as MenuItem | undefined);
+          originalItem.type === "product"
+            ? (productsMap[originalItem.id] as MenuItem | undefined)
+            : (combosMap[originalItem.id] as MenuItem | undefined);
 
         if (!data) return null;
 
         const imageUrl = getImageUrl(data.image);
-        const originalSubtotal = data.price * item.quantity;
+        const quantityToPay = compensatedItem.quantity;
+        const originalSubtotal = data.price * quantityToPay;
 
         const itemPromos = promotions.filter((promotion) => {
-          const collection = item.type === "product" ? promotion.products : promotion.combos;
-          return collection ? Object.prototype.hasOwnProperty.call(collection, item.id) : false;
+          const collection = originalItem.type === "product" ? promotion.product : promotion.combo;
+          return collection ? collection.some((c) => c.id === originalItem.id) : false;
         });
 
-        let payableQuantity = item.quantity;
+        let payableQuantity = quantityToPay;
         const activeLabels: string[] = [];
 
         itemPromos.forEach((promo) => {
@@ -158,7 +221,7 @@ export const CartView: React.FC = () => {
             const groups = Math.floor(payableQuantity / promo.buyQuantity);
             const remainder = payableQuantity % promo.buyQuantity;
             payableQuantity = groups * promo.payQuantity + remainder;
-            if (item.quantity >= promo.buyQuantity) {
+            if (quantityToPay >= promo.buyQuantity) {
               activeLabels.push(`${promo.buyQuantity}x${promo.payQuantity}`);
             }
           }
@@ -172,99 +235,75 @@ export const CartView: React.FC = () => {
             activeLabels.push(`-${promo.percentage}%`);
           }
         });
-
+        
+        runningTotal += finalSubtotal;
+        
         return {
-          key: `${item.type}-${item.id}`,
+          key: `${originalItem.type}-${originalItem.id}`,
           data,
           imageUrl,
+          originalCartItem: originalItem, 
+          displayQuantity: quantityToPay, 
           originalSubtotal,
           finalSubtotal,
           activeLabels,
-          cartItem: item,
         };
       })
       .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-  }, [validItems, productsMap, combosMap, promotions]);
 
-  const earnedGifts = useMemo(() => {
-    const gifts: { id: number; name: string; image?: Uint8Array; quantity: number }[] = [];
+    const finalEarnedGifts: DisplayGift[] = [];
 
-    const pushGift = (
-      rawId: unknown,
-      fallbackName: string | undefined,
-      quantity: number,
-      sourceMap: Record<number, MenuItem>,
-    ) => {
-      const id = typeof rawId === "number" ? rawId : Number(rawId);
-      if (!Number.isFinite(id)) return;
-
-      const entity = sourceMap[id];
-      gifts.push({
+    compensatedGifts.forEach(({ id, type, quantity }) => {
+      const entity = (type === "product" ? productsMap[id] : combosMap[id]);
+      finalEarnedGifts.push({
         id,
-        name: entity?.name ?? fallbackName ?? `Gift Item #${id}`,
+        name: entity?.name ?? `Compensated Item #${id}`,
         image: entity?.image,
         quantity,
-      });
-    };
-
-    const addFromCollection = (collection: unknown, map: Record<number, MenuItem>, quantity: number) => {
-      if (!collection) return;
-
-      if (Array.isArray(collection)) {
-        collection.forEach((entry) => {
-          if (typeof entry === "number" || typeof entry === "string") {
-            pushGift(entry, undefined, quantity, map);
-          } else if (entry && typeof entry === "object" && "id" in entry) {
-            const fallbackName = "name" in entry ? (entry as { name?: string }).name : undefined;
-            pushGift((entry as { id: number }).id, fallbackName, quantity, map);
-          }
-        });
-        return;
-      }
-
-      if (typeof collection === "object") {
-        Object.entries(collection as Record<string, string>).forEach(([key, value]) => {
-          pushGift(key, value, quantity, map);
-        });
-        return;
-      }
-
-      if (typeof collection === "number" || typeof collection === "string") {
-        pushGift(collection, undefined, quantity, map);
-      }
-    };
-
-    validItems.forEach((item) => {
-      const itemPromos = promotions.filter((promotion) => {
-        if (promotion.type !== "BUY_GIVE_FREE") return false;
-
-        const collection = item.type === "product" ? promotion.products : promotion.combos;
-        return collection ? Object.prototype.hasOwnProperty.call(collection, item.id) : false;
-      });
-
-      itemPromos.forEach((promo) => {
-        if (promo.type !== "BUY_GIVE_FREE") return;
-
-        const giftQty = promo.oneFreePerTrigger ? item.quantity : 1;
-        addFromCollection(promo.freeProducts, productsMap, giftQty);
-        addFromCollection(promo.freeCombos, combosMap, giftQty);
+        isCompensated: true,
+        type
       });
     });
 
-    return gifts;
-  }, [validItems, promotions, productsMap, combosMap]);
+    Array.from(giftsToCompensate.values()).forEach(({ id, type, quantity }) => {
+      const entity = (type === "product" ? productsMap[id] : combosMap[id]);
+      finalEarnedGifts.push({
+        id,
+        name: entity?.name ?? `Free Item #${id}`,
+        image: entity?.image,
+        quantity,
+        isCompensated: false,
+        type
+      });
+    });
+    
+    appliedThresholdPromotions.forEach((promo) => {
+        const thresholdPromo = promo as NormalizedPromotion & { type: "THRESHOLD"; discountAmount: number };
+        runningTotal -= thresholdPromo.discountAmount;
+    });
+    
+    const calculatedTotalPrice = Math.max(0, runningTotal); 
+
+    return { displayCartItems, displayEarnedGifts: finalEarnedGifts, calculatedTotalPrice };
+  }, [validItems, productsMap, combosMap, promotions, totalEarnedGifts, appliedThresholdPromotions]);
 
   useEffect(() => {
     return () => {
-      cartItems.forEach(({ imageUrl }) => {
+      displayCartItems.forEach(({ imageUrl }) => {
+        if (imageUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(imageUrl);
+        }
+      });
+      displayEarnedGifts.forEach((gift) => {
+        const imageUrl = getImageUrl(gift.image);
         if (imageUrl.startsWith("blob:")) {
           URL.revokeObjectURL(imageUrl);
         }
       });
     };
-  }, [cartItems]);
+  }, [displayCartItems, displayEarnedGifts]);
 
-  if (cartItems.length === 0) {
+  if (validItems.length === 0) {
     return (
       <CommonLayout>
         <div className={styles.cartContainer}>
@@ -282,7 +321,7 @@ export const CartView: React.FC = () => {
         <h2>Your order</h2>
 
         <div className={styles.cartItems}>
-          {cartItems.map(({ key, data, imageUrl, originalSubtotal, finalSubtotal, activeLabels, cartItem }) => (
+          {displayCartItems.map(({ key, data, imageUrl, originalSubtotal, finalSubtotal, activeLabels, originalCartItem, displayQuantity }) => (
             <div key={key} className={styles.cartItem}>
               <img src={imageUrl} alt={data.name} className={styles.cartItemImage} />
 
@@ -312,14 +351,14 @@ export const CartView: React.FC = () => {
               <div className={styles.quantityControls}>
                 <button
                   className={styles.quantityButton}
-                  onClick={() => handleQuantityChange(cartItem.id, cartItem.type, cartItem.quantity - 1)}
+                  onClick={() => handleQuantityChange(originalCartItem.id, originalCartItem.type, originalCartItem.quantity - 1)}
                 >
                   -
                 </button>
-                <span className={styles.quantity}>{cartItem.quantity}</span>
+                <span className={styles.quantity}>{displayQuantity}</span> 
                 <button
                   className={styles.quantityButton}
-                  onClick={() => handleQuantityChange(cartItem.id, cartItem.type, cartItem.quantity + 1)}
+                  onClick={() => handleQuantityChange(originalCartItem.id, originalCartItem.type, originalCartItem.quantity + 1)}
                 >
                   +
                 </button>
@@ -342,7 +381,7 @@ export const CartView: React.FC = () => {
 
               <button
                 className={styles.removeButton}
-                onClick={() => removeFromCart(cartItem.id, cartItem.type)}
+                onClick={() => removeFromCart(originalCartItem.id, originalCartItem.type)}
                 aria-label="Remove item"
               >
                 ✕
@@ -350,16 +389,26 @@ export const CartView: React.FC = () => {
             </div>
           ))}
 
-          {earnedGifts.length > 0 && (
+          {displayEarnedGifts.length > 0 && (
             <>
               <div style={{ padding: "1.5rem 0 0.5rem", fontWeight: 700, color: "#10b981" }}>🎁 Free Gifts</div>
-              {earnedGifts.map((gift, index) => (
-                <div key={`gift-${index}`} className={styles.cartItem} style={{ background: "#f0fdf4" }}>
+              {displayEarnedGifts.map((gift, index) => (
+                <div 
+                  key={`gift-${index}`} 
+                  className={styles.cartItem} 
+                  style={{ 
+                    background: gift.isCompensated ? "#eff6ff" : "#f0fdf4", 
+                    border: gift.isCompensated ? "1px solid #bfdbfe" : "none" 
+                  }}
+                >
                   <img src={getImageUrl(gift.image)} alt={gift.name} className={styles.cartItemImage} />
                   <div className={styles.cartItemInfo}>
                     <span className={styles.itemName}>{gift.name}</span>
-                    <span className={styles.itemPrice} style={{ color: "#10b981" }}>
-                      FREE
+                    <span 
+                        className={styles.itemPrice} 
+                        style={{ color: gift.isCompensated ? "#2563eb" : "#10b981", fontWeight: 700 }}
+                    >
+                      {gift.isCompensated ? "COMPENSATED" : "FREE"}
                     </span>
                     <div className={styles.quantityControls} style={{ border: "none", background: "transparent" }}>
                       <span className={styles.quantity}>Qty: {gift.quantity}</span>
@@ -399,7 +448,7 @@ export const CartView: React.FC = () => {
         <div className={styles.cartFooter}>
           <div className={styles.total}>
             <span>Total Amount</span>
-            <span>${totalPrice.toFixed(2)}</span>
+            <span>${calculatedTotalPrice.toFixed(2)}</span>
           </div>
 
           <div className={styles.paymentButtons}>

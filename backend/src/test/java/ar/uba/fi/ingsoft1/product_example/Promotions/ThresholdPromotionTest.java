@@ -25,6 +25,7 @@ class ThresholdPromotionTest {
         detail.calculateTotal();
         order.getDetails().add(detail);
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(new BigDecimal("80.00"), order.getTotalPrice());
     }
@@ -37,6 +38,7 @@ class ThresholdPromotionTest {
         detail.calculateTotal();
         order.getDetails().add(detail);
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(new BigDecimal("109.50"), order.getTotalPrice());
     }

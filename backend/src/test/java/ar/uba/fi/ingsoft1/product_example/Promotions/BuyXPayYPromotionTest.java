@@ -26,6 +26,7 @@ class BuyXPayYPromotionTest {
         Order order = order(detail);
 
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(new BigDecimal("10.00"), detail.getDiscount());
         assertEquals(new BigDecimal("20.00"), order.getTotalPrice());
@@ -41,6 +42,7 @@ class BuyXPayYPromotionTest {
 
         BigDecimal totalBefore = order.getTotalPrice();
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(0, detail.getDiscount().compareTo(BigDecimal.ZERO));
         assertEquals(totalBefore, order.getTotalPrice());
@@ -55,6 +57,7 @@ class BuyXPayYPromotionTest {
         Order order = order(detail);
 
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(new BigDecimal("16.00"), detail.getDiscount());
         assertEquals(new BigDecimal("40.00"), order.getTotalPrice());

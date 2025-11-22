@@ -44,8 +44,6 @@ public class PercentageDiscountPromotion extends Promotion {
                 detail.calculateTotal();
             }
         }
-
-        order.calculateTotal();
     }
 
     @Override

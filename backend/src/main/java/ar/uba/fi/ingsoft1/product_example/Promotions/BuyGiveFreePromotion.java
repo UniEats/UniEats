@@ -65,8 +65,6 @@ public class BuyGiveFreePromotion extends Promotion {
                 if (freebies <= 0) break;
             }
         }
-
-        order.calculateTotal();
     }
 
     @Override

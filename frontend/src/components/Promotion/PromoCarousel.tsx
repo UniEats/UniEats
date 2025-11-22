@@ -29,7 +29,7 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
     if (paused || promotions.length <= 1) return;
     const timer = setTimeout(() => next(), autoplayInterval);
     return () => clearTimeout(timer);
-  }, [currentIndex, paused, promotions.length]);
+  }, [next, currentIndex, paused, promotions.length]);
 
   useEffect(() => {
     if (!sliderRef.current || !wrapperRef.current) return;

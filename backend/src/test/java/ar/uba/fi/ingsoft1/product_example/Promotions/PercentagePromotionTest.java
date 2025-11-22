@@ -35,6 +35,7 @@ class PercentagePromotionTest {
         Order order = order(burgerDetail, drinkDetail);
 
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(new BigDecimal("3.60"), burgerDetail.getDiscount());
         assertEquals(0, drinkDetail.getDiscount().compareTo(BigDecimal.ZERO));

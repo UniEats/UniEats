@@ -107,7 +107,7 @@ export const PromotionUpdateForm = ({ onClose, promotionIdToUpdate }: PromotionU
       const matchedPromotion = promotions.find((p) => p.id === promotionIdToUpdate);
       setPromotionData(matchedPromotion, formData, weekDays);
     }
-  }, [promotionIdToUpdate, promotions, formData]);
+  }, [weekDays, promotionIdToUpdate, promotions, formData]);
 
   const submissionError = updatePromotion.error ? updatePromotion.error : null;
 

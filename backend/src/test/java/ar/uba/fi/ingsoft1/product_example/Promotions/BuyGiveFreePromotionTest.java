@@ -34,6 +34,7 @@ class BuyGiveFreePromotionTest {
         BigDecimal totalBefore = order.getTotalPrice();
 
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(totalBefore, order.getTotalPrice());
         assertEquals(0, freeDetail.getDiscount().compareTo(BigDecimal.ZERO));
@@ -54,6 +55,7 @@ class BuyGiveFreePromotionTest {
 
         BigDecimal totalBefore = order.getTotalPrice();
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(totalBefore, order.getTotalPrice());
         assertEquals(0, order.getDetails().get(1).getDiscount().compareTo(BigDecimal.ZERO));
@@ -72,6 +74,7 @@ class BuyGiveFreePromotionTest {
         Order order = order(triggerDetail, freeDetail);
 
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(new BigDecimal("5.00"), freeDetail.getDiscount());
         assertEquals(new BigDecimal("60.00"), order.getTotalPrice());
@@ -90,6 +93,7 @@ class BuyGiveFreePromotionTest {
         Order order = order(triggerDetail, freeDetail);
 
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(new BigDecimal("16.00"), freeDetail.getDiscount());
         assertEquals(new BigDecimal("52.00"), order.getTotalPrice());
@@ -109,6 +113,7 @@ class BuyGiveFreePromotionTest {
 
         BigDecimal totalBefore = order.getTotalPrice();
         promotion.apply(order);
+        order.calculateTotal();
 
         assertEquals(totalBefore, order.getTotalPrice());
         assertEquals(0, freeDetail.getDiscount().compareTo(BigDecimal.ZERO));

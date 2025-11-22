@@ -134,13 +134,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateQuantity = (id: number, type: "product" | "combo", newQuantity: number) => {
-    setCart((prevItems: CartItem[]) =>
-      prevItems.map((item: CartItem) =>
+    setCart((prevItems: CartItem[]) => {
+      if (newQuantity === 0) {
+        return prevItems.filter((item: CartItem) => !(item.id === id && item.type === type));
+      }
+      return prevItems.map((item: CartItem) =>
         item.id === id && item.type === type
           ? { ...item, quantity: newQuantity }
           : item
-      )
-    );
+      );
+    });
   };
 
   const removeFromCart = (id: number, type: "product" | "combo") => {

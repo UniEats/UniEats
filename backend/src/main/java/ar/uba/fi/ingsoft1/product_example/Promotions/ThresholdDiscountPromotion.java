@@ -36,7 +36,6 @@ public class ThresholdDiscountPromotion extends Promotion {
         if (order.getTotalPrice().compareTo(threshold) >= 0) {
             order.setDiscount(order.getDiscount().add(discount));
         }
-        order.calculateTotal();
     }
 
     @Override
