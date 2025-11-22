@@ -8,6 +8,7 @@ import { MenuItem, useProducts } from "../Product/ProductContext";
 import { CartItem, useCart } from "./Cart";
 import styles from "./CartView.module.css";
 import { type PaymentMethod, PaymentModal } from "./PaymentModal";
+import { NormalizedPromotion } from "@/models/Promotion";
 
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/80";
 
@@ -39,7 +40,7 @@ const getImageUrl = (image: Uint8Array | undefined) => {
 };
 
 export const CartView: React.FC = () => {
-  const { validItems, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { validItems, totalPrice, updateQuantity, removeFromCart, clearCart, appliedThresholdPromotions } = useCart();
   const { productsMap, combosMap } = useProducts();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const { data: promotions = [] } = useActivePromotionList();
@@ -81,6 +82,42 @@ export const CartView: React.FC = () => {
           quantity: item.quantity,
         };
       });
+
+      promotions
+        .filter((p) => p.type === "BUY_GIVE_FREE")
+        .forEach((promo) => {
+          validItems.forEach((item) => {
+            const collection =
+              item.type === "product" ? promo.product : promo.combo;
+
+            const isTrigger =
+              collection &&
+              collection.some((c) => c.id === item.id);
+            if (!isTrigger) return;
+
+            const giftQty = promo.oneFreePerTrigger ? item.quantity : 1;
+
+            if (promo.freeProducts) {
+              promo.freeProducts.forEach((gift) => {
+                orderDetails.push({
+                  productId: gift.id,
+                  comboId: null,
+                  quantity: giftQty,
+                });
+              });
+            }
+
+            if (promo.freeCombos) {
+              promo.freeCombos.forEach((gift) => {
+                orderDetails.push({
+                  productId: null,
+                  comboId: gift.id,
+                  quantity: giftQty,
+                });
+              });
+            }
+          });
+        });
 
       const order = await OrderService.createOrder({ details: orderDetails });
       await OrderService.payOrder(order.id, method);
@@ -335,6 +372,27 @@ export const CartView: React.FC = () => {
                 </div>
               ))}
             </>
+          )}
+          {appliedThresholdPromotions.length > 0 && (
+            <div style={{ marginBottom: "1rem", borderTop: "1px solid #e5e7eb", paddingTop: "0.5rem" }}>
+              <div style={{ display: "flex", alignItems: "center", padding: "0.5rem 0", color: "#bf0c2b", fontWeight: 700 }}>
+                <span style={{ fontSize: "1.1rem", marginRight: "8px" }}>✂️</span>
+                Discounts Applied
+              </div>
+              {appliedThresholdPromotions.map((promo) => {
+                const thresholdPromo = promo as NormalizedPromotion & { type: "THRESHOLD"; threshold: number; discountAmount: number };
+                return (
+                  <div key={thresholdPromo.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0" }}>
+                    <span style={{ fontSize: "0.9rem", color: "#6b7280" }}>
+                      Discount for purchase over ${thresholdPromo.threshold.toFixed(2)}
+                    </span>
+                    <span style={{ color: "#bf0c2b", fontWeight: 700, fontSize: "1.1rem" }}>
+                      -${thresholdPromo.discountAmount.toFixed(2)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
 

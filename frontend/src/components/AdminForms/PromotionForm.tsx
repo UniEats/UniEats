@@ -14,8 +14,8 @@ const PROMOTION_DEFAULT_VALUES: PromotionFormValues = {
     comboIds: [],
     validDays: [],
     type: "buyxpayy",
-    buyQuantity: 2,
-    payQuantity: 1,
+    buyQuantity: undefined,
+    payQuantity: undefined,
     percentage: undefined,
     threshold: undefined,
     discountAmount: undefined,
@@ -135,19 +135,19 @@ export const PromotionForm = ({ onClose }: PromotionFormProps) => {
               <>
                 {selectedType === "buyxpayy" && (
                   <>
-                    <formData.AppField name="buyQuantity" children={(field) => <field.TextField label="Buy Quantity" />} />
-                    <formData.AppField name="payQuantity" children={(field) => <field.TextField label="Pay Quantity" />} />
+                    <formData.AppField name="buyQuantity" children={(field) => <field.NumberField label="Buy Quantity" min={0} />} />
+                    <formData.AppField name="payQuantity" children={(field) => <field.NumberField label="Pay Quantity" min={0} />} />
                   </>
                 )}
 
                 {selectedType === "percentage" && (
-                  <formData.AppField name="percentage" children={(field) => <field.TextField label="Percentage (%)" />} />
+                  <formData.AppField name="percentage" children={(field) => <field.NumberField label="Percentage (%)" min={0} />} />
                 )}
 
                 {selectedType === "threshold" && (
                   <>
-                    <formData.AppField name="threshold" children={(field) => <field.TextField label="Minimum Purchase ($)" />} />
-                    <formData.AppField name="discountAmount" children={(field) => <field.TextField label="Discount Amount ($)" />} />
+                    <formData.AppField name="threshold" children={(field) => <field.NumberField label="Minimum Purchase ($)" min={0} />} />
+                    <formData.AppField name="discountAmount" children={(field) => <field.NumberField label="Discount Amount ($)" min={0} />} />
                   </>
                 )}
                 {selectedType === "buygivefree" && (
@@ -231,7 +231,7 @@ export const PromotionForm = ({ onClose }: PromotionFormProps) => {
             name="validDays"
             children={(field) => (
               <field.CheckboxField
-                label="Active Days (Optional)"
+                label="Active Days"
                   options={daysOfWeek.map((day, index) => ({
                     id: index,
                     value: index,

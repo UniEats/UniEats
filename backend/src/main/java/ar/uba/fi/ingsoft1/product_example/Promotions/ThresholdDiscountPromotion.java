@@ -32,20 +32,11 @@ public class ThresholdDiscountPromotion extends Promotion {
     @Override
     public void apply(Order order) {
         if (!isCurrentlyActive() || !isValidToday()) return;
-        System.out.println("Total antes de aplicar promoción: " + order.getTotalPrice());
 
         if (order.getTotalPrice().compareTo(threshold) >= 0) {
-            OrderDetail detail = order.getDetails().get(0);
-            System.out.println("Detalle antes de aplicar descuento: " + detail.getTotalPrice());
-
-            detail.setDiscount(detail.getDiscount().add(discount));
-            detail.calculateTotal();
-            System.out.println("Detalle después de aplicar descuento: " + detail.getTotalPrice());
-
+            order.setDiscount(order.getDiscount().add(discount));
         }
         order.calculateTotal();
-        System.out.println("Total después de aplicar promoción: " + order.getTotalPrice());
-
     }
 
     @Override

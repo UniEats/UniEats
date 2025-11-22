@@ -19,6 +19,7 @@ type CartContextType = {
   clearCart: () => void;
   validItems: CartItem[];
   totalPrice: number;
+  appliedThresholdPromotions: NormalizedPromotion[];
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -96,20 +97,26 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return promotion.type === "THRESHOLD";
   };
 
-  const totalPrice = useMemo(() => {
+  // Aquí modificamos para devolver también las promos threshold aplicadas
+  const totalPriceAndAppliedPromos = useMemo(() => {
     const subtotal = validItems.reduce((acc, item) => acc + calculateItemTotal(item), 0);
 
     let finalTotal = subtotal;
+    const appliedThresholds: NormalizedPromotion[] = [];
 
     promotions
       .filter(isThresholdPromotion)
       .forEach((promotion) => {
         if (subtotal >= promotion.threshold) {
           finalTotal -= promotion.discountAmount;
+          appliedThresholds.push(promotion);
         }
       });
 
-    return Math.max(0, finalTotal);
+    return {
+      totalPrice: Math.max(0, finalTotal),
+      appliedThresholdPromotions: appliedThresholds,
+    };
   }, [validItems, calculateItemTotal, promotions]);
 
   const addToCart = (id: number, type: "product" | "combo", quantity: number = 1) => {
@@ -145,7 +152,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = () => setCart([]);
 
   return (
-    <CartContext.Provider value={{ items: cart, setCart, addToCart, updateQuantity, removeFromCart, clearCart, validItems, totalPrice }}>
+    <CartContext.Provider
+      value={{
+        items: cart,
+        setCart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        validItems,
+        totalPrice: totalPriceAndAppliedPromos.totalPrice,
+        appliedThresholdPromotions: totalPriceAndAppliedPromos.appliedThresholdPromotions,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

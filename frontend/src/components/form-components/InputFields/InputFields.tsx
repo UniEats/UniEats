@@ -295,9 +295,10 @@ type SelectFieldProps = {
   label: string;
   options: { value: string; label: string }[];
   placeholder?: string;
+  readonly?: boolean;
 };
 
-export const SelectField = ({ label, options, placeholder }: SelectFieldProps) => {
+export const SelectField = ({ label, options, placeholder, readonly = false, }: SelectFieldProps) => {
   const id = useId();
   const field = useFieldContext<string>();
 
@@ -314,6 +315,7 @@ export const SelectField = ({ label, options, placeholder }: SelectFieldProps) =
         onChange={(e) => field.handleChange(e.target.value)}
         onBlur={field.handleBlur}
         className={styles.selectInput}
+        disabled={readonly} 
       >
         {placeholder && (
           <option value="" disabled>
