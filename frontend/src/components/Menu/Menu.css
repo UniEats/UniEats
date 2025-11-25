@@ -3,29 +3,35 @@
 }
 
 .menu-page {
-  background: linear-gradient(180deg, #ffffff 0%, #fff7f8 40%, #ffffff 100%);
+  background: #ffffff; /* Clean white background */
   color: #1f2933;
   min-height: 100vh;
   margin-bottom: 64px;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .menu-categories {
+  position: sticky; /* Make it sticky! */
+  top: 0;
+  z-index: 100;
   border-bottom: 1px solid #f2f3f6;
-  padding: 18px 48px;
-  background: rgba(255, 255, 255, 0.9);
+  padding: 16px 0; /* Reduce padding */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 .menu-categories ul {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px 18px;
+  flex-wrap: nowrap; /* Allow scrolling on mobile */
+  overflow-x: auto;
+  gap: 12px;
   list-style: none;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 24px;
   justify-content: center;
+  -webkit-overflow-scrolling: touch;
 }
 
 .menu-category {
@@ -47,6 +53,10 @@
   color: #bf0c2b;
 }
 
+.menu-categories ul::-webkit-scrollbar {
+  display: none;
+}
+
 .menu-category--active {
   background: #bf0c2b;
   color: #ffffff;
@@ -55,14 +65,14 @@
 
 .menu-hero {
   text-align: center;
-  padding: 64px 24px 40px;
+  padding: 40px 24px 24px; /* Reduced top padding */
 }
 
 .menu-hero h1 {
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
-  margin-bottom: 10px;
-  color: #0f172a;
-  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: #111827;
+  font-weight: 800;
 }
 
 .menu-hero p {

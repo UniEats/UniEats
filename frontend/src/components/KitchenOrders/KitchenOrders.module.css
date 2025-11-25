@@ -1,46 +1,47 @@
 .container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+  padding: 2rem;
+  max-width: 1400px; /* Wider layout for kitchen screens */
+  margin: 0 auto;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 80px);
 }
 
 .stateButtons {
-  border-bottom: 1px solid #f2f3f6;
-  padding: 18px 48px;
-  background: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
 }
 
 .stateButtons ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 18px;
+  gap: 4px;
   list-style: none;
-  margin: 0 auto;
-  padding: 0;
-  justify-content: center;
+  padding: 6px;
+  background: #e5e7eb; /* Light grey background track */
+  border-radius: 16px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .stateButton {
   background: transparent;
   border: none;
-  font-size: 0.92rem;
-  padding: 10px 18px;
-  border-radius: 999px;
-  color: #3c3f44;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 12px;
+  color: #6b7280;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.active {
-  background: #bf0c2b;
-  color: #ffffff;
-  box-shadow: 0 12px 24px rgba(218, 15, 51, 0.2);
+  transition: all 0.2s ease;
 }
 
 .stateButton:hover {
-  background: #ffeef1;
-  color: #bf0c2b;
+  color: #111827;
+}
+
+.active {
+  background: #ffffff;
+  color: #bf0c2b; /* Brand Red */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: scale(1.02);
 }

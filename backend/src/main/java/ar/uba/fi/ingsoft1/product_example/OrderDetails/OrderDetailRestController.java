@@ -22,16 +22,6 @@ public class OrderDetailRestController {
         return orderDetailService.getDetailsByOrderId(orderId);
     }
 
-    @PostMapping("/order/{orderId}")
-    public ResponseEntity<OrderDetailDTO> createDetail(
-            @PathVariable Long orderId,
-            @RequestBody OrderDetailCreateDTO dto
-    ) {
-        return orderDetailService.createOrderDetail(dto, orderId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
-    }
-
     @PatchMapping("/{id}")
     public Optional<OrderDetailDTO> updateDetail(
             @PathVariable Long id,

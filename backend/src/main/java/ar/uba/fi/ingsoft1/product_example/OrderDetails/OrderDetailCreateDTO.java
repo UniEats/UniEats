@@ -6,7 +6,5 @@ import java.math.BigDecimal;
 public record OrderDetailCreateDTO(
         Long productId,
         Long comboId,
-        @NonNull Integer quantity,
-        @NonNull BigDecimal price,
-        BigDecimal discount
+        @NonNull Integer quantity
 ) {}

@@ -105,17 +105,25 @@ public class OrderService {
             OrderDetail detail = new OrderDetail();
 
             if (detailDto.productId() != null) {
-                productRepository.findById(detailDto.productId())
-                        .ifPresent(detail::setProduct);
+                Optional<Product> p = productRepository.findById(detailDto.productId());
+                if (!p.isPresent()) {
+                    throw new EntityNotFoundException("Product not found with id: " + detailDto.productId());
+                }
+                detail.setProduct(p.get());
+                detail.setPrice(p.get().getPrice());
+                detail.setDiscount(BigDecimal.ZERO);
             }
             if (detailDto.comboId() != null) {
-                comboRepository.findById(detailDto.comboId())
-                        .ifPresent(detail::setCombo);
+                Optional<Combo> c = comboRepository.findById(detailDto.comboId());
+                if (!c.isPresent()) {
+                    throw new EntityNotFoundException("Combo not found with id: " + detailDto.productId());
+                }
+                detail.setCombo(c.get());
+                detail.setPrice(c.get().getPrice());
+                detail.setDiscount(BigDecimal.ZERO);
             }
 
             detail.setQuantity(detailDto.quantity());
-            detail.setPrice(detailDto.price());
-            detail.setDiscount(detailDto.discount() != null ? detailDto.discount() : BigDecimal.ZERO);
             detail.calculateTotal();
             order.addDetail(detail);
         }
@@ -126,6 +134,8 @@ public class OrderService {
             promo.apply(order);
         }
         order.calculateTotal();
+
+        discountIngredients(order);
 
         order = orderRepository.save(order);
         return Optional.of(order.toDTO());
@@ -157,17 +167,6 @@ public class OrderService {
         order.setEstimatedDeliveryTime(estimatedDTO.estimatedDeliveryTime());
         order.setState(new OrderStatus(STATUS_IN_PREPARATION, "in preparation"));
 
-        return Optional.of(orderRepository.save(order).toDTO());
-    }
-
-    @Transactional
-    public Optional<OrderDTO> confirmOrder(Long id) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-
-        discountIngredients(order);
-
-        order.setState(new OrderStatus(STATUS_CONFIRMED, "confirmed"));
         return Optional.of(orderRepository.save(order).toDTO());
     }
 

@@ -95,13 +95,6 @@ class OrderRestController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PostMapping("/{id}/confirm")
-    public ResponseEntity<OrderDTO> confirmOrder(@PathVariable Long id) {
-        return orderService.confirmOrder(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable long id) {
         boolean deleted = orderService.deleteOrder(id);

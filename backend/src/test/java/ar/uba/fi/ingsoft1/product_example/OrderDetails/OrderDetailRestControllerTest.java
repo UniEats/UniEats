@@ -74,47 +74,6 @@ class OrderDetailRestControllerTest {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    void createDetail_success() throws Exception {
-        OrderDetailCreateDTO dto = new OrderDetailCreateDTO(
-                1L,
-                null,
-                2,
-                new BigDecimal("120.00"),
-                null
-        );
-        String json = objectMapper.writeValueAsString(dto);
-
-        Mockito.when(orderDetailService.createOrderDetail(any(), eq(1L)))
-                .thenReturn(Optional.of(detailDTO));
-
-        mockMvc.perform(post("/order-details/order/1")
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)));
-    }
-
-    @Test
-    @WithMockUser(roles = {"ADMIN"})
-    void createDetail_fail_500() throws Exception {
-        OrderDetailCreateDTO dto = new OrderDetailCreateDTO(
-                1L, null, 2,
-                new BigDecimal("120.00"),
-                null
-        );
-        String json = objectMapper.writeValueAsString(dto);
-
-        Mockito.when(orderDetailService.createOrderDetail(any(), eq(1L)))
-                .thenReturn(Optional.empty());
-
-        mockMvc.perform(post("/order-details/order/1")
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
-    @WithMockUser(roles = {"ADMIN"})
     void updateDetail_success() throws Exception {
         OrderDetailUpdateDTO dto = new OrderDetailUpdateDTO(10, new BigDecimal("150.00"), new BigDecimal("10.00"));
         String json = objectMapper.writeValueAsString(dto);

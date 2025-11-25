@@ -6,8 +6,6 @@ interface OrderCreateDTO {
         productId: number | null;
         comboId: number | null;
         quantity: number;
-        price: number;
-        discount: number;
     }[];
 }
 

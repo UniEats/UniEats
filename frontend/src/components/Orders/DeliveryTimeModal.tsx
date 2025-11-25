@@ -1,5 +1,8 @@
-import { useAppForm } from '@/config/use-app-form';
-import styles from './DeliveryTimeModal.module.css';
+import { z } from "zod";
+
+import { useAppForm } from "@/config/use-app-form";
+
+import styles from "./DeliveryTimeModal.module.css";
 
 type Props = {
   orderId: number;
@@ -8,84 +11,86 @@ type Props = {
   isSubmitting: boolean;
 };
 
-type DeliveryTimeFormValues = {
-  year: string;
-  month: string;
-  day: string;
-  hour: string;
-  minute: string;
-};
+const DurationSchema = z.object({
+  minutes: z.number().min(1, "Duration must be at least 1 minute").max(1440, "Duration cannot exceed 24 hours"),
+});
 
-const now = new Date();
+const PRESET_TIMES = [15, 30, 45, 60];
 
 export const DeliveryTimeModal = ({ orderId, onSubmit, onCancel, isSubmitting }: Props) => {
+  const calculateCompletionTime = (mins: number) => {
+    const now = new Date();
+    const future = new Date(now.getTime() + mins * 60000);
+    return future.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
 
   const form = useAppForm({
     defaultValues: {
-      year: now.getFullYear().toString(),
-      month: (now.getMonth() + 1).toString().padStart(2, '0'),
-      day: now.getDate().toString().padStart(2, '0'),
-      hour: now.getHours().toString().padStart(2, '0'),
-      minute: now.getMinutes().toString().padStart(2, '0'),
-    } as DeliveryTimeFormValues,
+      minutes: 30,
+    },
+    validators: {
+      onChange: DurationSchema,
+    },
     onSubmit: ({ value }) => {
-      const { year, month, day, hour, minute } = value;
-      const formattedDateTime = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`;
-      const dateObject = new Date(formattedDateTime);
-      onSubmit(dateObject.toISOString());
+      const now = new Date();
+      const deliveryTime = new Date(now.getTime() + value.minutes * 60000);
+      onSubmit(deliveryTime.toISOString());
     },
   });
 
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <h3>Estimate Delivery Time for Order #{orderId}</h3>
+        <span className={styles.icon}>👨‍🍳</span>
+        <h3>Start Preparation</h3>
+        <p className={styles.subtitle}>How long will order #{orderId} take?</p>
+
         <form.AppForm>
           <form.FormContainer extraError={null}>
-            <div className={styles.fieldGroup}>
-              <form.AppField
-                name="year"
-                children={(field) => <field.TextField label="Year" />}
-              />
-              <form.AppField
-                name="month"
-                children={(field) => <field.TextField label="Month" />}
-              />
-              <form.AppField
-                name="day"
-                children={(field) => <field.TextField label="Day" />}
-              />
-            </div>
-            <div className={styles.fieldGroup}>
-              <form.AppField
-                name="hour"
-                children={(field) => <field.TextField label="Hour" />}
-              />
-              <form.AppField
-                name="minute"
-                children={(field) => <field.TextField label="Minute" />}
-              />
-            </div>
+            <form.AppField name="minutes">
+              {(field) => (
+                <div>
+                  <div className={styles.inputContainer}>
+                    <input
+                      type="number"
+                      className={styles.durationInput}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(Number(e.target.value))}
+                      min={0} // Changed from 1 to 0 to align with step={5} (0, 5, 10, 15...)
+                      step={5}
+                      autoFocus
+                    />
+                    <span className={styles.unit}>min</span>
+                  </div>
+
+                  <div className={styles.presets}>
+                    {PRESET_TIMES.map((time) => (
+                      <button
+                        key={time}
+                        type="button"
+                        className={styles.presetChip}
+                        onClick={() => field.handleChange(time)}
+                      >
+                        {time}m
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className={styles.timePreview}>
+                    <span className={styles.previewLabel}>Estimated completion:</span>
+                    <span className={styles.previewTime}>{calculateCompletionTime(field.state.value || 0)}</span>
+                  </div>
+                </div>
+              )}
+            </form.AppField>
 
             <div className={styles.actions}>
-              <form.Button
-                label="Cancel"
-                type="button"
-                onClick={onCloseModal}
-              />
-              <form.Button
-                label="Confirm"
-                loadingMessage="Confirming..."
-                isPending={isSubmitting}
-              />
+              <form.Button label="Cancel" type="button" onClick={onCancel} />
+              <form.Button label="Confirm & Start" loadingMessage="Starting..." isPending={isSubmitting} />
             </div>
           </form.FormContainer>
         </form.AppForm>
       </div>
     </div>
   );
-
-  function onCloseModal() {
-    onCancel();
-  }
 };

@@ -210,9 +210,6 @@ export function normalizePromotion(p: Promotion): NormalizedPromotion {
   };
 }
 
-// Días válidos de la semana
-const validDaysSchema = z.array(DayOfWeekSchema);
-
 export const PromotionUpdateFormSchema = z
   .object({
     promotionId: z.string().min(1, { message: "Promotion ID is required" }),
@@ -222,7 +219,7 @@ export const PromotionUpdateFormSchema = z
     active: z.boolean(),
     productIds: z.array(z.string()),
     comboIds: z.array(z.string()),
-    validDays: validDaysSchema.optional(),
+    validDays: z.array(z.string()),
 
     type: z.enum(["threshold", "percentage", "buyxpayy", "buygivefree"]), // Tipo de promoción
 

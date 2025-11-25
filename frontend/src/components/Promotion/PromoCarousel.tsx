@@ -1,5 +1,7 @@
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { NormalizedPromotion } from "@/models/Promotion";
+
 import "./PromoCarousel.css";
 
 type PromoCarouselProps = {
@@ -11,24 +13,23 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const autoplayInterval = 4500;
+  const autoplayInterval = 5000;
 
   const next = () => {
-    setCurrentIndex((prev) =>
-      prev + 1 >= promotions.length ? 0 : prev + 1
-    );
+    setCurrentIndex((prev) => (prev + 1 >= promotions.length ? 0 : prev + 1));
   };
 
   const prev = () => {
-    setCurrentIndex((prev) =>
-      prev - 1 < 0 ? promotions.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev - 1 < 0 ? promotions.length - 1 : prev - 1));
   };
 
+  const [paused] = useState(false);
+
   useEffect(() => {
-    const timer = setInterval(() => next(), autoplayInterval);
-    return () => clearInterval(timer);
-  }, [promotions.length]);
+    if (paused || promotions.length <= 1) return;
+    const timer = setTimeout(() => next(), autoplayInterval);
+    return () => clearTimeout(timer);
+  }, [next, currentIndex, paused, promotions.length]);
 
   useEffect(() => {
     if (!sliderRef.current || !wrapperRef.current) return;
@@ -39,110 +40,97 @@ export default function PromoCarousel({ promotions }: PromoCarouselProps) {
 
     if (!cards.length) return;
 
-    const firstCard = cards[0] as HTMLElement;
-    const cardWidth = firstCard.offsetWidth;
-    const gap = 20;
+    const activeCard = cards[currentIndex] as HTMLElement;
+    const cardWidth = activeCard.offsetWidth;
 
-    const fullCard = cardWidth + gap;
-
+    const cardLeft = activeCard.offsetLeft;
     const wrapperCenter = wrapper.offsetWidth / 2;
-
-    const cardCenter = fullCard * currentIndex + cardWidth / 2;
+    const cardCenter = cardLeft + cardWidth / 2;
 
     const translateX = wrapperCenter - cardCenter;
 
     slider.style.transform = `translateX(${translateX}px)`;
-  }, [currentIndex]);
+  }, [currentIndex, promotions.length]);
 
   const renderPromoDetails = (promo: NormalizedPromotion) => {
-    let details = "";
     if (promo.type === "PERCENTAGE") {
-      details = `Discount: ${promo.percentage}%`;
-    } else if (promo.type === "BUYX_PAYY") {
-      details = `You buy ${promo.buyQuantity} and pay for ${promo.payQuantity}`;
-    } else if (promo.type === "THRESHOLD") {
-      details = `Minimum spend: $${promo.threshold}, discount: $${promo.discountAmount}`;
-    } else if (promo.type === "BUY_GIVE_FREE") {
-      let bought = "";
-      if (promo.product?.length) {
-        bought = promo.product.map(p => p.name).join(", ");
-      } else if (promo.combo?.length) {
-        bought = promo.combo.map(c => c.name).join(", ");
-      }
-    
-      let free = "";
-      if (promo.freeProducts?.length) {
-        free = promo.freeProducts.map(p => p.name).join(", ");
-      } else if (promo.freeCombos?.length) {
-        free = promo.freeCombos.map(c => c.name).join(", ");
-      }
-    
-      details = `Buy ${promo.oneFreePerTrigger ? "one" : "trigger"} (${bought}), get free (${free})`;
-    
-      if (promo.oneFreePerTrigger) {
-        details += " (one free per trigger)";
-      }
+      return `Get ${promo.percentage}% OFF your order!`;
     }
-    return details;
+    if (promo.type === "BUYX_PAYY") {
+      return `Buy ${promo.buyQuantity}, Pay for ${promo.payQuantity}!`;
+    }
+    if (promo.type === "THRESHOLD") {
+      return `Save $${promo.discountAmount} on orders over $${promo.threshold}`;
+    }
+    if (promo.type === "BUY_GIVE_FREE") {
+      return "Buy specific items, get one free!";
+    }
+    return "Special Offer";
   };
 
+  if (!promotions || promotions.length === 0) return null;
+  
   return (
     <div className="promo-carousel-container">
       <div className="promo-carousel">
-        <button className="promo-arrow left" onClick={prev}>
-          ‹
-        </button>
+        {promotions.length > 1 && (
+          <button className="promo-arrow left" onClick={prev}>
+            ‹
+          </button>
+        )}
 
         <div className="promo-slider-wrapper" ref={wrapperRef}>
           <div className="promo-slider" ref={sliderRef}>
             {promotions.map((promo, i) => (
               <article
-                className={`promo-card ${
-                  i === currentIndex ? "active" : "inactive"
-                }`}
+                className={`promo-card ${i === currentIndex ? "active" : "inactive"}`}
                 key={promo.id}
+                onClick={() => setCurrentIndex(i)}
               >
-                <h3>{promo.name}</h3>
+                <span className="promo-type">{promo.name}</span>
+
+                <h3>{renderPromoDetails(promo)}</h3>
+
                 <p className="promo-description">{promo.description}</p>
 
-                <p className="promo-type">{renderPromoDetails(promo)}</p>
+                <div className="promo-details-container">
+                  {promo.products && Object.keys(promo.products).length > 0 && (
+                    <small>
+                      <strong>Includes:</strong> {Object.values(promo.products).join(", ")}
+                    </small>
+                  )}
+                  {promo.combos && Object.keys(promo.combos).length > 0 && (
+                    <small>
+                      <strong>Combos:</strong> {Object.values(promo.combos).join(", ")}
+                    </small>
+                  )}
+                </div>
 
-                {promo.products && Object.keys(promo.products).length > 0 && (
-                  <>
-                    <p className="promo-subtitle">Applied products:</p>
-                    <p className="promo-list">{Object.values(promo.products).join(", ")}</p>
-                  </>
-                )}
-
-                {promo.combos && Object.keys(promo.combos).length > 0 && (
-                  <>
-                    <p className="promo-subtitle">Applied combos:</p>
-                    <p className="promo-list">{Object.values(promo.combos).join(", ")}</p>
-                  </>
-                )}
-
-                <p className="promo-days">
-                  Valid: {promo.validDays.join(", ")}
-                </p>
+                <p className="promo-days">Available: {promo.validDays.map((d) => d.substring(0, 3)).join(", ")}</p>
               </article>
             ))}
           </div>
         </div>
 
-        <button className="promo-arrow right" onClick={next}>
-          ›
-        </button>
+        {promotions.length > 1 && (
+          <button className="promo-arrow right" onClick={next}>
+            ›
+          </button>
+        )}
       </div>
 
-      <div className="promo-dots">
-        {promotions.map((_, i) => (
-          <button
-            key={i}
-            className={`dot ${i === currentIndex ? "active" : ""}`}
-            onClick={() => setCurrentIndex(i)}
-          />
-        ))}
-      </div>
+      {promotions.length > 1 && (
+        <div className="promo-dots">
+          {promotions.map((_, i) => (
+            <button
+              key={i}
+              className={`dot ${i === currentIndex ? "active" : ""}`}
+              onClick={() => setCurrentIndex(i)}
+              aria-label={`Go to promotion ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
