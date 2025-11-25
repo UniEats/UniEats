@@ -81,7 +81,6 @@ export const Menu = ({ menuSections }: MenuProps) => {
     }
 
     addToCart(id, type, quantity);
-    alert(`Added ${quantity} of ${type} ${id} to cart`);
   };
 
   useEffect(() => {
