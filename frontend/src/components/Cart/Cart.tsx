@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from "react";
 import { useToken } from "@/services/TokenContext";
 import { useProducts } from "@/components/Product/ProductContext";
+import { useActivePromotionList } from "@/services/PromotionServices";
+import { NormalizedPromotion } from "@/models/Promotion";
 
 export type CartItem = {
   id: number;
@@ -17,6 +19,7 @@ type CartContextType = {
   clearCart: () => void;
   validItems: CartItem[];
   totalPrice: number;
+  appliedThresholdPromotions: NormalizedPromotion[];
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -24,6 +27,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [tokenState] = useToken();
   const { productsMap, combosMap } = useProducts();
+  const { data: promotions = [] } = useActivePromotionList();
   const userId = tokenState.state === "LOGGED_IN" ? tokenState.tokens.id : null;
   const storageKey = `cart_${userId}`;
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -40,7 +44,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(storageKey, JSON.stringify(cart));
   }, [cart, storageKey]);
 
-  const validItems = React.useMemo(() => {
+  const validItems = useMemo(() => {
     return cart.filter((item: CartItem) =>
       (item.type === "product" && Boolean(productsMap[item.id])) ||
       (item.type === "combo" && Boolean(combosMap[item.id]))
@@ -54,15 +58,66 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [validItems, cart, productsMap, setCart]);
 
-  const totalPrice = React.useMemo(() => {
-    return validItems.reduce((acc: number, item: CartItem) => {
-      const price =
-        item.type === "product"
-          ? (productsMap[item.id]?.price as number) ?? 0
-          : (combosMap[item.id]?.price as number) ?? 0;
-      return acc + price * item.quantity;
-    }, 0);
-  }, [validItems, productsMap, combosMap]);
+  const findPromotionsForItem = useCallback((item: CartItem): NormalizedPromotion[] => {
+    return promotions.filter((promotion) => {
+      const collection = item.type === "product" ? promotion.products : promotion.combos;
+      return collection ? Object.prototype.hasOwnProperty.call(collection, item.id) : false;
+    });
+  }, [promotions]);
+
+  const calculateItemTotal = useCallback((item: CartItem): number => {
+    const entity = item.type === "product" ? productsMap[item.id] : combosMap[item.id];
+    if (!entity) return 0;
+
+    const itemPromos = findPromotionsForItem(item);
+    let payableQuantity = item.quantity;
+
+    itemPromos.forEach((promo) => {
+      if (promo.type === "BUYX_PAYY") {
+        const groups = Math.floor(payableQuantity / promo.buyQuantity);
+        const remainder = payableQuantity % promo.buyQuantity;
+        payableQuantity = groups * promo.payQuantity + remainder;
+      }
+    });
+
+    let finalPrice = entity.price * payableQuantity;
+
+    itemPromos.forEach((promo) => {
+      if (promo.type === "PERCENTAGE") {
+        finalPrice -= (finalPrice * promo.percentage) / 100;
+      }
+    });
+
+    return finalPrice;
+  }, [productsMap, combosMap, findPromotionsForItem]);
+
+  const isThresholdPromotion = (
+    promotion: NormalizedPromotion,
+  ): promotion is NormalizedPromotion & { type: "THRESHOLD"; threshold: number; discountAmount: number } => {
+    return promotion.type === "THRESHOLD";
+  };
+
+  // Aquí modificamos para devolver también las promos threshold aplicadas
+  const totalPriceAndAppliedPromos = useMemo(() => {
+    const subtotal = validItems.reduce((acc, item) => acc + calculateItemTotal(item), 0);
+
+    let finalTotal = subtotal;
+    const appliedThresholds: NormalizedPromotion[] = [];
+
+    promotions
+      .filter(isThresholdPromotion)
+      .forEach((promotion) => {
+        if (subtotal >= promotion.threshold) {
+          finalTotal -= promotion.discountAmount;
+          appliedThresholds.push(promotion);
+        }
+      });
+
+    return {
+      totalPrice: Math.max(0, finalTotal),
+      appliedThresholdPromotions: appliedThresholds,
+    };
+  }, [validItems, calculateItemTotal, promotions]);
 
   const addToCart = (id: number, type: "product" | "combo", quantity: number = 1) => {
     setCart((prevItems: CartItem[]) => {
@@ -79,13 +134,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateQuantity = (id: number, type: "product" | "combo", newQuantity: number) => {
-    setCart((prevItems: CartItem[]) =>
-      prevItems.map((item: CartItem) =>
+    setCart((prevItems: CartItem[]) => {
+      if (newQuantity === 0) {
+        return prevItems.filter((item: CartItem) => !(item.id === id && item.type === type));
+      }
+      return prevItems.map((item: CartItem) =>
         item.id === id && item.type === type
           ? { ...item, quantity: newQuantity }
           : item
-      )
-    );
+      );
+    });
   };
 
   const removeFromCart = (id: number, type: "product" | "combo") => {
@@ -97,7 +155,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = () => setCart([]);
 
   return (
-    <CartContext.Provider value={{ items: cart, setCart, addToCart, updateQuantity, removeFromCart, clearCart, validItems, totalPrice }}>
+    <CartContext.Provider
+      value={{
+        items: cart,
+        setCart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        validItems,
+        totalPrice: totalPriceAndAppliedPromos.totalPrice,
+        appliedThresholdPromotions: totalPriceAndAppliedPromos.appliedThresholdPromotions,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

@@ -42,6 +42,10 @@ public class Order {
 
     @NonNull @Digits(integer = 10, fraction = 2)
     @DecimalMin("0.00")
+    private BigDecimal discount = BigDecimal.ZERO;  // only for discounts applied to the whole order (now only thresshold)
+
+    @NonNull @Digits(integer = 10, fraction = 2)
+    @DecimalMin("0.00")
     private BigDecimal totalPrice;
 
     public void setTotalPrice(BigDecimal price) {
@@ -63,7 +67,8 @@ public class Order {
     public void calculateTotal() {
         this.totalPrice = details.stream()
                 .map(OrderDetail::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .subtract(discount);
     }
 
     public OrderDTO toDTO() {

@@ -5,6 +5,7 @@ import ar.uba.fi.ingsoft1.product_example.Products.ProductDTO;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboDTO;
 import ar.uba.fi.ingsoft1.product_example.Products.Product;
 import ar.uba.fi.ingsoft1.product_example.Combos.Combo;
+import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetail;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -64,8 +65,6 @@ public class BuyGiveFreePromotion extends Promotion {
                 if (freebies <= 0) break;
             }
         }
-
-        order.calculateTotal();
     }
 
     @Override

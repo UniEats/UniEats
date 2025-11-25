@@ -1,5 +1,6 @@
 package ar.uba.fi.ingsoft1.product_example.Promotions;
 
+import ar.uba.fi.ingsoft1.product_example.OrderDetails.OrderDetail;
 import ar.uba.fi.ingsoft1.product_example.Orders.Order;
 import ar.uba.fi.ingsoft1.product_example.Products.ProductDTO;
 import ar.uba.fi.ingsoft1.product_example.Combos.ComboDTO;
@@ -33,7 +34,7 @@ public class ThresholdDiscountPromotion extends Promotion {
         if (!isCurrentlyActive() || !isValidToday()) return;
 
         if (order.getTotalPrice().compareTo(threshold) >= 0) {
-            order.setTotalPrice(order.getTotalPrice().subtract(discount));
+            order.setDiscount(order.getDiscount().add(discount));
         }
     }
 

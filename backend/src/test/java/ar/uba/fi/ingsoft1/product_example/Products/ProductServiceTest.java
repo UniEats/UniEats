@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.List;
 
@@ -146,6 +147,7 @@ class ProductServiceTest {
 
         MenuSection section = new MenuSection();
         section.setId(1L);
+        section.setLabel("Mock Section");
         when(menuSectionRepository.findById(1L)).thenReturn(Optional.of(section));
 
         Product updatedProduct = new Product("Updated Product", "Updated Description", new BigDecimal("350.0"));
@@ -158,6 +160,115 @@ class ProductServiceTest {
         assertEquals("Updated Product", result.get().name());
         assertEquals("Updated Description", result.get().description());
         assertEquals(new BigDecimal("350.0"), result.get().price());
+    }
+
+    @Test
+    void testUpdateProduct_ImageTooLarge_Throws() {
+        Product existingProduct = new Product("Product 1", "Description", new BigDecimal("100.0"));
+        existingProduct.setId(1L);
+        existingProduct.setTags(new ArrayList<>());
+        existingProduct.setMenuSections(new ArrayList<>());
+        existingProduct.setProductIngredients(new ArrayList<>());
+
+        ProductUpdateDTO updateDTO = new ProductUpdateDTO(
+                "Updated",
+                "Updated",
+                new BigDecimal("150.0"),
+                List.of(new IngredientQuantity(1L, 1)),
+                List.of(),
+                List.of()
+        );
+
+        MockMultipartFile image = new MockMultipartFile("image", "oversized.png", "image/png", new byte[3 * 1024 * 1024]);
+
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(1L);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
+        when(ingredientRepository.findById(1L)).thenReturn(Optional.of(ingredient));
+
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, updateDTO, image));
+    }
+
+    @Test
+    void testUpdateProduct_PartialUpdateRetainsName() {
+        Product existingProduct = new Product("Original", "Description", new BigDecimal("100.0"));
+        existingProduct.setId(1L);
+        existingProduct.setTags(new ArrayList<>());
+        existingProduct.setMenuSections(new ArrayList<>());
+        existingProduct.setProductIngredients(new ArrayList<>());
+
+        ProductUpdateDTO updateDTO = new ProductUpdateDTO(
+                null,
+                "New Description",
+                new BigDecimal("120.00"),
+                List.of(new IngredientQuantity(1L, 2)),
+                List.of(5L),
+                List.of()
+        );
+
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(1L);
+        Tag newTag = new Tag();
+        newTag.setId(5L);
+        newTag.setTag("Mock Tag");
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
+        when(ingredientRepository.findById(1L)).thenReturn(Optional.of(ingredient));
+        when(tagRepository.findById(5L)).thenReturn(Optional.of(newTag));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Optional<ProductDTO> result = productService.updateProduct(1L, updateDTO, null);
+
+        assertTrue(result.isPresent());
+        assertEquals("Original", existingProduct.getName());
+        assertEquals(new BigDecimal("120.00"), existingProduct.getPrice());
+        assertEquals("New Description", existingProduct.getDescription());
+        assertEquals(1, existingProduct.getTags().size());
+        assertEquals(5L, existingProduct.getTags().get(0).getId());
+    }
+
+    @Test
+    void testUpdateProduct_TagAndSectionUpdates() {
+        Product existingProduct = new Product("Product", "Description", new BigDecimal("100.0"));
+        existingProduct.setId(1L);
+        existingProduct.setTags(new ArrayList<>());
+        existingProduct.setMenuSections(new ArrayList<>());
+        existingProduct.setProductIngredients(new ArrayList<>());
+
+        ProductUpdateDTO updateDTO = new ProductUpdateDTO(
+                "Updated",
+                "Updated",
+                new BigDecimal("180.00"),
+                List.of(new IngredientQuantity(2L, 1)),
+                List.of(7L),
+                List.of(3L)
+        );
+
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(2L);
+        Tag tag = new Tag();
+        tag.setId(7L);
+        tag.setTag("Mock Tag");
+        MenuSection section = new MenuSection();
+        section.setId(3L);
+        section.setLabel("Mock Section");
+        section.setLabel("Mock Section");
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
+        when(ingredientRepository.findById(2L)).thenReturn(Optional.of(ingredient));
+        when(tagRepository.findById(7L)).thenReturn(Optional.of(tag));
+        when(menuSectionRepository.findById(3L)).thenReturn(Optional.of(section));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Optional<ProductDTO> result = productService.updateProduct(1L, updateDTO, null);
+
+        assertTrue(result.isPresent());
+        verify(tagRepository).findById(7L);
+        verify(menuSectionRepository).findById(3L);
+        assertEquals(1, existingProduct.getTags().size());
+        assertEquals(1, existingProduct.getMenuSections().size());
+        assertTrue(section.getProducts().contains(existingProduct));
     }
 
     @Test

@@ -1,6 +1,7 @@
 import { useUserRole } from "@/services/TokenContext";
 import "./Product.css";
 import { useEffect, useMemo, useState } from "react";
+import { NormalizedPromotion } from "@/models/Promotion";
 
 interface ProductProps {
   id: number;
@@ -12,6 +13,7 @@ interface ProductProps {
   onDelete: (id: number) => void;
   onAddToCart?: (id: number, quantity: number) => void;
   available?: boolean;
+  promotions?: NormalizedPromotion[];
 }
 
 const getImageUrl = (image?: Uint8Array) => {
@@ -40,7 +42,18 @@ const getImageUrl = (image?: Uint8Array) => {
   return URL.createObjectURL(blob);
 };
 
-export default function Product({ id, image, title, description, price, tags, onDelete, onAddToCart, available }: ProductProps) {
+export default function Product({
+  id,
+  image,
+  title,
+  description,
+  price,
+  tags,
+  onDelete,
+  onAddToCart,
+  available,
+  promotions = [],
+}: ProductProps) {
   const imageUrl = useMemo(() => getImageUrl(image), [image]);
 
   useEffect(() => {
@@ -54,6 +67,70 @@ export default function Product({ id, image, title, description, price, tags, on
   const [showCartControls, setShowCartControls] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const userRole = useUserRole();
+
+  const displayPrice = useMemo(() => {
+    let calculatedPrice = price;
+
+    promotions.forEach((promotion) => {
+      if (promotion.type === "PERCENTAGE" && promotion.percentage) {
+        calculatedPrice -= (calculatedPrice * promotion.percentage) / 100;
+      }
+    });
+
+    return calculatedPrice;
+  }, [price, promotions]);
+
+  const giftNames = useMemo(() => {
+    if (!promotions || promotions.length === 0) return [];
+
+    const names: string[] = [];
+    const appendNames = (items?: unknown) => {
+      if (!items) return;
+
+      if (Array.isArray(items)) {
+        items.forEach((entry) => {
+          if (typeof entry === "string") {
+            names.push(entry);
+          } else if (entry && typeof entry === "object" && "name" in entry) {
+            const value = (entry as { name?: string }).name;
+            if (value) names.push(value);
+          }
+        });
+        return;
+      }
+
+      if (typeof items === "string") {
+        names.push(items);
+        return;
+      }
+
+      if (typeof items === "object") {
+        Object.values(items as Record<string, string>).forEach((value) => {
+          if (value) names.push(value);
+        });
+      }
+    };
+
+    promotions.forEach((promotion) => {
+      if (promotion.type !== "BUY_GIVE_FREE") return;
+      appendNames(promotion.freeProducts);
+      appendNames(promotion.freeCombos);
+    });
+
+    return names;
+  }, [promotions]);
+
+  const promoLabels = useMemo(() => {
+    if (!promotions || promotions.length === 0) return [];
+
+    return promotions.map((promotion) => {
+      if (promotion.type === "PERCENTAGE") return `-${promotion.percentage}%`;
+      if (promotion.type === "BUYX_PAYY") return `${promotion.buyQuantity}x${promotion.payQuantity}`;
+      if (promotion.type === "BUY_GIVE_FREE") return "GIFT";
+      if (promotion.type === "THRESHOLD") return "DEAL";
+      return "PROMO";
+    });
+  }, [promotions]);
 
   const handleAddClick = () => {
     setShowCartControls((prev) => !prev);
@@ -71,14 +148,56 @@ export default function Product({ id, image, title, description, price, tags, on
 
   return (
     <article className="product-card">
+      <div
+        className="product-badges-container"
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+          zIndex: 2,
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
+        }}
+      >
+        {promoLabels.map((label, index) => (
+          <div key={`${id}-promo-${index}`} className="promo-badge" style={{ position: "static", marginBottom: 0 }}>
+            {label}
+          </div>
+        ))}
+      </div>
       <div className="product-media">
         <img className="product-image" src={imageUrl} alt={title} loading="lazy" />
       </div>
       <div className="product-body">
         <div className="product-content">
           <h3 className="product-title">{title}</h3>
+          {giftNames.length > 0 && (
+            <div
+              style={{
+                fontSize: "0.8rem",
+                color: "#10b981",
+                fontWeight: "bold",
+                marginTop: "4px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <span>🎁 Includes: {giftNames.join(", ")}</span>
+            </div>
+          )}
           <p className="product-description">{description}</p>
-          <span className="product-price">${price}</span>
+          <div className="product-price-container">
+            {displayPrice < price ? (
+              <>
+                <span className="original-price">${price.toFixed(2)}</span>
+                <span className="discounted-price">${displayPrice.toFixed(2)}</span>
+              </>
+            ) : (
+              <span className="product-price">${price.toFixed(2)}</span>
+            )}
+          </div>
           {tags.length > 0 ? (
             <ul className="product-tags" aria-label="Dietary tags">
               {tags.map((tag) => (
@@ -146,7 +265,7 @@ export default function Product({ id, image, title, description, price, tags, on
               />
             </label>
             <p className="cart-total">
-              Total: <strong>${(quantity * price).toFixed(2)}</strong>
+              Total: <strong>${(quantity * displayPrice).toFixed(2)}</strong>
             </p>
             <button
               className="product-cta product-cta--confirm"

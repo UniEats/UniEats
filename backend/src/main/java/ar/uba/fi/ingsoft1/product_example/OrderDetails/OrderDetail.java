@@ -60,9 +60,11 @@ public class OrderDetail {
     private BigDecimal totalPrice;
 
     public void calculateTotal() {
-        this.totalPrice = price.multiply(BigDecimal.valueOf(quantity))
-                .subtract(discount)
-                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal total = price.multiply(BigDecimal.valueOf(quantity)).subtract(discount);
+        if (total.compareTo(BigDecimal.ZERO) < 0) {
+            total = BigDecimal.ZERO;
+        }
+        this.totalPrice = total.setScale(2, RoundingMode.HALF_UP);
     }
 
     @ManyToOne

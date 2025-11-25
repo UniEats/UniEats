@@ -1,5 +1,6 @@
 import { useProducts } from "@/components/Product/ProductContext";
 import { OrderDTO, OrderDetailDTO } from "@/models/Order";
+
 import styles from "./Orders.module.css";
 
 type OrdersProps = {
@@ -13,6 +14,12 @@ type OrdersProps = {
   onMarkReady?: (orderId: number) => void;
   onMarkComplete?: (orderId: number) => void;
   onCancelOrder?: (orderId: number) => void;
+};
+
+// Helper to format time cleanly
+const formatTime = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
 export const Orders = ({
@@ -48,12 +55,12 @@ export const Orders = ({
 
       {!isLoading && !error && (!orders || orders.length === 0) && (
         <div className={styles.emptyState}>
-          <div className={styles.emptyInner}>
-            <div className={styles.emptyIcon} aria-hidden>🍽️</div>
-            <div>
-              <h3>{emptyStateMessage}</h3>
-              <p className={styles.emptySubtitle}>There are currently no orders to display in this category.</p>
-            </div>
+          <div className={styles.emptyIcon} aria-hidden>
+            🧑‍🍳
+          </div>
+          <div>
+            <h3>{emptyStateMessage}</h3>
+            <p className={styles.emptySubtitle}>Good job! No pending orders in this section.</p>
           </div>
         </div>
       )}
@@ -64,53 +71,54 @@ export const Orders = ({
             <div key={order.id} className={styles.orderCard}>
               <div className={styles.orderHeader}>
                 <h3>Order #{order.id}</h3>
+                <span>{formatTime(order.creationDate)}</span>
               </div>
-              <p className={styles.timestamp}>
-                Placed on: {new Date(order.creationDate).toLocaleString()}
-              </p>
-              {order.estimatedDeliveryTime && (
-                <p className={`${styles.timestamp} ${styles.deliveryTime}`}>
-                  <strong>
-                    Estimated Delivery: {new Date(order.estimatedDeliveryTime).toLocaleString()}
-                  </strong>
-                </p>
-              )}
+
+              <div className={styles.timestamp}>
+                <span>
+                  Placed: {new Date(order.creationDate).toLocaleDateString()} at {formatTime(order.creationDate)}
+                </span>
+                {order.estimatedDeliveryTime && (
+                  <div className={styles.deliveryTime}>Target: {formatTime(order.estimatedDeliveryTime)}</div>
+                )}
+              </div>
+
               <ul className={styles.orderItems}>
                 {order.details.map((detail) => (
                   <li key={detail.id} className={styles.item}>
-                    <span className={styles.quantity}>{detail.quantity}x</span>
-                    <span className={styles.itemName}>{getOrderItemName(detail)}</span>
+                    <div className={styles.quantity}>{detail.quantity}</div>
+                    <div className={styles.itemName}>{getOrderItemName(detail)}</div>
                   </li>
                 ))}
               </ul>
-              <div className={styles.orderFooter}>
-                <strong>Total: ${Number(order.totalPrice).toFixed(2)}</strong>
-              </div>
+
+              {/* Total is less critical for kitchen, but kept for reference */}
+              <div className={styles.orderFooter}>Total: ${Number(order.totalPrice).toFixed(2)}</div>
 
               {showStatusChangers && (
                 <div className={styles.actions}>
-                  {order.stateId === 1 && (
+                  {order.stateId === 1 && ( // CONFIRMED
                     <>
                       <button className={styles.primaryBtn} onClick={() => onStartPreparation?.(order.id)}>
-                        Start Preparation
+                        Start Prep
                       </button>
                       <button className={styles.secondaryBtn} onClick={() => onCancelOrder?.(order.id)}>
-                        Cancel
+                        Cancel Order
                       </button>
                     </>
                   )}
-                  {order.stateId === 2 && (
+                  {order.stateId === 2 && ( // IN PREPARATION
                     <button className={styles.primaryBtn} onClick={() => onMarkReady?.(order.id)}>
-                      Mark as Ready
+                      Mark Ready
                     </button>
                   )}
-                  {order.stateId === 3 && (
+                  {order.stateId === 3 && ( // READY
                     <button className={styles.primaryBtn} onClick={() => onMarkComplete?.(order.id)}>
-                      Mark as Picked Up
+                      Complete (Picked Up)
                     </button>
                   )}
-                  {order.stateId === 4 && <div className={styles.infoText}>Order Picked Up</div>}
-                  {order.stateId === 5 && <div className={styles.infoText}>Order Canceled</div>}
+                  {order.stateId === 4 && <div className={styles.infoText}>Completed</div>}
+                  {order.stateId === 5 && <div className={styles.infoText}>Canceled</div>}
                 </div>
               )}
             </div>

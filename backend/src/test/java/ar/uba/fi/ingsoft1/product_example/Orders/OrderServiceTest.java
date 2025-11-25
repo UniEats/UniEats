@@ -102,7 +102,7 @@ class OrderServiceTest {
     void testCreateOrder_Success() {
         OrderCreateDTO dto = new OrderCreateDTO(
                 List.of(new OrderDetailCreateDTO(
-                        1L, null, 1, new BigDecimal("500.00"), null))
+                        1L, null, 1))
         );
 
         Product product = new Product("P1", "Desc", new BigDecimal("500.00"));
@@ -182,7 +182,6 @@ class OrderServiceTest {
 
         EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now().plusHours(1));
 
-        // CHANGE HERE: Pass the new DTO to the method
         Optional<OrderDTO> result = orderService.startPreparation(1L, estimatedDto);
 
         assertTrue(result.isPresent());
@@ -196,18 +195,6 @@ class OrderServiceTest {
         EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now());
 
         assertThrows(Exception.class, () -> orderService.startPreparation(1L, estimatedDto));
-    }
-
-    @Test
-    void testConfirmOrder_Success() {
-        Order order = createValidOrder();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-
-        Optional<OrderDTO> result = orderService.confirmOrder(1L);
-
-        assertTrue(result.isPresent());
-        assertEquals(1L, order.getState().getId()); 
     }
 
     @Test
@@ -302,6 +289,55 @@ class OrderServiceTest {
     }
 
     @Test
+    void testGetOrdersWithAllMenuItemsInStock_MixedResults() {
+        Order withStock = createValidOrder();
+        withStock.setId(10L);
+        Order withoutStock = createValidOrder();
+        withoutStock.setId(20L);
+
+        Ingredient available = new Ingredient();
+        available.setId(100L);
+        available.setName("Tomate");
+        available.setDescription("desc");
+        available.setStock(5);
+
+        Ingredient missing = new Ingredient();
+        missing.setId(200L);
+        missing.setName("Lechuga");
+        missing.setDescription("desc");
+        missing.setStock(0);
+
+        Product availableProduct = new Product("Burger", "desc", BigDecimal.ONE);
+        availableProduct.setId(1L);
+        availableProduct.setProductIngredients(List.of(createProductIngredient(availableProduct, available, 1)));
+
+        Product missingProduct = new Product("Fries", "desc", BigDecimal.ONE);
+        missingProduct.setId(2L);
+        missingProduct.setProductIngredients(List.of(createProductIngredient(missingProduct, missing, 1)));
+
+        OrderDetail availableDetail = new OrderDetail(1, BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO);
+        availableDetail.setId(1000L);
+        availableDetail.setProduct(availableProduct);
+        availableDetail.setOrder(withStock);
+        availableDetail.calculateTotal();
+        withStock.setDetails(List.of(availableDetail));
+
+        OrderDetail missingDetail = new OrderDetail(1, BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO);
+        missingDetail.setId(2000L);
+        missingDetail.setProduct(missingProduct);
+        missingDetail.setOrder(withoutStock);
+        missingDetail.calculateTotal();
+        withoutStock.setDetails(List.of(missingDetail));
+
+        when(orderRepository.findAll()).thenReturn(List.of(withStock, withoutStock));
+
+        List<OrderDTO> result = orderService.getOrdersWithAllMenuItemsInStock();
+
+        assertEquals(1, result.size());
+        assertEquals(withStock.getId(), result.get(0).id());
+    }
+
+    @Test
     void testIsProductInStock_True() {
         Ingredient ingredient = new Ingredient();
         ingredient.setStock(5);
@@ -360,7 +396,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void testStartPreparation_NotConfirmed_Throws() {
+    void testStartPreparation_WhenReadyState_Throws() {
         Order order = createValidOrder();
         order.setState(new OrderStatus(3L, "ready"));
 
@@ -397,34 +433,12 @@ class OrderServiceTest {
     }
 
     @Test
-    void testDiscountIngredients_ReducesStock() {
-        Ingredient ingredient = new Ingredient();
-        ingredient.setId(100L);
-        ingredient.setName("Tomate");
-        ingredient.setStock(10);
-
-        Product p = new Product("P1", "desc", BigDecimal.ONE);
-        p.setId(1L);
-        ProductIngredient pi = createProductIngredient(p, ingredient, 2);
-        p.setProductIngredients(List.of(pi));
-
+    void testCancelOrder_InPreparationState_Throws() {
         Order order = createValidOrder();
-        OrderDetail detail = new OrderDetail(2, BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ONE);
-        detail.setId(5L);
-        detail.setProduct(p);
-        detail.setOrder(order);
-        order.setDetails(List.of(detail));
+        order.setState(new OrderStatus(2L, "in preparation"));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.save(order)).thenReturn(order);
-        when(ingredientRepository.save(any())).thenReturn(ingredient);
-
-        EstimatedDeliveryTimeDTO estimatedDto = new EstimatedDeliveryTimeDTO(LocalDateTime.now());
-
-        orderService.startPreparation(1L, estimatedDto);
-        orderService.confirmOrder(1L);
-
-        assertEquals(6, ingredient.getStock());
+        assertThrows(IllegalStateException.class, () -> orderService.cancelOrder(1L));
     }
 
     @Test
@@ -449,8 +463,7 @@ class OrderServiceTest {
 
         OrderCreateDTO dto = new OrderCreateDTO(
                 List.of(new OrderDetailCreateDTO(
-                        1L, null, 2, new BigDecimal("100.00"), BigDecimal.ZERO
-                ))
+                        1L, null, 2))
         );
 
         Product p = new Product("P1", "Desc", new BigDecimal("100.00"));
