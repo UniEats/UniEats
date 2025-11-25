@@ -1,0 +1,2052 @@
+{
+	"info": {
+		"_postman_id": "TP-IS1-collection",
+		"name": "TP-IS1 - Product System",
+		"description": "Collection generated based on OrderRestController.java and related DTOs.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": ["{{base_url}}"],
+							"path": ["orders"]
+						},
+						"description": "Retrieves all orders in the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Confirmed Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/confirmed",
+							"host": ["{{base_url}}"],
+							"path": ["orders", "confirmed"]
+						},
+						"description": "Retrieves only orders with CONFIRMED status."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/my-orders",
+							"host": ["{{base_url}}"],
+							"path": ["orders", "my-orders"]
+						},
+						"description": "Retrieves orders for the currently authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders with Stock",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/all-menu-items-in-stock",
+							"host": ["{{base_url}}"],
+							"path": ["orders", "all-menu-items-in-stock"]
+						},
+						"description": "Retrieves orders where all menu items are currently in stock."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id",
+							"host": ["{{base_url}}"],
+							"path": ["orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "Order ID"
+								}
+							]
+						},
+						"description": "Retrieves a specific order by its ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"details\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 2\n        },\n        {\n            \"comboId\": 2,\n            \"quantity\": 1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": ["{{base_url}}"],
+							"path": ["orders"]
+						},
+						"description": "Creates a new order. Requires a list of details (products or combos)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order (Patch)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"totalPrice\": 1500.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/:id",
+							"host": ["{{base_url}}"],
+							"path": ["orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Updates an order. Currently supports updating totalPrice via OrderUpdateDTO."
+					},
+					"response": []
+				},
+				{
+					"name": "Start Preparation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"estimatedDeliveryTime\": \"2024-12-31T20:30:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/:id/start-preparation",
+							"host": ["{{base_url}}"],
+							"path": ["orders", ":id", "start-preparation"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Moves order status to IN_PREPARATION. Requires EstimatedDeliveryTimeDTO."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Ready",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id/mark-ready",
+							"host": ["{{base_url}}"],
+							"path": ["orders", ":id", "mark-ready"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Marks an order as READY for pickup."
+					},
+					"response": []
+				},
+				{
+					"name": "Pickup Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id/pickup",
+							"host": ["{{base_url}}"],
+							"path": ["orders", ":id", "pickup"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Marks an order as COMPLETE after pickup."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["orders", ":id", "cancel"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Cancels an order if it hasn't started preparation."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id",
+							"host": ["{{base_url}}"],
+							"path": ["orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Hard deletes an order."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All States",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/states",
+							"host": ["{{base_url}}"],
+							"path": ["orders", "states"]
+						},
+						"description": "Retrieves all possible order statuses."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders by State ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/state/:stateId",
+							"host": ["{{base_url}}"],
+							"path": ["orders", "state", ":stateId"],
+							"variable": [
+								{
+									"key": "stateId",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Retrieves orders filtered by a specific state ID."
+					},
+					"response": []
+				}
+			],
+			"description": "The **Orders API** allows managing the lifecycle of orders, from creation to pickup/cancellation."
+		},
+        {
+            "name": "Order Details",
+            "item": [
+                {
+                    "name": "Get Details by Order ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/order-details/order/:orderId",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "order-details",
+                                "order",
+                                ":orderId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "orderId",
+                                    "value": "1",
+                                    "description": "ID of the order to fetch details for"
+                                }
+                            ]
+                        },
+                        "description": "Retrieves all order details associated with a specific Order ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Order Detail",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"quantity\": 5,\n    \"price\": 150.00,\n    \"discount\": 10.00\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/order-details/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "order-details",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID of the order detail to update"
+                                }
+                            ]
+                        },
+                        "description": "Updates specific fields of an order detail (quantity, price, or discount)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Order Detail",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/order-details/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "order-details",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID of the order detail to delete"
+                                }
+                            ]
+                        },
+                        "description": "Deletes a specific order detail by its ID."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "The **Order Details API** manages individual line items within an order. It allows retrieving details for a specific order, updating quantities or prices, and removing items from an order."
+        },
+        {
+            "name": "Promotions",
+            "item": [
+                {
+                    "name": "Get All Promotions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions"
+                            ]
+                        },
+                        "description": "Retrieves a list of all promotions."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Active Promotions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/promotions/active",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions",
+                                "active"
+                            ]
+                        },
+                        "description": "Retrieves only currently active promotions."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Promotion By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/promotions/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Promotion ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieves details of a specific promotion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Promotion (Percentage)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"percentage\",\n    \"name\": \"Black Friday Deal\",\n    \"description\": \"50% off on electronics\",\n    \"active\": true,\n    \"productIds\": [1, 2],\n    \"comboIds\": [],\n    \"validDays\": [\"FRIDAY\"],\n    \"percentage\": 50.0\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions"
+                            ]
+                        },
+                        "description": "Creates a Percentage Discount Promotion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Promotion (Threshold)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"threshold\",\n    \"name\": \"Big Spender Discount\",\n    \"description\": \"Save $20 on orders over $100\",\n    \"active\": true,\n    \"productIds\": [],\n    \"comboIds\": [],\n    \"validDays\": [\"SATURDAY\", \"SUNDAY\"],\n    \"threshold\": 100.00,\n    \"discountAmount\": 20.00\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions"
+                            ]
+                        },
+                        "description": "Creates a Threshold Discount Promotion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Promotion (Buy X Pay Y)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"buyxpayy\",\n    \"name\": \"3 for 2 on Shirts\",\n    \"description\": \"Buy 3 shirts, pay for 2\",\n    \"active\": true,\n    \"productIds\": [5, 6],\n    \"comboIds\": [],\n    \"validDays\": [\"MONDAY\", \"WEDNESDAY\", \"FRIDAY\"],\n    \"buyQuantity\": 3,\n    \"payQuantity\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions"
+                            ]
+                        },
+                        "description": "Creates a Buy X Pay Y Promotion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Promotion (Buy Give Free)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"buygivefree\",\n    \"name\": \"Free Cap with Shoes\",\n    \"description\": \"Buy a pair of shoes, get a free cap\",\n    \"active\": true,\n    \"productIds\": [10],\n    \"comboIds\": [],\n    \"validDays\": [],\n    \"freeProductIds\": [15],\n    \"freeComboIds\": [],\n    \"oneFreePerTrigger\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions"
+                            ]
+                        },
+                        "description": "Creates a Buy Give Free Promotion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Promotion (Percentage)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"percentage\",\n    \"name\": \"Updated Summer Sale\",\n    \"percentage\": 25.0\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/promotions/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID of a Percentage Promotion"
+                                }
+                            ]
+                        },
+                        "description": "Updates a Percentage Promotion. Note: 'type' is required."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Promotion (Threshold)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"threshold\",\n    \"threshold\": 150.00,\n    \"discountAmount\": 30.00\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/promotions/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "2",
+                                    "description": "ID of a Threshold Promotion"
+                                }
+                            ]
+                        },
+                        "description": "Updates a Threshold Promotion. Note: 'type' is required."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Promotion (Buy X Pay Y)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"buyxpayy\",\n    \"payQuantity\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/promotions/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "3",
+                                    "description": "ID of a BuyXPayY Promotion"
+                                }
+                            ]
+                        },
+                        "description": "Updates a Buy X Pay Y Promotion. Note: 'type' is required."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Promotion (Buy Give Free)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"buygivefree\",\n    \"oneFreePerTrigger\": false,\n    \"freeProductIds\": [20]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/promotions/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "4",
+                                    "description": "ID of a BuyGiveFree Promotion"
+                                }
+                            ]
+                        },
+                        "description": "Updates a Buy Give Free Promotion. Note: 'type' is required."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Toggle Active Status",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/promotions/:id/toggle-active",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions",
+                                ":id",
+                                "toggle-active"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Promotion ID"
+                                }
+                            ]
+                        },
+                        "description": "Toggles the active status of a promotion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Promotion",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/promotions/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "promotions",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Promotion ID"
+                                }
+                            ]
+                        },
+                        "description": "Deletes a promotion by its ID."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "The **Promotions API** allows managing different types of discounts and offers."
+        },
+        {
+            "name": "Ingredients",
+            "item": [
+                {
+                    "name": "Get All Ingredients",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/ingredients",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ingredients"
+                            ]
+                        },
+                        "description": "Retrieves a list of all ingredients in the system."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Ingredient By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/ingredients/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ingredients",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Ingredient ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieves specific details of an ingredient by its ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Ingredient",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Tomato Sauce\",\n    \"description\": \"Organic tomato sauce\",\n    \"stock\": 100\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/ingredients",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ingredients"
+                            ]
+                        },
+                        "description": "Creates a new ingredient. Requires name, description, and initial stock."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Ingredient Details",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Spicy Tomato Sauce\",\n    \"description\": \"Now with extra chili\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/ingredients/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ingredients",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Ingredient ID"
+                                }
+                            ]
+                        },
+                        "description": "Updates an ingredient's name or description."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Increase Ingredient Stock",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/ingredients/:id/stock?amount=50",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ingredients",
+                                ":id",
+                                "stock"
+                            ],
+                            "query": [
+                                {
+                                    "key": "amount",
+                                    "value": "50",
+                                    "description": "Amount to add to current stock"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Ingredient ID"
+                                }
+                            ]
+                        },
+                        "description": "Increases the stock of a specific ingredient by the given amount."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Ingredient",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/ingredients/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ingredients",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Ingredient ID"
+                                }
+                            ]
+                        },
+                        "description": "Deletes an ingredient. Note: It may fail if the ingredient is associated with products."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "The **Ingredients API** manages the inventory of raw materials used to create products."
+        },
+        {
+            "name": "Payments",
+            "item": [
+                {
+                    "name": "Pay with Credit Card",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/payments/:orderId?method=credit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payments",
+                                ":orderId"
+                            ],
+                            "query": [
+                                {
+                                    "key": "method",
+                                    "value": "credit",
+                                    "description": "Payment method strategy"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "orderId",
+                                    "value": "1",
+                                    "description": "ID of the order to pay"
+                                }
+                            ]
+                        },
+                        "description": "Processes a payment for a specific order using a Credit Card simulation."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Pay with Cash",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/payments/:orderId?method=cash",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payments",
+                                ":orderId"
+                            ],
+                            "query": [
+                                {
+                                    "key": "method",
+                                    "value": "cash",
+                                    "description": "Payment method strategy"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "orderId",
+                                    "value": "1",
+                                    "description": "ID of the order to pay"
+                                }
+                            ]
+                        },
+                        "description": "Processes a payment for a specific order using Cash simulation."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Pay with QR",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/payments/:orderId?method=qr",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payments",
+                                ":orderId"
+                            ],
+                            "query": [
+                                {
+                                    "key": "method",
+                                    "value": "qr",
+                                    "description": "Payment method strategy"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "orderId",
+                                    "value": "1",
+                                    "description": "ID of the order to pay"
+                                }
+                            ]
+                        },
+                        "description": "Processes a payment for a specific order using QR Code simulation."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "The **Payments API** handles the payment processing for orders using different strategies (Credit, Cash, QR)."
+        },
+        {
+            "name": "Products",
+            "item": [
+                {
+                    "name": "Get All Products",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products"
+                            ]
+                        },
+                        "description": "Retrieves a list of all products in the system."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Products with Ingredients in Stock",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products/all-ingredients-in-stock",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products",
+                                "all-ingredients-in-stock"
+                            ]
+                        },
+                        "description": "Retrieves only products for which all required ingredients are currently in stock."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Product By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieves specific details of a product by its ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "product",
+                                    "value": "{\n    \"name\": \"Cheeseburger\",\n    \"description\": \"Juicy burger with cheddar cheese\",\n    \"price\": 12.50,\n    \"ingredientIds\": [\n        {\"ingredientId\": 1, \"quantity\": 1},\n        {\"ingredientId\": 2, \"quantity\": 2}\n    ],\n    \"tagIds\": [1],\n    \"menuSectionIds\": [1]\n}",
+                                    "type": "text",
+                                    "contentType": "application/json"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/products",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products"
+                            ]
+                        },
+                        "description": "Creates a new product. Uses `multipart/form-data` to handle both the JSON data (`product`) and an image file (`image`)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Product",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "product",
+                                    "value": "{\n    \"name\": \"Double Cheeseburger\",\n    \"description\": \"Now with double cheese\",\n    \"price\": 15.00,\n    \"ingredientIds\": [\n        {\"ingredientId\": 1, \"quantity\": 1},\n        {\"ingredientId\": 2, \"quantity\": 4}\n    ],\n    \"tagIds\": [1, 2],\n    \"menuSectionIds\": [1]\n}",
+                                    "type": "text",
+                                    "contentType": "application/json"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Updates an existing product. Also uses `multipart/form-data` to update fields and/or the image."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Product",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Deletes a product by its ID."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "The **Products API** allows managing the catalog of items available for order, including their ingredients, tags, and menu sections."
+        },
+        {
+            "name": "Combos",
+            "item": [
+                {
+                    "name": "Get All Combos",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/combos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "combos"
+                            ]
+                        },
+                        "description": "Retrieves a list of all combos in the system."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Combos with Products in Stock",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/combos/all-products-in-stock",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "combos",
+                                "all-products-in-stock"
+                            ]
+                        },
+                        "description": "Retrieves only combos for which all required products (and their ingredients) are currently in stock."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Combo By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/combos/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "combos",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Combo ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieves specific details of a combo by its ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Combo",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "combo",
+                                    "value": "{\n    \"name\": \"Family Pack\",\n    \"description\": \"Best value for families\",\n    \"price\": 45.00,\n    \"productIds\": [\n        {\"productId\": 1, \"quantity\": 2},\n        {\"productId\": 2, \"quantity\": 1}\n    ],\n    \"tagIds\": [1],\n    \"menuSectionIds\": [1]\n}",
+                                    "type": "text",
+                                    "contentType": "application/json"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/combos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "combos"
+                            ]
+                        },
+                        "description": "Creates a new combo. Uses `multipart/form-data` to handle both the JSON data (`combo`) and an image file (`image`)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Combo",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "combo",
+                                    "value": "{\n    \"name\": \"Super Family Pack\",\n    \"description\": \"Even better value for families\",\n    \"price\": 50.00,\n    \"productIds\": [\n        {\"productId\": 1, \"quantity\": 3},\n        {\"productId\": 2, \"quantity\": 2}\n    ],\n    \"tagIds\": [1, 2],\n    \"menuSectionIds\": [1]\n}",
+                                    "type": "text",
+                                    "contentType": "application/json"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/combos/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "combos",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Combo ID"
+                                }
+                            ]
+                        },
+                        "description": "Updates an existing combo. Also uses `multipart/form-data` to update fields and/or the image."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Combo",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/combos/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "combos",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Combo ID"
+                                }
+                            ]
+                        },
+                        "description": "Deletes a combo by its ID."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "The **Combos API** allows managing bundles of products offered as single items."
+        },
+        {
+            "name": "Tags",
+            "item": [
+                {
+                    "name": "Get All Tags",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/tags",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tags"
+                            ]
+                        },
+                        "description": "Retrieves a list of all tags available in the system."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Tag By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/tags/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tags",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Tag ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieves details of a specific tag by its ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Tag",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"tag\": \"Vegan\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tags",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tags"
+                            ]
+                        },
+                        "description": "Creates a new tag. The body requires a 'tag' string."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Tag",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"tag\": \"Vegetarian\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tags/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tags",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Tag ID"
+                                }
+                            ]
+                        },
+                        "description": "Updates an existing tag's name."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Tag",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/tags/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tags",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Tag ID"
+                                }
+                            ]
+                        },
+                        "description": "Deletes a tag. Note: This will remove the tag association from any products or combos that use it before deleting the tag itself."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "The **Tags API** allows managing labels (like 'Vegan', 'Gluten-Free') that can be attached to Products and Combos."
+        },
+        {
+            "name": "Menu Sections",
+            "item": [
+                {
+                    "name": "Get Public Menu",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/menus",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "menus"
+                            ]
+                        },
+                        "description": "Retrieves the full list of menu sections for public display."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Sections (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/menu-sections",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "menu-sections"
+                            ]
+                        },
+                        "description": "Retrieves all menu sections for management purposes."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Section By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/menu-sections/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "menu-sections",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Menu Section ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieves a specific menu section by its ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Menu Section",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"label\": \"Desserts\",\n    \"description\": \"Sweet treats and cakes\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/menu-sections",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "menu-sections"
+                            ]
+                        },
+                        "description": "Creates a new menu section (e.g., 'Starters', 'Main Course')."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Menu Section",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"label\": \"Beverages\",\n    \"description\": \"Cold and Hot drinks\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/menu-sections/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "menu-sections",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Menu Section ID"
+                                }
+                            ]
+                        },
+                        "description": "Updates the label or description of a menu section."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add Products to Section",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"productsId\": [1, 2, 3]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/menu-sections/:id/products",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "menu-sections",
+                                ":id",
+                                "products"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Menu Section ID"
+                                }
+                            ]
+                        },
+                        "description": "Associates existing products with a menu section."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add Combos to Section",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"combosId\": [1]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/menu-sections/:id/combos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "menu-sections",
+                                ":id",
+                                "combos"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Menu Section ID"
+                                }
+                            ]
+                        },
+                        "description": "Associates existing combos with a menu section."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Menu Section",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/menu-sections/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "menu-sections",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Menu Section ID"
+                                }
+                            ]
+                        },
+                        "description": "Deletes a menu section by its ID."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "The **Menu Sections API** allows organizing products and combos into categories (e.g., 'Breakfast', 'Lunch') for the menu display."
+        },
+        {
+            "name": "Sessions",
+            "item": [
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"admin@example.com\",\n    \"password\": \"1234\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/sessions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "sessions"
+                            ]
+                        },
+                        "description": "Logs in a user and returns Access Token and Refresh Token."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.accessToken) {",
+                                    "    pm.environment.set(\"jwt\", jsonData.accessToken);",
+                                    "    console.log(\"Access Token updated\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "response": []
+                },
+                {
+                    "name": "Refresh Token",
+                    "request": {
+                        "method": "PUT",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"refreshToken\": \"<YOUR_REFRESH_TOKEN>\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/sessions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "sessions"
+                            ]
+                        },
+                        "description": "Refreshes the session using a valid refresh token."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "API for managing user sessions (Login/Refresh)."
+        },
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "Register User (Multipart)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "user",
+                                    "value": "{\n    \"nombre\": \"Carlos\",\n    \"apellido\": \"Lopez\",\n    \"email\": \"carlos@example.com\",\n    \"edad\": 30,\n    \"genero\": \"Male\",\n    \"domicilio\": \"Av Siempre Viva 123\",\n    \"password\": \"securePass123\"\n}",
+                                    "type": "text",
+                                    "contentType": "application/json"
+                                },
+                                {
+                                    "key": "photo",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "register"
+                            ]
+                        },
+                        "description": "Registers a new user. Requires multipart/form-data. 'user' is a JSON string and 'photo' is an optional file."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Verify Email",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"carlos@example.com\",\n    \"code\": \"123456\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/verify",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "verify"
+                            ]
+                        },
+                        "description": "Verifies the user account using the code sent by email."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create User (Admin Manual)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"admin2@example.com\",\n    \"password\": \"adminPass\",\n    \"role\": \"ROLE_ADMIN\",\n    \"id\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users"
+                            ]
+                        },
+                        "description": "Direct user creation (usually for admins). Bypasses email verification flow."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Change Role",
+                    "request": {
+                        "method": "PUT",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"carlos@example.com\",\n    \"role\": \"ROLE_ADMIN\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/change-role",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "change-role"
+                            ]
+                        },
+                        "description": "Updates the role of a user."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User Count",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/users/count",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "count"
+                            ]
+                        },
+                        "description": "Returns the total number of registered users."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Password Reset Request",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"carlos@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/password-reset/request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "password-reset",
+                                "request"
+                            ]
+                        },
+                        "description": "Initiates password reset by sending a code to the email."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Password Reset Confirm",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"carlos@example.com\",\n    \"code\": \"123456\",\n    \"newPassword\": \"newSecurePass\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/password-reset/reset",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "password-reset",
+                                "reset"
+                            ]
+                        },
+                        "description": "Resets the password using the verification code."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "API for user management, registration, and password recovery."
+        }
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// Agregamos el token al header Authorization",
+					"const token = pm.environment.get(\"jwt\");",
+					"if (token) {",
+					"    pm.request.headers.add({",
+					"        key: \"Authorization\",",
+					"        value: `Bearer ${token}`",
+					"    });",
+					"    console.log(\"Header Authorization configurado.\");",
+					"} else {",
+					"    console.warn(\"No se encontró un token JWT en el entorno (variable 'jwt'). Asegúrate de hacer Login primero.\");",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:20500/api",
+			"type": "string"
+		}
+	]
+}
