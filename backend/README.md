@@ -1,84 +1,120 @@
-# Backend
+# UniEats Backend: Core Domain & API
 
-This is a combination of things that can be used as they are, and incredibly contrived examples.
+The UniEats backend is a robust **Java 21 / Spring Boot 3.4** application responsible for the core business logic, persistence, and security of the university dining system. It provides a RESTful API to manage a complex ecosystem of stock-dependent products and dynamic promotions.
 
-## To run
+## 🏗 Architectural Overview
 
-### Compile
+The project follows a layered architecture to ensure separation of concerns:
+
+* **Web Layer:** REST Controllers handling HTTP requests, DTO mapping, and OpenAPI documentation.
+* **Service Layer:** Business logic orchestration, including promotion evaluation and stock validation.
+* **Data Layer:** Spring Data JPA with a PostgreSQL database.
+* **Security Layer:** Stateless JWT-based authentication and Role-Based Access Control (RBAC).
+
+---
+
+## 🛠 Technical Deep Dive
+
+### 1. Advanced Promotion Engine
+
+The system implements a flexible promotion engine using **JPA Inheritance (Table-per-class)**. This allows the system to evaluate different discount strategies during the order creation process:
+
+* **BuyXPayY:** Logic-based quantity discounts (e.g., 3x2).
+* **Threshold Discounts:** Global order reductions applied when a subtotal is reached.
+* **Trigger-based Gifts:** Automatically adding free items based on specific "trigger" products in the cart.
+* **Temporal Logic:** Promotions include `dayOfWeek` constraints to limit validity to specific university schedules.
+
+### 2. Inventory-Driven Catalog
+
+Unlike simple e-commerce apps, UniEats products are **composite entities**:
+
+* **Stock Tracking:** Ingredients have real-time stock levels.
+* **Recursive Availability:** A `Product` is only "Available" if all its `ProductIngredients` have sufficient stock. A `Combo` is only "Available" if all its constituent `Products` are available.
+
+### 3. Security Implementation
+
+* **Stateless Auth:** Uses JWT (JSON Web Tokens) issued upon login.
+* **RBAC:** Strict method-level security using `@PreAuthorize`.
+* `ADMIN`: Catalog management, user permissions, and global stats.
+* `STAFF`: Order lifecycle management (Preparation -> Delivery) and stock updates.
+* `USER`: Personal order history and menu browsing.
+
+
+* **Encryption:** Sensitive data and passwords handled via `BCrypt`.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* Java 21 JDK
+* Maven 3.x
+* Docker (for database and local environment)
+
+### Compilation & Packaging
+
+To build the executable JAR:
 
 ```bash
+# Packages the app into target/uni-eats-backend-0.0.1-SNAPSHOT.jar
 mvn package -DskipTests
+
 ```
 
-This will produce a jar file inside the target dir, using the project name.
-By default, this is `product-template-0.0.1-SNAPSHOT.jar`
+### Execution
 
-Also by default, `mvn package` will run tests before packaging the executable.
-`-DskipTests` will allow for faster packaging, assuming that tests are already
-known to be successful.
+1. **Database:** Start the PostgreSQL container:
+```bash
+docker-compose up -d db
 
-### Execute
+```
 
-1. Configure a database in [application.properties](src/main/resources/application.properties).
-   The default database is the one exposed by the docker-compose, which can be started with
+2. **Run Application:**
+```bash
+java -jar target/uni-eats-backend-0.0.1-SNAPSHOT.jar
 
-   ```bash
-   docker-compose up -d db
-   ```
+```
 
-2. After compiling:
+### API Documentation (OpenAPI/Swagger)
 
-   ```bash
-   java -jar target/product-template-0.0.1-SNAPSHOT.jar
-   ```
+Once running, explore the interactive API docs:
 
-3. If both are running, you should be able to access the swagger docs and run requests
+* **Local Dev:** `http://localhost:8080/swagger-ui/index.html`
+* **Production Ingress:** `https://[your-domain]/api/swagger-ui/index.html`
 
-### Swagger/OpenAPI
+---
 
-This project generates swagger docs from annotations on source code. These may also be used to call endpoints.
+## 🧪 Quality Assurance
 
-Depending on environment:
+### Testing Strategy
 
-- Dev: http://localhost:8080/swagger-ui/index.html
-- Local Docker: http://localhost:20000/api/swagger-ui/index.html
-- Cloud: https://grupo-00.tp1.ingsoft1.fiuba.ar/api/swagger-ui/index.html
-
-You may need to replace these numbers depending on your environment's configuration
-
-### Tests
-
+* **Unit Tests:** Testing core domain logic (Promotions, Stock calculation).
+* **Integration Tests:** Verifying Repository layers and Database constraints.
+* **Command:** 
 ```bash
 mvn verify
 ```
 
-## Reference
+## 📚 Reference & Standards
 
-### Reference Documentation
+### Implementation Details
 
-For further reference, please consider the following sections:
+* **Context Path:** All endpoints are prefixed with `/api` via `server.servlet.context-path`.
+* **Maven Parent Overrides:** To maintain clean metadata, the project POM contains empty overrides for `<license>` and `<developers>` inherited from the Spring Boot parent.
 
-- [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-- [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/3.4.3/maven-plugin)
-- [Spring Web](https://docs.spring.io/spring-boot/3.4.3/reference/web/servlet.html)
-- [Spring Security](https://docs.spring.io/spring-boot/3.4.3/reference/web/spring-security.html)
-- [Spring Data JPA](https://docs.spring.io/spring-boot/3.4.3/reference/data/sql.html#data.sql.jpa-and-spring-data)
+### Spring Modules Used
 
-### Guides
+* **Spring Web:** For building the RESTful interface.
+* **Spring Security:** For JWT and RBAC.
+* **Spring Data JPA:** For ORM and PostgreSQL integration.
+* **Validation:** For ensuring data integrity in RequestBodies.
 
-The following guides illustrate how to use some features concretely:
+---
 
-- [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-- [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-- [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-- [Securing a Web Application](https://spring.io/guides/gs/securing-web/)
-- [Spring Boot and OAuth2](https://spring.io/guides/tutorials/spring-boot-oauth2/)
-- [Authenticating a User with LDAP](https://spring.io/guides/gs/authenticating-ldap/)
-- [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
+### Key Technical Improvements:
 
-### Maven Parent overrides
-
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
+1. **Domain Highlights:** Specifically mentioned the JPA Inheritance for promotions, which is a key technical detail of your project.
+2. **Availability Logic:** Explained how products relate to ingredients, showing a deeper level of system design.
+3. **Deployment Clarity:** Clarified the `/api` context path which is critical for the Ingress setup.
+4. **Java Version:** Specified Java 21/Spring Boot 3.4 (as seen in your snippets) to keep it modern and accurate.
